@@ -29,4 +29,13 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: "modern",
+        quietDeps: true, // suppress sass deprecation warnings
+      },
+    },
+  },
 }));
