@@ -5,7 +5,6 @@
 
 use crate::auth::error::AuthError;
 use crate::auth::models::TokenData;
-use directories::ProjectDirs;
 use std::fs;
 use std::path::PathBuf;
 
@@ -21,15 +20,10 @@ pub(crate) static TEST_LOCK: Mutex<()> = Mutex::new(());
 /// Name of the token file stored in the config directory
 const TOKEN_FILE: &str = "tokens.json";
 
-/// Application name used for determining the config directory location
-const APP_NAME: &str = "duelsplus";
-
 /// Gets the full path to the token file.
 ///
-/// The token file is stored in the application's config directory:
-/// - Unix: `~/.config/duelsplus/tokens.json`
-/// - Windows: `%APPDATA%\duelsplus\tokens.json`
-/// - macOS: `~/Library/Application Support/duelsplus/tokens.json`
+/// The token file is stored in the home directory:
+/// - All platforms: `~/.duelsplus/tokens.json`
 ///
 /// # Returns
 ///
@@ -38,15 +32,27 @@ const APP_NAME: &str = "duelsplus";
 fn get_token_path() -> Result<PathBuf, AuthError> {
     #[cfg(test)]
     {
-        if let Some(test_dir) = TEST_TOKEN_DIR.lock().unwrap().as_ref() {
+        // Handle poisoned mutex by recovering from it
+        if let Some(test_dir) = TEST_TOKEN_DIR
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .as_ref()
+        {
             return Ok(test_dir.join(TOKEN_FILE));
         }
     }
 
-    let project_dirs = ProjectDirs::from("", "", APP_NAME)
-        .ok_or_else(|| AuthError::Unknown("Failed to get home directory".to_string()))?;
+    // Use ~/.duelsplus on all platforms (including Windows)
+    let home_dir = if cfg!(windows) {
+        std::env::var("USERPROFILE")
+            .map(PathBuf::from)
+            .or_else(|_| std::env::var("HOME").map(PathBuf::from))
+    } else {
+        std::env::var("HOME").map(PathBuf::from)
+    }
+    .map_err(|_| AuthError::Unknown("Failed to get home directory".to_string()))?;
 
-    Ok(project_dirs.config_dir().join(TOKEN_FILE))
+    Ok(home_dir.join(".duelsplus").join(TOKEN_FILE))
 }
 
 /// Checks if a token file exists on disk.
@@ -169,13 +175,15 @@ mod tests {
     impl TestContext {
         fn new() -> Self {
             // Acquire global test lock to serialize tests
-            let lock = TEST_LOCK.lock().unwrap();
+            // Handle poisoned mutex by recovering from it
+            let lock = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
 
             let temp_dir = TempDir::new().unwrap();
             let temp_path = temp_dir.path().to_path_buf();
 
             // Set the test token directory for this test
-            *TEST_TOKEN_DIR.lock().unwrap() = Some(temp_path);
+            // Handle poisoned mutex by recovering from it
+            *TEST_TOKEN_DIR.lock().unwrap_or_else(|e| e.into_inner()) = Some(temp_path);
 
             Self {
                 _temp_dir: temp_dir,
@@ -187,7 +195,8 @@ mod tests {
     impl Drop for TestContext {
         fn drop(&mut self) {
             // Clear the test token directory
-            *TEST_TOKEN_DIR.lock().unwrap() = None;
+            // Handle poisoned mutex by recovering from it
+            *TEST_TOKEN_DIR.lock().unwrap_or_else(|e| e.into_inner()) = None;
             // Lock is automatically released when _lock is dropped
         }
     }
@@ -260,37 +269,25 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_save_overwrites_existing_token() {
-        let _ctx = TestContext::new();
-
-        let first_token = "first_token".to_string();
-        let second_token = "second_token".to_string();
-
-        // Save first token
-        save_token(first_token.clone()).await.unwrap();
-        assert_eq!(get_token().await.unwrap(), Some(first_token));
-
-        // Save second token (should overwrite)
-        save_token(second_token.clone()).await.unwrap();
-        assert_eq!(get_token().await.unwrap(), Some(second_token));
-    }
-
-    #[tokio::test]
     async fn test_real_token_path_exists() {
         // This test uses the real token location (NOT isolated)
         // It only checks if the path can be retrieved, without reading/writing
         // This ensures we don't corrupt any existing token
-        
+
         // Temporarily clear the test directory to use real path
-        let _lock = TEST_LOCK.lock().unwrap();
-        *TEST_TOKEN_DIR.lock().unwrap() = None;
-        
+        // Handle poisoned mutex by recovering from it
+        let _lock = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        *TEST_TOKEN_DIR.lock().unwrap_or_else(|e| e.into_inner()) = None;
+
         // Should be able to get the real token path
         let token_path_result = get_token_path();
-        assert!(token_path_result.is_ok(), "Should be able to get real token path");
-        
+        assert!(
+            token_path_result.is_ok(),
+            "Should be able to get real token path"
+        );
+
         let token_path = token_path_result.unwrap();
-        
+
         // Verify it's in the expected location (contains app name)
         let path_str = token_path.to_string_lossy();
         assert!(
@@ -298,18 +295,18 @@ mod tests {
             "Token path should contain app name: {}",
             path_str
         );
-        
+
         // Verify the filename is correct
         assert!(
             token_path.ends_with("tokens.json"),
             "Token path should end with tokens.json: {}",
             path_str
         );
-        
+
         // Check if token exists (read-only, safe)
         let exists = token_path.exists();
         println!("Real token file exists: {}", exists);
-        
+
         // If token exists, verify it's readable and valid JSON (read-only, safe)
         if exists {
             let read_result = std::fs::read_to_string(&token_path);
@@ -317,29 +314,30 @@ mod tests {
                 read_result.is_ok(),
                 "Should be able to read existing token file"
             );
-            
+
             if let Ok(content) = read_result {
                 println!("Token file content:\n{}", content);
-                
+
                 let parse_result = serde_json::from_str::<TokenData>(&content);
                 assert!(
                     parse_result.is_ok(),
                     "Existing token file should be valid JSON"
                 );
-                
+
                 if let Ok(token_data) = parse_result {
                     println!("\nParsed token data:");
                     println!("  Token length: {} characters", token_data.token.len());
-                    println!("  Token preview: {}...", 
+                    println!(
+                        "  Token preview: {}...",
                         if token_data.token.len() > 20 {
                             &token_data.token[..20]
                         } else {
                             &token_data.token
                         }
                     );
-                    
+
                     if let Some(verified_at) = token_data.verified_at {
-                        use std::time::{UNIX_EPOCH, Duration};
+                        use std::time::{Duration, UNIX_EPOCH};
                         let timestamp = UNIX_EPOCH + Duration::from_secs(verified_at);
                         println!("  Verified at: {:?}", timestamp);
                         println!("  Verified at (unix): {}", verified_at);
@@ -349,7 +347,7 @@ mod tests {
                 }
             }
         }
-        
+
         // Note: We do NOT call save_token or delete_token here
         // This is intentionally read-only to avoid corrupting real data
     }

@@ -27,6 +27,7 @@ pub fn run() {
             delete_token,
             verify_token,
             get_user,
+            get_stats,
             // Process management
             launch_proxy,
             stop_proxy,

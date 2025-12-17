@@ -85,6 +85,23 @@ pub async fn get_user(token: String) -> Result<auth::models::GetUserResponse, St
     auth::api::get_user(&token).await.map_err(|e| e.to_string())
 }
 
+/// Retrieves user statistics from the API.
+///
+/// This is a Tauri command that can be called from the frontend.
+/// Gets the user's stats from the API.
+///
+/// # Arguments
+///
+/// * `token` - The authentication token
+///
+/// # Returns
+///
+/// Returns a `GetStatsResponse` with success status and stats data.
+#[tauri::command]
+pub async fn get_stats(token: String) -> Result<auth::models::GetStatsResponse, String> {
+    auth::api::get_stats(&token).await.map_err(|e| e.to_string())
+}
+
 /// Launches the proxy process.
 ///
 /// This command checks for updates, downloads if necessary, and starts the proxy.
