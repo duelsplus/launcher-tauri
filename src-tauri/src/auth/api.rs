@@ -542,19 +542,22 @@ mod tests {
 
     #[tokio::test]
     async fn test_integration_save_load_and_verify_token() {
-        // Clean up any existing token file
-        let _ = token::delete_token().await;
+        use tempfile::TempDir;
+
+        // Acquire test lock to prevent parallel execution
+        let _lock = token::TEST_LOCK.lock().unwrap();
+
+        // Create isolated test environment
+        let _temp_dir = TempDir::new().unwrap();
+        let temp_path = _temp_dir.path().to_path_buf();
+        *token::TEST_TOKEN_DIR.lock().unwrap() = Some(temp_path);
 
         let test_token = "integration_test_token_12345".to_string();
 
-        // Step 1: Save token to actual location
         token::save_token(test_token.clone()).await.unwrap();
-
-        // Step 2: Load token from actual location
         let loaded_token = token::get_token().await.unwrap();
         assert_eq!(loaded_token, Some(test_token.clone()));
 
-        // Step 3: Use loaded token to authenticate with mocked API
         let mut server = Server::new_async().await;
         let mock_server = server
             .mock("GET", "/user")
@@ -573,7 +576,6 @@ mod tests {
             .await
             .unwrap();
 
-        // Step 4: Verify authentication succeeded
         assert!(result.success);
         assert_eq!(result.user_id, Some("integration_user123".to_string()));
         assert_eq!(result.username, Some("integration_user".to_string()));
@@ -582,23 +584,25 @@ mod tests {
         mock_server.assert();
 
         // Clean up
-        let _ = token::delete_token().await;
+        *token::TEST_TOKEN_DIR.lock().unwrap() = None;
     }
 
     #[tokio::test]
     async fn test_integration_save_load_and_get_user() {
-        // Clean up any existing token file
-        let _ = token::delete_token().await;
+        use tempfile::TempDir;
+
+        // Acquire test lock to prevent parallel execution
+        let _lock = token::TEST_LOCK.lock().unwrap();
+
+        // Create isolated test environment
+        let _temp_dir = TempDir::new().unwrap();
+        let temp_path = _temp_dir.path().to_path_buf();
+        *token::TEST_TOKEN_DIR.lock().unwrap() = Some(temp_path);
 
         let test_token = "integration_get_user_token".to_string();
-
-        // Step 1: Save token to actual location
         token::save_token(test_token.clone()).await.unwrap();
-
-        // Step 2: Load token from actual location
         let loaded_token = token::get_token().await.unwrap().unwrap();
 
-        // Step 3: Use loaded token to get user data from mocked API
         let mut server = Server::new_async().await;
         let user_data = serde_json::json!({
             "id": "integration_user456",
@@ -620,7 +624,6 @@ mod tests {
             .await
             .unwrap();
 
-        // Step 4: Verify user data retrieval succeeded
         assert!(result.success);
         assert!(result.data.is_some());
         let data = result.data.unwrap();
@@ -630,7 +633,7 @@ mod tests {
         mock_server.assert();
 
         // Clean up
-        let _ = token::delete_token().await;
+        *token::TEST_TOKEN_DIR.lock().unwrap() = None;
     }
 
     #[tokio::test]

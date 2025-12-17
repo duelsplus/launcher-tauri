@@ -186,3 +186,85 @@ pub fn cleanup_old_executables(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_find_latest_release_none() {
+        let releases = vec![Release {
+            version: "1.0.0".to_string(),
+            is_latest: false,
+            assets: vec![],
+        }];
+
+        let result = find_latest_release(&releases);
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), ProxyError::NoReleaseFound));
+    }
+
+    #[test]
+    fn test_find_platform_asset_not_found() {
+        let release = Release {
+            version: "1.0.0".to_string(),
+            is_latest: true,
+            assets: vec![Asset {
+                id: "1".to_string(),
+                name: "proxy-win-x64.exe".to_string(),
+            }],
+        };
+
+        let result = find_platform_asset(&release, "unsupported-platform");
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), ProxyError::NoAssetFound(_)));
+    }
+
+    #[test]
+    fn test_cleanup_old_executables() {
+        let temp_dir = TempDir::new().unwrap();
+        let install_dir = temp_dir.path().to_path_buf();
+
+        // Create several executable files
+        #[cfg(windows)]
+        {
+            fs::write(install_dir.join("old_proxy_v1.exe"), "test").unwrap();
+            fs::write(install_dir.join("old_proxy_v2.exe"), "test").unwrap();
+            fs::write(install_dir.join("current_proxy.exe"), "test").unwrap();
+            fs::write(install_dir.join("readme.txt"), "test").unwrap();
+        }
+
+        #[cfg(unix)]
+        {
+            fs::write(install_dir.join("old_proxy_v1"), "test").unwrap();
+            fs::write(install_dir.join("old_proxy_v2"), "test").unwrap();
+            fs::write(install_dir.join("current_proxy"), "test").unwrap();
+            fs::write(install_dir.join("readme.txt"), "test").unwrap();
+        }
+
+        // Clean up old executables, keeping current_proxy
+        #[cfg(windows)]
+        cleanup_old_executables(&install_dir, "current_proxy.exe").unwrap();
+
+        #[cfg(unix)]
+        cleanup_old_executables(&install_dir, "current_proxy").unwrap();
+
+        // Check that old executables are gone but current one remains
+        #[cfg(windows)]
+        {
+            assert!(!install_dir.join("old_proxy_v1.exe").exists());
+            assert!(!install_dir.join("old_proxy_v2.exe").exists());
+            assert!(install_dir.join("current_proxy.exe").exists());
+            assert!(install_dir.join("readme.txt").exists()); // Non-exe files kept
+        }
+
+        #[cfg(unix)]
+        {
+            assert!(!install_dir.join("old_proxy_v1").exists());
+            assert!(!install_dir.join("old_proxy_v2").exists());
+            assert!(install_dir.join("current_proxy").exists());
+            assert!(install_dir.join("readme.txt").exists()); // Files with extensions kept
+        }
+    }
+}

@@ -9,6 +9,15 @@ use directories::ProjectDirs;
 use std::fs;
 use std::path::PathBuf;
 
+#[cfg(test)]
+use std::sync::Mutex;
+
+#[cfg(test)]
+pub(crate) static TEST_TOKEN_DIR: Mutex<Option<PathBuf>> = Mutex::new(None);
+
+#[cfg(test)]
+pub(crate) static TEST_LOCK: Mutex<()> = Mutex::new(());
+
 /// Name of the token file stored in the config directory
 const TOKEN_FILE: &str = "tokens.json";
 
@@ -27,6 +36,13 @@ const APP_NAME: &str = "duelsplus";
 /// Returns the full path to the token file, or an error if the home directory
 /// cannot be determined.
 fn get_token_path() -> Result<PathBuf, AuthError> {
+    #[cfg(test)]
+    {
+        if let Some(test_dir) = TEST_TOKEN_DIR.lock().unwrap().as_ref() {
+            return Ok(test_dir.join(TOKEN_FILE));
+        }
+    }
+
     let project_dirs = ProjectDirs::from("", "", APP_NAME)
         .ok_or_else(|| AuthError::Unknown("Failed to get home directory".to_string()))?;
 
@@ -138,29 +154,47 @@ pub async fn delete_token() -> Result<bool, AuthError> {
 mod tests {
     use super::*;
     use std::fs;
+    use std::sync::Mutex;
+    use tempfile::TempDir;
 
-    // Helper function to get the token path for testing
-    fn get_test_token_path() -> Result<PathBuf, AuthError> {
-        get_token_path()
+    // Global lock to prevent tests from running in parallel
+    static TEST_LOCK: Mutex<()> = Mutex::new(());
+
+    // Helper to set up isolated test environment
+    struct TestContext {
+        _temp_dir: TempDir,
+        _lock: std::sync::MutexGuard<'static, ()>,
     }
 
-    // Helper to clean up token file before and after tests
-    async fn cleanup_token_file() {
-        if let Ok(path) = get_test_token_path() {
-            if path.exists() {
-                let _ = fs::remove_file(&path);
+    impl TestContext {
+        fn new() -> Self {
+            // Acquire global test lock to serialize tests
+            let lock = TEST_LOCK.lock().unwrap();
+
+            let temp_dir = TempDir::new().unwrap();
+            let temp_path = temp_dir.path().to_path_buf();
+
+            // Set the test token directory for this test
+            *TEST_TOKEN_DIR.lock().unwrap() = Some(temp_path);
+
+            Self {
+                _temp_dir: temp_dir,
+                _lock: lock,
             }
-            // Try to remove the directory if it's empty (ignore errors)
-            if let Some(parent) = path.parent() {
-                let _ = fs::remove_dir(parent);
-            }
+        }
+    }
+
+    impl Drop for TestContext {
+        fn drop(&mut self) {
+            // Clear the test token directory
+            *TEST_TOKEN_DIR.lock().unwrap() = None;
+            // Lock is automatically released when _lock is dropped
         }
     }
 
     #[tokio::test]
     async fn test_save_and_get_token() {
-        // Clean up any existing token file before test
-        cleanup_token_file().await;
+        let _ctx = TestContext::new();
 
         let test_token = "test_token_12345".to_string();
 
@@ -174,52 +208,40 @@ mod tests {
         // Get token
         let retrieved_token = get_token().await.unwrap();
         assert_eq!(retrieved_token, Some(test_token));
-
-        // Clean up after test
-        cleanup_token_file().await;
     }
 
     #[tokio::test]
     async fn test_save_token_creates_directory() {
-        // Clean up any existing token file
-        cleanup_token_file().await;
+        let _ctx = TestContext::new();
 
         let test_token = "test_token_directory_creation".to_string();
         save_token(test_token.clone()).await.unwrap();
 
         // Verify the directory was created
-        let token_path = get_test_token_path().unwrap();
+        let token_path = get_token_path().unwrap();
         let token_dir = token_path.parent().unwrap();
         assert!(token_dir.exists());
-
-        // Clean up
-        cleanup_token_file().await;
     }
 
     #[tokio::test]
     async fn test_save_token_includes_timestamp() {
-        // Clean up any existing token file before test
-        cleanup_token_file().await;
+        let _ctx = TestContext::new();
 
         let test_token = "test_token_with_timestamp".to_string();
         save_token(test_token.clone()).await.unwrap();
 
         // Read the file directly to verify structure
-        let token_path = get_test_token_path().unwrap();
+        let token_path = get_token_path().unwrap();
         let content = fs::read_to_string(&token_path).unwrap();
         let token_data: TokenData = serde_json::from_str(&content).unwrap();
 
         assert_eq!(token_data.token, test_token);
         assert!(token_data.verified_at.is_some());
-
-        // Clean up after test
-        cleanup_token_file().await;
     }
 
     #[tokio::test]
     async fn test_delete_token_when_exists() {
-        // Clean up any existing token file
-        cleanup_token_file().await;
+        let _ctx = TestContext::new();
 
         let test_token = "test_token_to_delete".to_string();
         save_token(test_token).await.unwrap();
@@ -239,8 +261,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_save_overwrites_existing_token() {
-        // Clean up any existing token file before test
-        cleanup_token_file().await;
+        let _ctx = TestContext::new();
 
         let first_token = "first_token".to_string();
         let second_token = "second_token".to_string();
@@ -252,8 +273,84 @@ mod tests {
         // Save second token (should overwrite)
         save_token(second_token.clone()).await.unwrap();
         assert_eq!(get_token().await.unwrap(), Some(second_token));
+    }
 
-        // Clean up after test
-        cleanup_token_file().await;
+    #[tokio::test]
+    async fn test_real_token_path_exists() {
+        // This test uses the real token location (NOT isolated)
+        // It only checks if the path can be retrieved, without reading/writing
+        // This ensures we don't corrupt any existing token
+        
+        // Temporarily clear the test directory to use real path
+        let _lock = TEST_LOCK.lock().unwrap();
+        *TEST_TOKEN_DIR.lock().unwrap() = None;
+        
+        // Should be able to get the real token path
+        let token_path_result = get_token_path();
+        assert!(token_path_result.is_ok(), "Should be able to get real token path");
+        
+        let token_path = token_path_result.unwrap();
+        
+        // Verify it's in the expected location (contains app name)
+        let path_str = token_path.to_string_lossy();
+        assert!(
+            path_str.contains("duelsplus"),
+            "Token path should contain app name: {}",
+            path_str
+        );
+        
+        // Verify the filename is correct
+        assert!(
+            token_path.ends_with("tokens.json"),
+            "Token path should end with tokens.json: {}",
+            path_str
+        );
+        
+        // Check if token exists (read-only, safe)
+        let exists = token_path.exists();
+        println!("Real token file exists: {}", exists);
+        
+        // If token exists, verify it's readable and valid JSON (read-only, safe)
+        if exists {
+            let read_result = std::fs::read_to_string(&token_path);
+            assert!(
+                read_result.is_ok(),
+                "Should be able to read existing token file"
+            );
+            
+            if let Ok(content) = read_result {
+                println!("Token file content:\n{}", content);
+                
+                let parse_result = serde_json::from_str::<TokenData>(&content);
+                assert!(
+                    parse_result.is_ok(),
+                    "Existing token file should be valid JSON"
+                );
+                
+                if let Ok(token_data) = parse_result {
+                    println!("\nParsed token data:");
+                    println!("  Token length: {} characters", token_data.token.len());
+                    println!("  Token preview: {}...", 
+                        if token_data.token.len() > 20 {
+                            &token_data.token[..20]
+                        } else {
+                            &token_data.token
+                        }
+                    );
+                    
+                    if let Some(verified_at) = token_data.verified_at {
+                        use std::time::{UNIX_EPOCH, Duration};
+                        let timestamp = UNIX_EPOCH + Duration::from_secs(verified_at);
+                        println!("  Verified at: {:?}", timestamp);
+                        println!("  Verified at (unix): {}", verified_at);
+                    } else {
+                        println!("  Verified at: None");
+                    }
+                }
+            }
+        }
+        
+        // Note: We do NOT call save_token or delete_token here
+        // This is intentionally read-only to avoid corrupting real data
     }
 }

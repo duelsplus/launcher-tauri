@@ -291,3 +291,17 @@ impl Default for ProxyManager {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_proxy_manager_stop_when_not_running() {
+        let manager = ProxyManager::new();
+        let result = manager.stop().await;
+
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), ProxyError::NotRunning));
+    }
+}
