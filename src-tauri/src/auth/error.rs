@@ -20,10 +20,6 @@ pub enum AuthError {
     #[error("Network error: {0}")]
     Network(#[from] reqwest::Error),
 
-    /// Token file not found when attempting to read
-    #[error("Token not found")]
-    TokenNotFound,
-
     /// Generic error for unexpected situations
     #[error("Unknown error: {0}")]
     Unknown(String),
