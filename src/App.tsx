@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Form, Stack, Button, TextInput } from "@carbon/react";
-import "./styles/carbon.scss";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -13,25 +11,22 @@ function App() {
   }
 
   return (
-    <main>
-      <Form
+    <main className="p-4 space-y-2">
+      <h1>Welcome to Tauri + React</h1>
+      <form
+        className="flex gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           greet();
         }}
       >
-        <Stack gap={4} orientation="horizontal">
-          <TextInput
-            id="greet-input"
-            labelText="Name"
-            size="md"
-            type="text"
-            inline
-            onChange={(e) => setName(e.currentTarget.value)}
-          />
-          <Button type="submit">Greet</Button>
-        </Stack>
-      </Form>
+        <input
+          id="greet-input"
+          onChange={(e) => setName(e.currentTarget.value)}
+          placeholder="Enter a name..."
+        />
+        <button type="submit">Greet</button>
+      </form>
       <p>{greetMsg}</p>
     </main>
   );
