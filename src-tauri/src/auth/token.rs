@@ -5,6 +5,7 @@
 
 use crate::auth::error::AuthError;
 use crate::auth::models::TokenData;
+use crate::utils;
 use std::fs;
 use std::path::PathBuf;
 
@@ -42,16 +43,7 @@ fn get_token_path() -> Result<PathBuf, AuthError> {
         }
     }
 
-    // Use ~/.duelsplus on all platforms (including Windows)
-    let home_dir = if cfg!(windows) {
-        std::env::var("USERPROFILE")
-            .map(PathBuf::from)
-            .or_else(|_| std::env::var("HOME").map(PathBuf::from))
-    } else {
-        std::env::var("HOME").map(PathBuf::from)
-    }
-    .map_err(|_| AuthError::Unknown("Failed to get home directory".to_string()))?;
-
+    let home_dir = utils::get_home_dir().map_err(|e| AuthError::Unknown(e))?;
     Ok(home_dir.join(".duelsplus").join(TOKEN_FILE))
 }
 

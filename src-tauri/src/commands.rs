@@ -4,6 +4,7 @@
 //! invoked from the frontend JavaScript/TypeScript code.
 
 use crate::auth;
+use crate::config;
 use crate::proxy::ProxyManager;
 use tauri::{AppHandle, State};
 
@@ -144,4 +145,118 @@ pub async fn stop_proxy(manager: State<'_, ProxyManager>) -> Result<(), String> 
 #[tauri::command]
 pub async fn get_proxy_status(manager: State<'_, ProxyManager>) -> Result<bool, String> {
     Ok(manager.is_running().await)
+}
+
+/// Checks if the legacy configuration file exists.
+///
+/// This is a Tauri command that can be called from the frontend.
+/// Returns `true` if the legacy config file exists, `false` otherwise.
+#[tauri::command]
+pub async fn legacy_config_exists() -> Result<bool, String> {
+    config::manager::legacy_config_exists()
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Checks if the configuration file exists.
+///
+/// This is a Tauri command that can be called from the frontend.
+/// Returns `true` if the config file exists, `false` otherwise.
+#[tauri::command]
+pub async fn config_exists() -> Result<bool, String> {
+    config::manager::config_exists()
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Reads the legacy configuration file.
+///
+/// This is a Tauri command that can be called from the frontend.
+/// Returns the config if it exists, `None` otherwise.
+#[tauri::command]
+pub async fn get_legacy_config() -> Result<Option<config::models::Config>, String> {
+    config::manager::get_legacy_config()
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Reads the configuration file.
+///
+/// This is a Tauri command that can be called from the frontend.
+/// Returns the config if it exists, `None` otherwise.
+#[tauri::command]
+pub async fn get_config() -> Result<Option<config::models::Config>, String> {
+    config::manager::get_config()
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Reads a specific key from the legacy configuration file.
+///
+/// This is a Tauri command that can be called from the frontend.
+///
+/// # Arguments
+///
+/// * `key` - The configuration key to read
+///
+/// # Returns
+///
+/// Returns the value if the key exists, `None` otherwise.
+#[tauri::command]
+pub async fn get_legacy_config_value(key: String) -> Result<Option<serde_json::Value>, String> {
+    config::manager::get_legacy_config_value(&key)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Reads a specific key from the configuration file.
+///
+/// This is a Tauri command that can be called from the frontend.
+///
+/// # Arguments
+///
+/// * `key` - The configuration key to read
+///
+/// # Returns
+///
+/// Returns the value if the key exists, `None` otherwise.
+#[tauri::command]
+pub async fn get_config_value(key: String) -> Result<Option<serde_json::Value>, String> {
+    config::manager::get_config_value(&key)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Sets a specific key in the configuration file.
+///
+/// This is a Tauri command that can be called from the frontend.
+///
+/// # Arguments
+///
+/// * `key` - The configuration key to set
+/// * `value` - The value to set (must be a valid JSON value)
+#[tauri::command]
+pub async fn set_config_key(
+    key: String,
+    value: serde_json::Value,
+) -> Result<(), String> {
+    config::manager::set_config_key(&key, value)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Saves the entire configuration structure to the configuration file.
+///
+/// This is a Tauri command that can be called from the frontend.
+///
+/// # Arguments
+///
+/// * `config` - The complete configuration structure to write
+#[tauri::command]
+pub async fn save_config(
+    config: config::models::Config,
+) -> Result<(), String> {
+    config::manager::save_config(config)
+        .await
+        .map_err(|e| e.to_string())
 }
