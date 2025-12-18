@@ -4,7 +4,7 @@ import { MainView } from "./main-view";
 
 export function Shell() {
   return (
-    <div className="w-screen h-screen bg-background text-foreground overflow-hidden flex flex-col">
+    <div className="w-screen h-screen bg-background text-foreground overflow-hidden flex flex-col select-none">
       <Titlebar />
 
       <div className="flex flex-1 relative overflow-hidden">
