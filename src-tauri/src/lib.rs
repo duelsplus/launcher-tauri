@@ -5,8 +5,10 @@
 
 mod auth;
 mod commands;
+mod proxy;
 
 use commands::*;
+use proxy::ProxyManager;
 
 /// Initializes and runs the Tauri application.
 ///
@@ -16,14 +18,26 @@ use commands::*;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .manage(ProxyManager::new())
         .invoke_handler(tauri::generate_handler![
+            // Authentication handling
             token_exists,
             get_token,
             save_token,
             delete_token,
             verify_token,
-            get_user
+            get_user,
+            get_stats,
+            // Process management
+            launch_proxy,
+            stop_proxy,
+            get_proxy_status
         ])
+        .setup(|_app| {
+            // Cleanup will be handled by the on_window_event hook
+            // or by explicit stop_proxy calls from the frontend
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

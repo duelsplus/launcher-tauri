@@ -95,3 +95,22 @@ pub enum GetUserCode {
     /// HTTP status code
     Number(u16),
 }
+
+/// Response from the get stats endpoint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GetStatsResponse {
+    /// Whether the request was successful
+    pub success: bool,
+
+    /// Optional error code
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code: Option<GetUserCode>,
+
+    /// Stats data if successful
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stats: Option<serde_json::Value>,
+
+    /// Error message if any
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
