@@ -16,8 +16,8 @@ export function ThemeSwitcher() {
       className="relative rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6"
       onClick={toggleTheme}
     >
-      <SunIcon className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <MoonIcon className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <SunIcon className="rotate-0 scale-100 transition-all dark:-rotate-95 dark:scale-0" />
+      <MoonIcon className="absolute rotate-95 scale-0 transition-all dark:rotate-0 dark:scale-100" />
     </Button>
   );
 }

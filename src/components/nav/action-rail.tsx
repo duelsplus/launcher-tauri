@@ -6,6 +6,7 @@ import {
   ChartLineIcon,
   GearFineIcon,
 } from "@phosphor-icons/react";
+import type { IconWeight } from "@phosphor-icons/react";
 import clsx from "clsx";
 import { ThemeSwitcher } from "./theme-switcher";
 
@@ -16,11 +17,12 @@ interface ActionButtonProps {
 }
 
 function ActionButton({ icon, active, onClick }: ActionButtonProps) {
+  const iconWeight: IconWeight = active ? "fill" : "regular";
   const iconsMap = {
-    home: <HouseIcon />,
-    logs: <ListHeartIcon />,
-    stats: <ChartLineIcon />,
-    settings: <GearFineIcon />,
+    home: <HouseIcon weight={iconWeight} />,
+    logs: <ListHeartIcon weight={iconWeight} />,
+    stats: <ChartLineIcon weight={iconWeight} />,
+    settings: <GearFineIcon weight={iconWeight} />,
   };
 
   return (
@@ -29,7 +31,8 @@ function ActionButton({ icon, active, onClick }: ActionButtonProps) {
       size="icon-lg"
       className={clsx(
         "rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6",
-        active && "rounded-3xl bg-popover text-popover-foreground hover:bg-popover/70",
+        active &&
+          "rounded-3xl bg-popover text-popover-foreground hover:bg-popover/70",
       )}
       onClick={onClick}
     >
@@ -52,7 +55,7 @@ function ActionCategory({ children }: ActionCategoryProps) {
 
 export function ActionRail() {
   return (
-    <nav className="flex flex-col justify-center items-center h-full bg-muted/50 gap-3 p-3">
+    <nav className="fixed top-0 bottom-0 left-0 w-24 flex flex-col justify-center items-center bg-muted/50 gap-3 backdrop-blur">
       <ActionCategory>
         <ActionButton icon="home" active />
         <ActionButton icon="logs" onClick={() => console.log("Open Logs")} />

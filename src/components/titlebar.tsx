@@ -14,13 +14,13 @@ export function Titlebar() {
   return (
     <header
       data-tauri-drag-region
-      className="w-full bg-muted/50 flex items-center justify-end px-2"
+      className="w-full flex items-center justify-end px-2"
     >
       <div className="flex items-center">
-        <Button onClick={minimize} variant="ghost" size="sm">
+        <Button onClick={minimize} variant="ghost">
           <MinusIcon />
         </Button>
-        <Button onClick={close} variant="ghost" size="sm">
+        <Button onClick={close} variant="ghost">
           <XIcon />
         </Button>
       </div>
