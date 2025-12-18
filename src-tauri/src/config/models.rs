@@ -63,4 +63,3 @@ impl Default for Config {
         }
     }
 }
-

@@ -343,4 +343,29 @@ mod tests {
         // Note: We do NOT call save_token or delete_token here
         // This is intentionally read-only to avoid corrupting real data
     }
+
+    #[tokio::test]
+    async fn test_invalid_json_token_file() {
+        let _ctx = TestContext::new();
+
+        // Create a token file with invalid JSON
+        let token_path = get_token_path().unwrap();
+        let token_dir = token_path.parent().unwrap();
+        fs::create_dir_all(token_dir).unwrap();
+        fs::write(&token_path, "{ invalid json }").unwrap();
+
+        // Reading should return an error
+        let result = get_token().await;
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("JSON parse error"));
+    }
+
+    #[tokio::test]
+    async fn test_get_token_when_file_missing() {
+        let _ctx = TestContext::new();
+
+        // Token file doesn't exist
+        let token = get_token().await.unwrap();
+        assert_eq!(token, None);
+    }
 }

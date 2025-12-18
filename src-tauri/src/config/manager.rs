@@ -418,4 +418,120 @@ mod tests {
         let value = get_legacy_config_value("autoUpdate").await.unwrap();
         assert_eq!(value, Some(serde_json::json!(false)));
     }
+
+    #[tokio::test]
+    async fn test_set_config_key_preserves_other_keys() {
+        let _ctx = TestContext::new();
+
+        // Save initial config with multiple values
+        let initial_config = Config {
+            minimizeToTray: false,
+            autoUpdate: true,
+            proxyPort: "25565".to_string(),
+            enableRpc: true,
+            ..Default::default()
+        };
+        save_config(initial_config.clone()).await.unwrap();
+
+        // Update only one key
+        set_config_key("minimizeToTray", serde_json::json!(true))
+            .await
+            .unwrap();
+
+        // Verify the updated key changed
+        let config = get_config().await.unwrap().unwrap();
+        assert!(config.minimizeToTray);
+
+        // Verify other keys were preserved
+        assert_eq!(config.autoUpdate, initial_config.autoUpdate);
+        assert_eq!(config.proxyPort, initial_config.proxyPort);
+        assert_eq!(config.enableRpc, initial_config.enableRpc);
+    }
+
+    #[tokio::test]
+    async fn test_set_config_key_multiple_sequential_updates() {
+        let _ctx = TestContext::new();
+
+        // Set first key
+        set_config_key("minimizeToTray", serde_json::json!(true))
+            .await
+            .unwrap();
+
+        // Set second key
+        set_config_key("autoUpdate", serde_json::json!(false))
+            .await
+            .unwrap();
+
+        // Set third key
+        set_config_key("proxyPort", serde_json::json!("8080"))
+            .await
+            .unwrap();
+
+        // Verify all keys are set correctly
+        let config = get_config().await.unwrap().unwrap();
+        assert!(config.minimizeToTray);
+        assert!(!config.autoUpdate);
+        assert_eq!(config.proxyPort, "8080");
+    }
+
+    #[tokio::test]
+    async fn test_get_config_value_nonexistent_key() {
+        let _ctx = TestContext::new();
+
+        // Save a config
+        save_config(Config::default()).await.unwrap();
+
+        // Try to get a key that doesn't exist
+        let value = get_config_value("nonexistentKey").await.unwrap();
+        assert_eq!(value, None);
+    }
+
+    #[tokio::test]
+    async fn test_invalid_json_handling() {
+        let _ctx = TestContext::new();
+
+        // Create a config file with invalid JSON
+        let config_path = get_config_path().unwrap();
+        let config_dir = config_path.parent().unwrap();
+        fs::create_dir_all(config_dir).unwrap();
+        fs::write(&config_path, "{ invalid json }").unwrap();
+
+        // Reading should return an error
+        let result = get_config().await;
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("JSON parse error"));
+    }
+
+    #[tokio::test]
+    async fn test_migrate_from_legacy_to_new_config() {
+        let _ctx = TestContext::new();
+
+        // Create a legacy config
+        let legacy_path = get_legacy_config_path().unwrap();
+        let legacy_dir = legacy_path.parent().unwrap();
+        fs::create_dir_all(legacy_dir).unwrap();
+
+        let legacy_config = Config {
+            minimizeToTray: true,
+            autoUpdate: false,
+            proxyPort: "25565".to_string(),
+            enableRpc: true,
+            ..Default::default()
+        };
+        let json = serde_json::to_string_pretty(&legacy_config).unwrap();
+        fs::write(&legacy_path, json).unwrap();
+
+        // Read from legacy
+        let read_legacy = get_legacy_config().await.unwrap().unwrap();
+
+        // Save to new config
+        save_config(read_legacy.clone()).await.unwrap();
+
+        // Verify new config matches legacy
+        let new_config = get_config().await.unwrap().unwrap();
+        assert_eq!(new_config.minimizeToTray, read_legacy.minimizeToTray);
+        assert_eq!(new_config.autoUpdate, read_legacy.autoUpdate);
+        assert_eq!(new_config.proxyPort, read_legacy.proxyPort);
+        assert_eq!(new_config.enableRpc, read_legacy.enableRpc);
+    }
 }
