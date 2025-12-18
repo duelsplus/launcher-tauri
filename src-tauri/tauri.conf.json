@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "launcher-tauri",
+        "title": "Duels+ Launcher",
         "width": 1000,
         "height": 700,
         "shadow": true,

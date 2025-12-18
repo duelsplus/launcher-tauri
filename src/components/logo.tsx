@@ -4,7 +4,103 @@ interface LogoProps {
   height?: number;
 }
 
-export function Logo({ className = "", width = 40, height = 27 }: LogoProps) {
+export function Logo({ className = "", width = 378, height = 76 }: LogoProps) {
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 378 76"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <svg
+        width="378"
+        height="76"
+        viewBox="0 0 378 76"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g filter="url(#filter0_d_82_52)">
+          <path
+            d="M0 66V0H28.35V9.42857H9.45V56.5714H28.35V66H0Z"
+            fill="currentColor"
+          />
+          <path
+            d="M75.6 56.5714V9.42857H85.05V56.5714H75.6ZM37.8 66V0H75.6V9.42857H47.25V56.5714H75.6V66H37.8Z"
+            fill="currentColor"
+          />
+          <path
+            d="M94.5 56.5714V18.8571H103.95V56.5714H94.5ZM103.95 66V56.5714H132.3V18.8571H141.75V66H103.95Z"
+            fill="currentColor"
+          />
+          <path
+            d="M160.65 66V56.5714H198.45V66H160.65ZM151.2 56.5714V28.2857H160.65V37.7143H189V28.2857H198.45V47.1429H160.65V56.5714H151.2ZM160.65 28.2857V18.8571H189V28.2857H160.65Z"
+            fill="currentColor"
+          />
+          <path
+            d="M217.35 66V56.5714H226.8V66H217.35ZM207.9 56.5714V0H217.35V56.5714H207.9Z"
+            fill="currentColor"
+          />
+          <path
+            d="M236.25 66V56.5714H274.05V66H236.25ZM274.05 56.5714V47.1429H283.5V56.5714H274.05ZM245.7 47.1429V37.7143H274.05V47.1429H245.7ZM236.25 37.7143V28.2857H245.7V37.7143H236.25ZM245.7 28.2857V18.8571H283.5V28.2857H245.7Z"
+            fill="currentColor"
+          />
+          <path
+            d="M311.85 66V47.1429H292.95V37.7143H311.85V18.8571H321.3V37.7143H340.2V47.1429H321.3V66H311.85Z"
+            fill="currentColor"
+          />
+          <path
+            d="M349.65 66V56.5714H368.55V9.42857H349.65V0H378V66H349.65Z"
+            fill="currentColor"
+          />
+        </g>
+        <defs>
+          <filter
+            id="filter0_d_82_52"
+            x="0"
+            y="0"
+            width="378"
+            height="75.4"
+            filterUnits="userSpaceOnUse"
+            colorInterpolationFilters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="9.4" />
+            <feComposite in2="hardAlpha" operator="out" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_82_52"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_82_52"
+              result="shape"
+            />
+          </filter>
+        </defs>
+      </svg>
+    </svg>
+  );
+}
+
+export function Logomark({
+  className = "",
+  width = 40,
+  height = 27,
+}: LogoProps) {
   return (
     <svg
       width={width}
