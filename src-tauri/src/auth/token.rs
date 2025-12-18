@@ -5,6 +5,7 @@
 
 use crate::auth::error::AuthError;
 use crate::auth::models::TokenData;
+use crate::utils;
 use std::fs;
 use std::path::PathBuf;
 
@@ -42,16 +43,7 @@ fn get_token_path() -> Result<PathBuf, AuthError> {
         }
     }
 
-    // Use ~/.duelsplus on all platforms (including Windows)
-    let home_dir = if cfg!(windows) {
-        std::env::var("USERPROFILE")
-            .map(PathBuf::from)
-            .or_else(|_| std::env::var("HOME").map(PathBuf::from))
-    } else {
-        std::env::var("HOME").map(PathBuf::from)
-    }
-    .map_err(|_| AuthError::Unknown("Failed to get home directory".to_string()))?;
-
+    let home_dir = utils::get_home_dir().map_err(|e| AuthError::Unknown(e))?;
     Ok(home_dir.join(".duelsplus").join(TOKEN_FILE))
 }
 
@@ -350,5 +342,30 @@ mod tests {
 
         // Note: We do NOT call save_token or delete_token here
         // This is intentionally read-only to avoid corrupting real data
+    }
+
+    #[tokio::test]
+    async fn test_invalid_json_token_file() {
+        let _ctx = TestContext::new();
+
+        // Create a token file with invalid JSON
+        let token_path = get_token_path().unwrap();
+        let token_dir = token_path.parent().unwrap();
+        fs::create_dir_all(token_dir).unwrap();
+        fs::write(&token_path, "{ invalid json }").unwrap();
+
+        // Reading should return an error
+        let result = get_token().await;
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("JSON parse error"));
+    }
+
+    #[tokio::test]
+    async fn test_get_token_when_file_missing() {
+        let _ctx = TestContext::new();
+
+        // Token file doesn't exist
+        let token = get_token().await.unwrap();
+        assert_eq!(token, None);
     }
 }

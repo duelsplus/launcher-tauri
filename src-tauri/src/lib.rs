@@ -5,7 +5,9 @@
 
 mod auth;
 mod commands;
+mod config;
 mod proxy;
+mod utils;
 
 use commands::*;
 use proxy::ProxyManager;
@@ -31,7 +33,16 @@ pub fn run() {
             // Process management
             launch_proxy,
             stop_proxy,
-            get_proxy_status
+            get_proxy_status,
+            // Configuration management
+            legacy_config_exists,
+            config_exists,
+            get_legacy_config,
+            get_config,
+            get_legacy_config_value,
+            get_config_value,
+            set_config_key,
+            save_config
         ])
         .setup(|_app| {
             // Cleanup will be handled by the on_window_event hook
