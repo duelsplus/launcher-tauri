@@ -13,8 +13,13 @@
     "windows": [
       {
         "title": "launcher-tauri",
-        "width": 800,
-        "height": 600
+        "width": 1000,
+        "height": 700,
+        "shadow": true,
+        "decorations": false,
+        "dragDropEnabled": false,
+        "maximizable": false,
+        "resizable": false
       }
     ],
     "security": {

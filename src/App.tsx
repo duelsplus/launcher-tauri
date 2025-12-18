@@ -1,9 +1,10 @@
 import { ThemeProvider } from "@/components/theme-provider";
+import { Shell } from "@/components/shell";
 
 function App() {
   return (
     <ThemeProvider>
-      <p>test</p>
+      <Shell />
     </ThemeProvider>
   );
 }
