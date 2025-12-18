@@ -28,8 +28,8 @@ function ActionButton({ icon, active, onClick }: ActionButtonProps) {
       variant="muted"
       size="icon-lg"
       className={clsx(
-        "rounded-full p-5.5 [&_svg:not([class*='size-'])]:size-6",
-        active && "bg-popover text-popover-foreground hover:bg-popover/70",
+        "rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6",
+        active && "rounded-3xl bg-popover text-popover-foreground hover:bg-popover/70",
       )}
       onClick={onClick}
     >
