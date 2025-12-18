@@ -14,7 +14,7 @@ export function Titlebar() {
   return (
     <header
       data-tauri-drag-region
-      className="w-full flex items-center justify-end px-2"
+      className="w-full bg-muted/50 flex items-center justify-end px-2"
     >
       <div className="flex items-center">
         <Button onClick={minimize} variant="ghost" size="sm">

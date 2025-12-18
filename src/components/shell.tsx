@@ -1,5 +1,5 @@
 import { Titlebar } from "./titlebar"
-import { ActionRail } from "./action-rail";
+import { ActionRail } from "./nav/action-rail";
 import { MainView } from "./main-view";
 
 export function Shell() {
@@ -7,7 +7,7 @@ export function Shell() {
     <div className="w-screen h-screen bg-background text-foreground relative overflow-hidden flex flex-col">
       <Titlebar />
 
-      <div className="flex items-center flex-1">
+      <div className="flex flex-1">
         <ActionRail />
         <MainView className="flex-1" />
       </div>
