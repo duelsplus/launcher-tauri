@@ -195,8 +195,13 @@ mod tests {
     #[test]
     fn test_find_latest_release_none() {
         let releases = vec![Release {
+            id: "1".to_string(),
             version: "1.0.0".to_string(),
+            release_date: "2025-01-01T00:00:00Z".to_string(),
+            is_beta: false,
             is_latest: false,
+            changelog: "".to_string(),
+            whats_new: vec![],
             assets: vec![],
         }];
 
@@ -208,11 +213,17 @@ mod tests {
     #[test]
     fn test_find_platform_asset_not_found() {
         let release = Release {
+            id: "1".to_string(),
             version: "1.0.0".to_string(),
+            release_date: "2025-01-01T00:00:00Z".to_string(),
+            is_beta: false,
             is_latest: true,
+            changelog: "".to_string(),
+            whats_new: vec![],
             assets: vec![Asset {
                 id: "1".to_string(),
                 name: "proxy-win-x64.exe".to_string(),
+                url: "https://example.com/proxy.exe".to_string(),
             }],
         };
 

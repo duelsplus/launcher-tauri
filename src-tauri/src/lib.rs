@@ -34,6 +34,7 @@ pub fn run() {
             launch_proxy,
             stop_proxy,
             get_proxy_status,
+            fetch_releases,
             // Configuration management
             legacy_config_exists,
             config_exists,

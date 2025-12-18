@@ -6,8 +6,13 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Release {
+    pub id: String,
     pub version: String,
+    pub release_date: String,
+    pub is_beta: bool,
     pub is_latest: bool,
+    pub changelog: String,
+    pub whats_new: Vec<String>,
     pub assets: Vec<Asset>,
 }
 
@@ -16,6 +21,7 @@ pub struct Release {
 pub struct Asset {
     pub id: String,
     pub name: String,
+    pub url: String,
 }
 
 /// Download progress information

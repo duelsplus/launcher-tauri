@@ -5,12 +5,11 @@
 
 use crate::auth;
 use crate::config;
-use crate::proxy::ProxyManager;
+use crate::proxy::{download, models, ProxyManager};
 use tauri::{AppHandle, State};
 
 /// Checks if a token file exists on disk.
 ///
-/// This is a Tauri command that can be called from the frontend.
 /// Returns `true` if the token file exists, `false` otherwise.
 #[tauri::command]
 pub async fn token_exists() -> Result<bool, String> {
@@ -19,7 +18,6 @@ pub async fn token_exists() -> Result<bool, String> {
 
 /// Retrieves the stored authentication token from disk.
 ///
-/// This is a Tauri command that can be called from the frontend.
 /// Returns `Some(token)` if the token exists, `None` if it doesn't.
 #[tauri::command]
 pub async fn get_token() -> Result<Option<String>, String> {
@@ -28,7 +26,6 @@ pub async fn get_token() -> Result<Option<String>, String> {
 
 /// Saves an authentication token to disk.
 ///
-/// This is a Tauri command that can be called from the frontend.
 /// The token is saved with appropriate file permissions and a verification timestamp.
 ///
 /// # Arguments
@@ -43,7 +40,6 @@ pub async fn save_token(token: String) -> Result<(), String> {
 
 /// Deletes the token file from disk.
 ///
-/// This is a Tauri command that can be called from the frontend.
 /// Returns `true` if the file was deleted, `false` if it didn't exist.
 #[tauri::command]
 pub async fn delete_token() -> Result<bool, String> {
@@ -52,7 +48,6 @@ pub async fn delete_token() -> Result<bool, String> {
 
 /// Verifies an authentication token with the API.
 ///
-/// This is a Tauri command that can be called from the frontend.
 /// Checks if the token is valid and if the user is banned.
 ///
 /// # Arguments
@@ -71,7 +66,6 @@ pub async fn verify_token(token: String) -> Result<auth::models::VerifyTokenResp
 
 /// Retrieves user data from the API.
 ///
-/// This is a Tauri command that can be called from the frontend.
 /// Gets the full user object from the API.
 ///
 /// # Arguments
@@ -88,7 +82,6 @@ pub async fn get_user(token: String) -> Result<auth::models::GetUserResponse, St
 
 /// Retrieves user statistics from the API.
 ///
-/// This is a Tauri command that can be called from the frontend.
 /// Gets the user's stats from the API.
 ///
 /// # Arguments
@@ -100,7 +93,9 @@ pub async fn get_user(token: String) -> Result<auth::models::GetUserResponse, St
 /// Returns a `GetStatsResponse` with success status and stats data.
 #[tauri::command]
 pub async fn get_stats(token: String) -> Result<auth::models::GetStatsResponse, String> {
-    auth::api::get_stats(&token).await.map_err(|e| e.to_string())
+    auth::api::get_stats(&token)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 /// Launches the proxy process.
@@ -147,9 +142,20 @@ pub async fn get_proxy_status(manager: State<'_, ProxyManager>) -> Result<bool, 
     Ok(manager.is_running().await)
 }
 
+/// Fetches the list of releases from the API.
+///
+/// Returns a list of all available releases with their version, assets, and metadata.
+///
+/// # Returns
+///
+/// Returns a `Vec<Release>` containing all releases from the API.
+#[tauri::command]
+pub async fn fetch_releases() -> Result<Vec<models::Release>, String> {
+    download::fetch_releases().await.map_err(|e| e.to_string())
+}
+
 /// Checks if the legacy configuration file exists.
 ///
-/// This is a Tauri command that can be called from the frontend.
 /// Returns `true` if the legacy config file exists, `false` otherwise.
 #[tauri::command]
 pub async fn legacy_config_exists() -> Result<bool, String> {
@@ -160,7 +166,6 @@ pub async fn legacy_config_exists() -> Result<bool, String> {
 
 /// Checks if the configuration file exists.
 ///
-/// This is a Tauri command that can be called from the frontend.
 /// Returns `true` if the config file exists, `false` otherwise.
 #[tauri::command]
 pub async fn config_exists() -> Result<bool, String> {
@@ -171,7 +176,6 @@ pub async fn config_exists() -> Result<bool, String> {
 
 /// Reads the legacy configuration file.
 ///
-/// This is a Tauri command that can be called from the frontend.
 /// Returns the config if it exists, `None` otherwise.
 #[tauri::command]
 pub async fn get_legacy_config() -> Result<Option<config::models::Config>, String> {
@@ -182,7 +186,6 @@ pub async fn get_legacy_config() -> Result<Option<config::models::Config>, Strin
 
 /// Reads the configuration file.
 ///
-/// This is a Tauri command that can be called from the frontend.
 /// Returns the config if it exists, `None` otherwise.
 #[tauri::command]
 pub async fn get_config() -> Result<Option<config::models::Config>, String> {
@@ -192,8 +195,6 @@ pub async fn get_config() -> Result<Option<config::models::Config>, String> {
 }
 
 /// Reads a specific key from the legacy configuration file.
-///
-/// This is a Tauri command that can be called from the frontend.
 ///
 /// # Arguments
 ///
@@ -211,8 +212,6 @@ pub async fn get_legacy_config_value(key: String) -> Result<Option<serde_json::V
 
 /// Reads a specific key from the configuration file.
 ///
-/// This is a Tauri command that can be called from the frontend.
-///
 /// # Arguments
 ///
 /// * `key` - The configuration key to read
@@ -229,17 +228,12 @@ pub async fn get_config_value(key: String) -> Result<Option<serde_json::Value>, 
 
 /// Sets a specific key in the configuration file.
 ///
-/// This is a Tauri command that can be called from the frontend.
-///
 /// # Arguments
 ///
 /// * `key` - The configuration key to set
 /// * `value` - The value to set (must be a valid JSON value)
 #[tauri::command]
-pub async fn set_config_key(
-    key: String,
-    value: serde_json::Value,
-) -> Result<(), String> {
+pub async fn set_config_key(key: String, value: serde_json::Value) -> Result<(), String> {
     config::manager::set_config_key(&key, value)
         .await
         .map_err(|e| e.to_string())
@@ -247,15 +241,11 @@ pub async fn set_config_key(
 
 /// Saves the entire configuration structure to the configuration file.
 ///
-/// This is a Tauri command that can be called from the frontend.
-///
 /// # Arguments
 ///
 /// * `config` - The complete configuration structure to write
 #[tauri::command]
-pub async fn save_config(
-    config: config::models::Config,
-) -> Result<(), String> {
+pub async fn save_config(config: config::models::Config) -> Result<(), String> {
     config::manager::save_config(config)
         .await
         .map_err(|e| e.to_string())
