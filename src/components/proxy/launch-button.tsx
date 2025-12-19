@@ -135,71 +135,73 @@ export function LaunchButton() {
     <div className="relative w-fit">
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            onClick={handle}
-            disabled={isDisabled}
-            variant={isRunning && !hovered ? "default" : "input"}
-            size="pill-lg"
-            className="z-10 gap-2 [&_svg:not([class*='size-'])]:size-7 relative"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-          >
-            {state === "downloading" ? (
-              <>
-                <CloudArrowDownIcon weight="fill" />
-                <div className="flex flex-col text-left">
-                  Downloading...
-                  {speed && (
-                    <p className="text-xs text-muted-foreground -mt-0.5">
-                      {speed}
-                    </p>
-                  )}
-                </div>
-              </>
-            ) : state === "checking" ? (
-              <>
-                <SpinnerIcon weight="regular" className="animate-spin" />
-                Preparing...
-              </>
-            ) : state === "stopping" ? (
-              <>
-                <SpinnerIcon weight="regular" className="animate-spin" />
-                Stopping...
-              </>
-            ) : isRunning ? (
-              <>
+          <span className="inline-flex">
+            <Button
+              onClick={handle}
+              disabled={isDisabled}
+              variant={isRunning && !hovered ? "default" : "input"}
+              size="pill-lg"
+              className="z-10 gap-2 [&_svg:not([class*='size-'])]:size-7 relative"
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+            >
+              {state === "downloading" ? (
                 <>
-                  <motion.div
-                    key={hovered ? "stop" : "running"}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="flex items-center gap-2"
-                  >
-                    {hovered ? (
-                      <StopCircleIcon weight="fill" />
-                    ) : (
-                      <HeartbeatIcon weight="fill" />
+                  <CloudArrowDownIcon weight="fill" />
+                  <div className="flex flex-col text-left">
+                    Downloading...
+                    {speed && (
+                      <p className="text-xs text-muted-foreground -mt-0.5">
+                        {speed}
+                      </p>
                     )}
-                    <div className="flex flex-col text-left">
-                      {hovered ? "Stop" : "Running"}
-                      {statusText && !hovered && (
-                        <p className="text-xs text-white/70 -mt-0.5">
-                          {statusText}
-                        </p>
-                      )}
-                    </div>
-                  </motion.div>
+                  </div>
                 </>
-              </>
-            ) : (
-              <>
-                <PlayCircleIcon weight="fill" />
-                Launch
-              </>
-            )}
-          </Button>
+              ) : state === "checking" ? (
+                <>
+                  <SpinnerIcon weight="regular" className="animate-spin" />
+                  Preparing...
+                </>
+              ) : state === "stopping" ? (
+                <>
+                  <SpinnerIcon weight="regular" className="animate-spin" />
+                  Stopping...
+                </>
+              ) : isRunning ? (
+                <>
+                  <>
+                    <motion.div
+                      key={hovered ? "stop" : "running"}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="flex items-center gap-2"
+                    >
+                      {hovered ? (
+                        <StopCircleIcon weight="fill" />
+                      ) : (
+                        <HeartbeatIcon weight="fill" />
+                      )}
+                      <div className="flex flex-col text-left">
+                        {hovered ? "Stop" : "Running"}
+                        {statusText && !hovered && (
+                          <p className="text-xs text-white/70 -mt-0.5">
+                            {statusText}
+                          </p>
+                        )}
+                      </div>
+                    </motion.div>
+                  </>
+                </>
+              ) : (
+                <>
+                  <PlayCircleIcon weight="fill" />
+                  Launch
+                </>
+              )}
+            </Button>
+          </span>
         </TooltipTrigger>
         {state === "downloading" && (
           <TooltipContent side="right">
