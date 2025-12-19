@@ -266,7 +266,7 @@ impl ProxyManager {
                 use nix::unistd::Pid;
 
                 if let Some(pid) = child.id() {
-                    let _ = kill(Pid::from_raw(pid as i32), Signal::SIGINT);
+                    let _ = kill(Pid::from_raw(pid as i32), Signal::SIGTERM);
                 }
             }
 
