@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import {
+  SpinnerIcon,
   CloudArrowDownIcon,
   HeartbeatIcon,
   PlayCircleIcon,
@@ -23,7 +24,12 @@ type DownloadProgress = {
   speed: number;
 };
 
-type ProxyState = "unknown" | "running" | "downloading" | "stopped";
+type ProxyState =
+  | "unknown"
+  | "running"
+  | "checking"
+  | "downloading"
+  | "stopped";
 
 export function LaunchButton() {
   const [state, setState] = useState<ProxyState>("unknown");
@@ -46,6 +52,11 @@ export function LaunchButton() {
       (event) => {
         const status = event.payload.status;
         //setStatusText(status);
+
+        if (status === "checking") {
+          setState("checking");
+          setProgress(null);
+        }
 
         if (status === "downloading") {
           setState("downloading");
@@ -89,7 +100,7 @@ export function LaunchButton() {
     try {
       const running = await invoke<boolean>("get_proxy_status");
       if (!running) {
-        setStatusText("Checking for updates...");
+        setState("checking");
         await invoke("launch_proxy");
       } else {
         await invoke("stop_proxy");
@@ -132,6 +143,11 @@ export function LaunchButton() {
                 <p className="text-xs text-muted-foreground -mt-0.5">{speed}</p>
               )}
             </div>
+          </>
+        ) : state === "checking" ? (
+          <>
+            <SpinnerIcon weight="regular" className="animate-spin" />
+            Preparing...
           </>
         ) : isRunning ? (
           <>
