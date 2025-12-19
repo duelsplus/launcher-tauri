@@ -8,6 +8,8 @@ use std::fs;
 use std::path::PathBuf;
 use tokio::io::AsyncWriteExt;
 
+use crate::utils;
+
 const API_BASE: &str = "https://duelsplus.com/api/releases";
 const APP_NAME: &str = "duelsplus";
 const MIN_FILE_SIZE_MB: f64 = 50.0;
@@ -27,10 +29,8 @@ pub fn get_platform_tag() -> Result<String, ProxyError> {
 
 /// Gets the installation directory for the proxy
 pub fn get_install_dir() -> Result<PathBuf, ProxyError> {
-    let project_dirs = ProjectDirs::from("", "", APP_NAME)
-        .ok_or_else(|| ProxyError::Unknown("Failed to get home directory".to_string()))?;
-
-    let install_dir = project_dirs.data_dir().join("proxy");
+    let home_dir = utils::get_home_dir().map_err(|e| ProxyError::Unknown(e))?;
+    let install_dir = home_dir.join(".duelsplus").join("proxy");
     Ok(install_dir)
 }
 
