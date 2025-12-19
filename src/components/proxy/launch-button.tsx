@@ -45,20 +45,23 @@ export function LaunchButton() {
       "updater:status",
       (event) => {
         const status = event.payload.status;
-        setStatusText(status);
+        //setStatusText(status);
 
         if (status === "downloading") {
           setState("downloading");
+          setStatusText("Downloading");
           setProgress(null);
         }
 
         if (status === "launched") {
           setState("running");
+          setStatusText("Launched");
           setBusy(false);
           setProgress(null);
         }
 
         if (status === "error") {
+          setStatusText("Error");
           setBusy(false);
         }
       },
