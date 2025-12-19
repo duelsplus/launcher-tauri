@@ -2,6 +2,7 @@ import { PlayCircleIcon } from "@phosphor-icons/react";
 import { Logo } from "./logo";
 import { Button } from "./ui/button";
 import { WhatsNew } from "./whats-new";
+import { LaunchButton } from "./proxy/launch-button";
 
 export function MainView({ className }: { className?: string }) {
   return (
@@ -11,10 +12,7 @@ export function MainView({ className }: { className?: string }) {
 
       <div className="space-y-6">
         <Logo className="h-16 w-auto text-primary dark:text-foreground" />
-        <Button className="gap-2! [&_svg:not([class*='size-'])]:size-7" variant="input" size="pill-lg">
-          <PlayCircleIcon weight="fill" />
-          Launch
-        </Button>
+        <LaunchButton />
 
         <div className="space-y-3">
           <h2 className="text-base font-medium">What's new</h2>
