@@ -65,7 +65,7 @@ export function Logo({ className = "", width = 378, height = 76 }: LogoProps) {
             filterUnits="userSpaceOnUse"
             colorInterpolationFilters="sRGB"
           >
-            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feFlood floodOpacity="0" result="BackgroundImageFix" />
             <feColorMatrix
               in="SourceAlpha"
               type="matrix"
@@ -76,7 +76,7 @@ export function Logo({ className = "", width = 378, height = 76 }: LogoProps) {
             <feComposite in2="hardAlpha" operator="out" />
             <feColorMatrix
               type="matrix"
-              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0"
             />
             <feBlend
               mode="normal"
