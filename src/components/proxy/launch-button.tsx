@@ -10,10 +10,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
-type ProxyStatusEvent = {
-  status: string;
-  version?: string | null;
-};
+type ProxyStatusEvent =
+  | { status: "checking" }
+  | { status: "downloading"; version: string }
+  | { status: "launching" }
+  | { status: "launched" }
+  | { status: "error" };
 
 type DownloadProgress = {
   downloaded: number;
@@ -45,18 +47,18 @@ export function LaunchButton() {
         const status = event.payload.status;
         setStatusText(status);
 
-        if (status === "Downloading...") {
+        if (status === "downloading") {
           setState("downloading");
           setProgress(null);
         }
 
-        if (status === "Launched") {
+        if (status === "launched") {
           setState("running");
           setBusy(false);
           setProgress(null);
         }
 
-        if (status === "Error") {
+        if (status === "error") {
           setBusy(false);
         }
       },
@@ -139,7 +141,11 @@ export function LaunchButton() {
                 transition={{ duration: 0.15 }}
                 className="flex items-center gap-2"
               >
-                {hovered ? <StopCircleIcon weight="fill" /> : <HeartbeatIcon weight="fill" />}
+                {hovered ? (
+                  <StopCircleIcon weight="fill" />
+                ) : (
+                  <HeartbeatIcon weight="fill" />
+                )}
                 <div className="flex flex-col text-left">
                   {hovered ? "Stop" : "Running"}
                   {statusText && !hovered && (
