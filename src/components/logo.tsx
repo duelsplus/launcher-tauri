@@ -76,7 +76,7 @@ export function Logo({ className = "", width = 378, height = 76 }: LogoProps) {
             <feComposite in2="hardAlpha" operator="out" />
             <feColorMatrix
               type="matrix"
-              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0"
             />
             <feBlend
               mode="normal"
