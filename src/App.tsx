@@ -1,11 +1,14 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { Shell } from "@/components/shell";
+import { TabsProvider } from "@/lib/tabs";
 
 function App() {
   return (
-    <ThemeProvider>
-      <Shell />
-    </ThemeProvider>
+    <TabsProvider>
+      <ThemeProvider>
+        <Shell />
+      </ThemeProvider>
+    </TabsProvider>
   );
 }
 

@@ -9,6 +9,7 @@ import {
 import type { IconWeight } from "@phosphor-icons/react";
 import clsx from "clsx";
 import { ThemeSwitcher } from "./theme-switcher";
+import { useTabs } from "@/lib/tabs";
 
 interface ActionButtonProps {
   icon: "home" | "logs" | "stats" | "settings";
@@ -54,15 +55,29 @@ function ActionCategory({ children }: ActionCategoryProps) {
 }
 
 export function ActionRail() {
+  const { activeTab, setActiveTab } = useTabs();
   return (
     <nav className="fixed top-0 bottom-0 left-0 w-24 flex flex-col justify-center items-center bg-muted/50 gap-3 backdrop-blur">
       <ActionCategory>
-        <ActionButton icon="home" active />
-        <ActionButton icon="logs" onClick={() => console.log("Open Logs")} />
-        <ActionButton icon="stats" onClick={() => console.log("Open Stats")} />
+        <ActionButton
+          icon="home"
+          active={activeTab === "home"}
+          onClick={() => setActiveTab("home")}
+        />
+        <ActionButton
+          icon="logs"
+          active={activeTab === "logs"}
+          onClick={() => setActiveTab("logs")}
+        />
+        <ActionButton
+          icon="stats"
+          active={activeTab === "stats"}
+          onClick={() => setActiveTab("stats")}
+        />
         <ActionButton
           icon="settings"
-          onClick={() => console.log("Open Settings")}
+          active={activeTab === "settings"}
+          onClick={() => setActiveTab("settings")}
         />
       </ActionCategory>
       <ActionCategory>
