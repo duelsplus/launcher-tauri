@@ -72,7 +72,9 @@ impl ProxyManager {
             // Download with progress tracking
             let app_clone = app.clone();
             download_artifact(&asset.id, &file_path, move |progress| {
-                let _ = app_clone.emit("updater:progress", progress);
+                if let Err(e) = app_clone.emit("updater:progress", &progress) {
+                    eprintln!("Failed to emit progress event: {:?}", e);
+                }
             })
             .await?;
 
