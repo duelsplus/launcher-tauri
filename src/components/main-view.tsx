@@ -10,7 +10,7 @@ export function MainView({ className }: { className?: string }) {
       <div className="min-h-[20vh]" />
 
       <div className="space-y-6">
-        <Logo className="h-16 w-auto text-muted dark:text-foreground" />
+        <Logo className="h-16 w-auto text-primary dark:text-foreground" />
         <Button className="gap-2! [&_svg:not([class*='size-'])]:size-7" variant="input" size="pill-lg">
           <PlayCircleIcon weight="fill" />
           Launch
