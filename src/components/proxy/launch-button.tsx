@@ -107,6 +107,7 @@ export function LaunchButton() {
         setState("stopping");
         await invoke("stop_proxy");
         setState("stopped");
+        setBusy(false);
         setStatusText(null);
       }
     } catch (err) {
