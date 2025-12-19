@@ -205,7 +205,7 @@ export function LaunchButton() {
         </TooltipTrigger>
         {state === "downloading" && (
           <TooltipContent side="right">
-            <p>The proxy cannot be stopped while downloading a new version.</p>
+            <p>The proxy cannot be stopped while downloading.</p>
           </TooltipContent>
         )}
         <AnimatePresence>
