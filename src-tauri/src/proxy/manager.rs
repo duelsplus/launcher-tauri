@@ -43,7 +43,7 @@ impl ProxyManager {
 
         // Emit status
         let _ = app.emit("updater:show", ());
-        let _ = app.emit("updater:status", ProxyStatus::checking());
+        let _ = app.emit("updater:status", ProxyStatus::Checking);
 
         // Get platform and install directory
         let platform_tag = get_platform_tag()?;
@@ -66,7 +66,7 @@ impl ProxyManager {
             );
             let _ = app.emit(
                 "updater:status",
-                ProxyStatus::downloading(latest.version.clone()),
+                ProxyStatus::Downloading { version: latest.version.clone() },
             );
 
             // Download with progress tracking
@@ -90,7 +90,7 @@ impl ProxyManager {
         cleanup_old_executables(&install_dir, &asset.name)?;
 
         // Launch the proxy
-        let _ = app.emit("updater:status", ProxyStatus::launching());
+        let _ = app.emit("updater:status", ProxyStatus::Launching);
         self.launch_process(app, file_path, port).await?;
 
         Ok(())
@@ -136,7 +136,7 @@ impl ProxyManager {
         *self.process.lock().await = Some(child);
         *self.is_running.lock().await = true;
 
-        let _ = app.emit("updater:status", ProxyStatus::launched());
+        let _ = app.emit("updater:status", ProxyStatus::Launched);
         let _ = app.emit("updater:hide", ());
 
         // Spawn tasks to handle stdout and stderr
@@ -223,7 +223,7 @@ impl ProxyManager {
         }
 
         *is_running.lock().await = false;
-        let _ = app.emit("updater:status", ProxyStatus::error());
+        let _ = app.emit("updater:status", ProxyStatus::Error);
         let _ = app.emit("log-message", "Proxy process exited");
     }
 

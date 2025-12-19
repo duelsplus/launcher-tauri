@@ -35,60 +35,13 @@ pub struct DownloadProgress {
 
 /// Proxy status information
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ProxyStatus {
-    pub status: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub version: Option<String>,
-    pub color: String,
-    pub bar_color: String,
-}
-
-impl ProxyStatus {
-    pub fn checking() -> Self {
-        Self {
-            status: "Checking for updates...".to_string(),
-            version: None,
-            color: "text-yellow-400".to_string(),
-            bar_color: "bg-yellow-400".to_string(),
-        }
-    }
-
-    pub fn downloading(version: String) -> Self {
-        Self {
-            status: "Downloading...".to_string(),
-            version: Some(version),
-            color: "text-blue-400".to_string(),
-            bar_color: "bg-blue-500".to_string(),
-        }
-    }
-
-    pub fn launching() -> Self {
-        Self {
-            status: "Launching...".to_string(),
-            version: None,
-            color: "text-green-400".to_string(),
-            bar_color: "bg-green-400".to_string(),
-        }
-    }
-
-    pub fn launched() -> Self {
-        Self {
-            status: "Launched".to_string(),
-            version: None,
-            color: "text-green-400".to_string(),
-            bar_color: "bg-green-400".to_string(),
-        }
-    }
-
-    pub fn error() -> Self {
-        Self {
-            status: "Error".to_string(),
-            version: None,
-            color: "text-red-500".to_string(),
-            bar_color: "bg-red-500".to_string(),
-        }
-    }
+#[serde(rename_all = "camelCase", tag = "status")]
+pub enum ProxyStatus {
+    Checking,
+    Downloading { version: String },
+    Launching,
+    Launched,
+    Error,
 }
 
 /// User data extracted from proxy logs for RPC
