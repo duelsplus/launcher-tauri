@@ -10,6 +10,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Release = {
   id: string;
@@ -45,6 +46,7 @@ export function renderMarkdown(text: string) {
 export function WhatsNew() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<Release | null>(null);
   const [page, setPage] = useState(0); //zero‑based
   const itemsPerPage = 6;
 
@@ -78,7 +80,14 @@ export function WhatsNew() {
           const whatsNew = release.whatsNew ?? [];
           const showMore = release.whatsNew.length > maxBullets;
           return (
-            <div key={release.id} className="p-4 rounded-2xl bg-muted/70">
+            <motion.div
+              key={release.id}
+              layoutId={`release-${release.id}`}
+              onClick={() => setSelected(release)}
+              className="p-4 rounded-2xl bg-muted/70"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="text-lg font-semibold">{release.version}</h3>
                 {release.isLatest && (
@@ -98,10 +107,44 @@ export function WhatsNew() {
                   +{whatsNew.length - maxBullets} more
                 </p>
               )}
-            </div>
+            </motion.div>
           );
         })}
       </div>
+
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur bg-black/50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelected(null)}
+          >
+            <motion.div
+              layoutId={`release-${selected.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-lg rounded-2xl bg-background p-6 shadow-xl"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <h3 className="text-xl font-bold">{selected.version}</h3>
+                {selected.isLatest && (
+                  <div className="size-1.5 bg-primary rounded-full" />
+                )}
+              </div>
+
+              <ul className="list-disc list-inside space-y-2 text-sm">
+                {selected.whatsNew.map((item, i) => (
+                  <li
+                    key={i}
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(item) }}
+                  />
+                ))}
+              </ul>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Pagination className="mt-6 justify-center flex">
         <PaginationContent>
