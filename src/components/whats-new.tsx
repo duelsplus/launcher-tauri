@@ -80,7 +80,7 @@ export function WhatsNew() {
           return (
             <div
               key={release.id}
-              className="p-4 rounded-2xl shadow-sm bg-muted"
+              className="p-4 rounded-2xl bg-muted"
             >
               <h3 className="text-lg font-semibold mb-2">{release.version}</h3>
               <ul className="list-disc list-inside space-y-1 text-sm">
