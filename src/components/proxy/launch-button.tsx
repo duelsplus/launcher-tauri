@@ -29,6 +29,7 @@ type ProxyState =
   | "running"
   | "checking"
   | "downloading"
+  | "stopping"
   | "stopped";
 
 export function LaunchButton() {
@@ -103,6 +104,7 @@ export function LaunchButton() {
         setState("checking");
         await invoke("launch_proxy");
       } else {
+        setState("stopping");
         await invoke("stop_proxy");
         setState("stopped");
         setStatusText(null);
@@ -148,6 +150,11 @@ export function LaunchButton() {
           <>
             <SpinnerIcon weight="regular" className="animate-spin" />
             Preparing...
+          </>
+        ) : state === "stopping" ? (
+          <>
+            <SpinnerIcon weight="regular" className="animate-spin" />
+            Stopping...
           </>
         ) : isRunning ? (
           <>
