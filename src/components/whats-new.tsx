@@ -78,11 +78,13 @@ export function WhatsNew() {
           const whatsNew = release.whatsNew ?? [];
           const showMore = release.whatsNew.length > maxBullets;
           return (
-            <div
-              key={release.id}
-              className="p-4 rounded-2xl bg-muted/70"
-            >
-              <h3 className="text-lg font-semibold mb-2">{release.version}</h3>
+            <div key={release.id} className="p-4 rounded-2xl bg-muted/70">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-lg font-semibold">{release.version}</h3>
+                {release.isLatest && (
+                  <div className="size-1.5 bg-primary rounded-full" />
+                )}
+              </div>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 {whatsNew.slice(0, maxBullets).map((item, idx) => (
                   <li
