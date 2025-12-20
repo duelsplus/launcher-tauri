@@ -7,6 +7,7 @@ import {
   HeartbeatIcon,
   PlayCircleIcon,
   StopCircleIcon,
+  HeartBreakIcon,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -34,6 +35,7 @@ type ProxyState =
   | "running"
   | "checking"
   | "downloading"
+  | "error"
   | "stopping"
   | "stopped";
 
@@ -78,6 +80,7 @@ export function LaunchButton() {
         }
 
         if (status === "error") {
+          setState("error");
           setStatusText("Error");
           setBusy(false);
         }
@@ -118,6 +121,7 @@ export function LaunchButton() {
     } catch (err) {
       console.error(err);
       setBusy(false);
+      setState("error");
       setStatusText("Error");
     }
   }
@@ -139,7 +143,11 @@ export function LaunchButton() {
             <Button
               onClick={handle}
               disabled={isDisabled}
-              variant={isRunning && !hovered ? "default" : "input"}
+              variant={
+                (isRunning || state === "error") && !hovered
+                  ? "default"
+                  : "input"
+              }
               size="pill-lg"
               className="z-10 gap-2 [&_svg:not([class*='size-'])]:size-7 relative"
               onMouseEnter={() => setHovered(true)}
@@ -166,6 +174,26 @@ export function LaunchButton() {
                 <>
                   <SpinnerIcon weight="regular" className="animate-spin" />
                   Stopping...
+                </>
+              ) : state === "error" ? (
+                <>
+                  <>
+                    <motion.div
+                      key={hovered ? "stop" : "error"}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="flex items-center gap-2"
+                    >
+                      {hovered ? (
+                        <StopCircleIcon weight="fill" />
+                      ) : (
+                        <HeartBreakIcon weight="fill" />
+                      )}
+                      {hovered ? "Stop" : "Error"}
+                    </motion.div>
+                  </>
                 </>
               ) : isRunning ? (
                 <>
