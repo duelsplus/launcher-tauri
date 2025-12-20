@@ -69,7 +69,7 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
       .finally(() => setLoading(false));
   }, []);
 
-  // auto-close after final pane
+  // autoclose after final step
   useEffect(() => {
     if (step === "welcome") {
       const t = setTimeout(onWelcome, 3000);
