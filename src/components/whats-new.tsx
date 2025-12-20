@@ -150,7 +150,6 @@ export function WhatsNew() {
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
-              href="#"
               onClick={(e) => {
                 e.preventDefault();
                 setPage(Math.max(page - 1, 0));
@@ -161,7 +160,6 @@ export function WhatsNew() {
           {Array.from({ length: totalPages }).map((_, i) => (
             <PaginationItem key={i}>
               <PaginationLink
-                href="#"
                 isActive={i === page}
                 onClick={(e) => {
                   e.preventDefault();
@@ -175,7 +173,6 @@ export function WhatsNew() {
 
           <PaginationItem>
             <PaginationNext
-              href="#"
               onClick={(e) => {
                 e.preventDefault();
                 setPage(Math.min(page + 1, totalPages - 1));
