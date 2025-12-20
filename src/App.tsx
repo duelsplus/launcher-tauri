@@ -1,14 +1,28 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { Shell } from "@/components/shell";
+import { OnboardingProvider, useOnboarding } from "@/lib/onboarding";
+import { Onboarding } from "@/components/onboarding";
 import { TabsProvider } from "@/lib/tabs";
+
+function Content() {
+  const { isOnboarded, setOnboarded } = useOnboarding();
+
+  if (!isOnboarded) {
+    return <Onboarding open onFinish={() => setOnboarded(true)} />;
+  }
+
+  return <Shell />;
+}
 
 function App() {
   return (
-    <TabsProvider>
-      <ThemeProvider>
-        <Shell />
-      </ThemeProvider>
-    </TabsProvider>
+    <OnboardingProvider>
+      <TabsProvider>
+        <ThemeProvider>
+          <Content />
+        </ThemeProvider>
+      </TabsProvider>
+    </OnboardingProvider>
   );
 }
 
