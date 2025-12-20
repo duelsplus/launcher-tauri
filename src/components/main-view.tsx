@@ -13,10 +13,10 @@ function TabPanel({
   return (
     <div
       className={clsx(
-        "transition-opacity duration-200",
+        "w-full h-full",
         active
-          ? "opacity-100 pointer-events-auto"
-          : "opacity-0 pointer-events-none",
+          ? "inline-block"
+          : "hidden",
       )}
     >
       {children}
@@ -28,7 +28,7 @@ export function MainView({ className }: { className?: string }) {
   const { activeTab } = useTabs();
 
   return (
-    <div className={`ml-24 pb-12 px-8 h-full overflow-auto ${className ?? ""}`}>
+    <div className={`ml-24 py-12 px-8 h-full overflow-auto ${className ?? ""}`}>
       <TabPanel active={activeTab === "home"}>
         <Home />
       </TabPanel>
