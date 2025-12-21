@@ -92,7 +92,7 @@ pub async fn download_artifact<F>(
 where
     F: FnMut(DownloadProgress),
 {
-    let url = format!("{}/artifact?assetId={}", API_BASE, asset_id);
+    let url = format!("{}/signed?assetId={}", API_BASE, asset_id);
     let client = reqwest::Client::new();
 
     let response = client.get(&url).send().await?;
