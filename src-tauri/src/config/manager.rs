@@ -72,7 +72,7 @@ fn get_legacy_config_path() -> Result<PathBuf, ConfigError> {
 /// Gets the full path to the configuration file.
 ///
 /// Config file location:
-/// - All platforms: `~/.config/duelsplus/config.json`
+/// - All platforms: `~/.duelsplus/config.json`
 ///
 /// # Returns
 ///
@@ -90,9 +90,8 @@ fn get_config_path() -> Result<PathBuf, ConfigError> {
         }
     }
 
-    let home_dir = utils::get_home_dir().map_err(|e| ConfigError::Unknown(e))?;
-
-    Ok(home_dir.join(".config").join("duelsplus").join(CONFIG_FILE))
+    let app_root = utils::get_app_root().map_err(|e| ConfigError::Unknown(e))?;
+    Ok(app_root.join(CONFIG_FILE))
 }
 
 /// Checks if the legacy configuration file exists.

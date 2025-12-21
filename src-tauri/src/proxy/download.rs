@@ -2,7 +2,6 @@
 
 use super::error::ProxyError;
 use super::models::{Asset, DownloadProgress, Release};
-use directories::ProjectDirs;
 use reqwest;
 use std::fs;
 use std::path::PathBuf;
@@ -11,7 +10,6 @@ use tokio::io::AsyncWriteExt;
 use crate::utils;
 
 const API_BASE: &str = "https://duelsplus.com/api/releases";
-const APP_NAME: &str = "duelsplus";
 const MIN_FILE_SIZE_MB: f64 = 50.0;
 
 /// Gets the platform-specific tag for binary selection
@@ -29,9 +27,8 @@ pub fn get_platform_tag() -> Result<String, ProxyError> {
 
 /// Gets the installation directory for the proxy
 pub fn get_install_dir() -> Result<PathBuf, ProxyError> {
-    let home_dir = utils::get_home_dir().map_err(|e| ProxyError::Unknown(e))?;
-    let install_dir = home_dir.join(".duelsplus").join("proxy");
-    Ok(install_dir)
+    let app_root = utils::get_app_root().map_err(|e| ProxyError::Unknown(e))?;
+    Ok(app_root.join("proxy"))
 }
 
 /// Fetches the list of releases from the API

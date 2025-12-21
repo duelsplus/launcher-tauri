@@ -4,10 +4,15 @@
 //! including token verification and user data retrieval.
 
 use crate::auth::error::AuthError;
-use crate::auth::models::{GetStatsResponse, GetUserResponse, User, VerifyTokenResponse};
+use crate::auth::models::{
+    GetGlobalStatsResponse, GetStatsResponse, GetUserResponse, User, VerifyTokenResponse,
+};
 
 /// Base URL for the authentication API
 const API_BASE_URL: &str = "https://api.venxm.uk";
+
+/// Base URL for the public stats API
+const STATS_API_URL: &str = "https://duelsplus.com/api/stats";
 
 /// Maximum number of retry attempts for network requests
 const MAX_RETRIES: u32 = 3;
@@ -406,6 +411,102 @@ async fn process_get_stats_response(
         success: false,
         code: Some(crate::auth::models::GetUserCode::Number(status.as_u16())),
         stats: None,
+        message: None,
+    })
+}
+
+/// Retrieves global statistics from the public API.
+///
+/// Sends a request to get global stats from the public API (no auth required).
+///
+/// # Returns
+///
+/// Returns a `GetGlobalStatsResponse` with:
+/// - `success: true` and stats data if the request was successful
+/// - `success: false` with HTTP status code for errors (500, etc.)
+///
+/// # Errors
+///
+/// Returns `AuthError` if there was a network error or error parsing the response JSON.
+pub async fn get_global_stats() -> Result<GetGlobalStatsResponse, AuthError> {
+    let client = reqwest::Client::new();
+
+    // Retry logic for network errors and server errors
+    for attempt in 0..=MAX_RETRIES {
+        let response = match client.get(STATS_API_URL).send().await {
+            Ok(res) => res,
+            Err(e) => {
+                // If this is the last attempt, return network error
+                if attempt == MAX_RETRIES {
+                    return Ok(GetGlobalStatsResponse {
+                        success: false,
+                        code: Some(crate::auth::models::GetUserCode::String(
+                            "network_error".to_string(),
+                        )),
+                        data: None,
+                        message: Some(e.to_string()),
+                    });
+                }
+                // Wait before retrying with exponential backoff
+                tokio::time::sleep(tokio::time::Duration::from_millis(
+                    INITIAL_RETRY_DELAY_MS * (1 << attempt),
+                ))
+                .await;
+                continue;
+            }
+        };
+
+        let status = response.status();
+
+        // Retry on server errors (500+), but not on client errors (4xx)
+        if status.as_u16() >= 500 && attempt < MAX_RETRIES {
+            // Wait before retrying with exponential backoff
+            tokio::time::sleep(tokio::time::Duration::from_millis(
+                INITIAL_RETRY_DELAY_MS * (1 << attempt),
+            ))
+            .await;
+            continue;
+        }
+
+        // Process the response
+        return process_get_global_stats_response(response, status).await;
+    }
+
+    // Should never reach here, but return a generic error
+    Err(AuthError::Unknown("Max retries exceeded".to_string()))
+}
+
+/// Processes the global stats response from the API.
+async fn process_get_global_stats_response(
+    response: reqwest::Response,
+    status: reqwest::StatusCode,
+) -> Result<GetGlobalStatsResponse, AuthError> {
+    // Success case (200 OK)
+    if status.is_success() {
+        let data: serde_json::Value = response.json().await?;
+        return Ok(GetGlobalStatsResponse {
+            success: true,
+            code: None,
+            data: Some(data),
+            message: None,
+        });
+    }
+
+    // Handle server errors (500+)
+    if status.as_u16() >= 500 {
+        return Ok(GetGlobalStatsResponse {
+            success: false,
+            code: Some(crate::auth::models::GetUserCode::Number(500)),
+            data: None,
+            message: None,
+        });
+    }
+
+    // Handle other HTTP status codes
+    Ok(GetGlobalStatsResponse {
+        success: false,
+        code: Some(crate::auth::models::GetUserCode::Number(status.as_u16())),
+        data: None,
         message: None,
     })
 }

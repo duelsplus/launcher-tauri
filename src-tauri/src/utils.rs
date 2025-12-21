@@ -7,8 +7,6 @@ use std::path::PathBuf;
 /// On Windows, tries `USERPROFILE` first, then falls back to `HOME`.
 /// On Unix systems, uses `HOME`.
 ///
-/// # Returns
-///
 /// Returns the home directory path, or an error message if it cannot be determined.
 pub fn get_home_dir() -> Result<PathBuf, String> {
     let home_dir = if cfg!(windows) {
@@ -23,3 +21,10 @@ pub fn get_home_dir() -> Result<PathBuf, String> {
     Ok(home_dir)
 }
 
+/// Gets the app root directory (~/.duelsplus).
+///
+/// Returns the app root directory path, or an error message if the home directory
+/// cannot be determined.
+pub fn get_app_root() -> Result<PathBuf, String> {
+    Ok(get_home_dir()?.join(".duelsplus"))
+}

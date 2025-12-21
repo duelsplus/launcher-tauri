@@ -114,3 +114,23 @@ pub struct GetStatsResponse {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
+
+/// Response from the get global stats endpoint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GetGlobalStatsResponse {
+    /// Whether the request was successful
+    pub success: bool,
+
+    /// Optional error code
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code: Option<GetUserCode>,
+
+    /// Global stats data if successful
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<serde_json::Value>,
+
+    /// Error message if any
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}

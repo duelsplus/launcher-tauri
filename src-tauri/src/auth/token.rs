@@ -2,15 +2,22 @@
 //!
 //! This module handles reading, writing, and deleting authentication tokens
 //! from the local file system. Tokens are stored in the application's config directory.
+//! The token is cached in memory after the first read to avoid repeated disk access.
 
 use crate::auth::error::AuthError;
 use crate::auth::models::TokenData;
 use crate::utils;
 use std::fs;
 use std::path::PathBuf;
-
-#[cfg(test)]
 use std::sync::Mutex;
+use std::sync::OnceLock;
+
+/// Cached token storage - initialized on first access
+static TOKEN_CACHE: OnceLock<Mutex<Option<String>>> = OnceLock::new();
+
+fn get_cache() -> &'static Mutex<Option<String>> {
+    TOKEN_CACHE.get_or_init(|| Mutex::new(None))
+}
 
 #[cfg(test)]
 pub(crate) static TEST_TOKEN_DIR: Mutex<Option<PathBuf>> = Mutex::new(None);
@@ -43,8 +50,8 @@ fn get_token_path() -> Result<PathBuf, AuthError> {
         }
     }
 
-    let home_dir = utils::get_home_dir().map_err(|e| AuthError::Unknown(e))?;
-    Ok(home_dir.join(".duelsplus").join(TOKEN_FILE))
+    let app_root = utils::get_app_root().map_err(|e| AuthError::Unknown(e))?;
+    Ok(app_root.join(TOKEN_FILE))
 }
 
 /// Checks if a token file exists on disk.
@@ -59,14 +66,25 @@ pub async fn token_exists() -> Result<bool, AuthError> {
     Ok(token_path.exists())
 }
 
-/// Retrieves the stored authentication token from disk.
+/// Retrieves the stored authentication token.
+///
+/// Returns the cached token if available, otherwise reads from disk and caches it.
 ///
 /// # Returns
 ///
-/// - `Ok(Some(token))` if the token file exists and was successfully read
-/// - `Ok(None)` if the token file does not exist
+/// - `Ok(Some(token))` if the token exists (cached or on disk)
+/// - `Ok(None)` if no token exists
 /// - `Err(AuthError)` if there was an error reading or parsing the token file
 pub async fn get_token() -> Result<Option<String>, AuthError> {
+    // Check cache first
+    {
+        let cache = get_cache().lock().unwrap_or_else(|e| e.into_inner());
+        if let Some(ref token) = *cache {
+            return Ok(Some(token.clone()));
+        }
+    }
+
+    // Not in cache, read from disk
     let token_path = get_token_path()?;
 
     if !token_path.exists() {
@@ -76,10 +94,16 @@ pub async fn get_token() -> Result<Option<String>, AuthError> {
     let content = fs::read_to_string(&token_path)?;
     let token_data: TokenData = serde_json::from_str(&content)?;
 
+    // Cache the token
+    {
+        let mut cache = get_cache().lock().unwrap_or_else(|e| e.into_inner());
+        *cache = Some(token_data.token.clone());
+    }
+
     Ok(Some(token_data.token))
 }
 
-/// Saves an authentication token to disk.
+/// Saves an authentication token to disk and updates the cache.
 ///
 /// Creates the config directory if it doesn't exist, writes the token
 /// along with a verification timestamp, and sets appropriate file permissions
@@ -127,10 +151,16 @@ pub async fn save_token(token: String) -> Result<(), AuthError> {
         fs::set_permissions(&token_path, perms)?;
     }
 
+    // Update cache
+    {
+        let mut cache = get_cache().lock().unwrap_or_else(|e| e.into_inner());
+        *cache = Some(token);
+    }
+
     Ok(())
 }
 
-/// Deletes the token file from disk.
+/// Deletes the token file from disk and clears the cache.
 ///
 /// # Returns
 ///
@@ -138,6 +168,12 @@ pub async fn save_token(token: String) -> Result<(), AuthError> {
 /// - `Ok(false)` if the token file did not exist
 /// - `Err(AuthError)` if there was an error deleting the file
 pub async fn delete_token() -> Result<bool, AuthError> {
+    // Clear cache
+    {
+        let mut cache = get_cache().lock().unwrap_or_else(|e| e.into_inner());
+        *cache = None;
+    }
+
     let token_path = get_token_path()?;
 
     if token_path.exists() {

@@ -82,18 +82,33 @@ pub async fn get_user(token: String) -> Result<auth::models::GetUserResponse, St
 
 /// Retrieves user statistics from the API.
 ///
-/// Gets the user's stats from the API.
-///
-/// # Arguments
-///
-/// * `token` - The authentication token
+/// Gets the user's stats from the API using the cached/stored token.
 ///
 /// # Returns
 ///
 /// Returns a `GetStatsResponse` with success status and stats data.
 #[tauri::command]
-pub async fn get_stats(token: String) -> Result<auth::models::GetStatsResponse, String> {
+pub async fn get_user_stats() -> Result<auth::models::GetStatsResponse, String> {
+    let token = auth::token::get_token()
+        .await
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "No token found".to_string())?;
+
     auth::api::get_stats(&token)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Retrieves global statistics from the public API.
+///
+/// Gets global stats from the public API (no authentication required).
+///
+/// # Returns
+///
+/// Returns a `GetGlobalStatsResponse` with success status and global stats data.
+#[tauri::command]
+pub async fn get_global_stats() -> Result<auth::models::GetGlobalStatsResponse, String> {
+    auth::api::get_global_stats()
         .await
         .map_err(|e| e.to_string())
 }
