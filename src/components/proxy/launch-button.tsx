@@ -134,6 +134,10 @@ export function LaunchButton() {
       : `${(progress.speed / 1_000).toFixed(1)} KB/s`
     : null;
 
+  const percent = progress
+    ? Math.round((progress.downloaded / progress.total) * 100).toString()
+    : null;
+
   return (
     <div className="relative w-fit">
       <Tooltip>
@@ -148,7 +152,7 @@ export function LaunchButton() {
                   : "input"
               }
               size="pill-lg"
-              className="z-10 gap-2 [&_svg:not([class*='size-'])]:size-7 relative"
+              className="z-10 gap-2 [&_svg:not([class*='size-'])]:size-7 relative overflow-hidden"
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
             >
@@ -163,6 +167,12 @@ export function LaunchButton() {
                       </p>
                     )}
                   </div>
+                  {percent && (
+                    <div
+                      className="absolute inset-0 bg-primary/30 z-0 transition-all duration-300"
+                      style={{ width: `${percent}%`, left: 0 }}
+                    />
+                  )}
                 </>
               ) : state === "checking" ? (
                 <>
