@@ -169,7 +169,7 @@ export function LaunchButton() {
                   </div>
                   {percent && (
                     <div
-                      className="absolute inset-0 bg-primary/30 z-0 transition-all duration-300"
+                      className="absolute inset-0 bg-primary/30 -z-10 transition-all duration-300"
                       style={{ width: `${percent}%`, left: 0 }}
                     />
                   )}
