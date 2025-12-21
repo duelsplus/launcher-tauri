@@ -17,6 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getToken } from "@/lib/token";
 
 type ProxyStatusEvent =
   | { status: "checking" }
@@ -40,6 +41,11 @@ type ProxyState =
   | "stopping"
   | "stopped";
 
+type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+};
+
 type User = {
   id: string;
   username: string;
@@ -55,11 +61,11 @@ export function LaunchButton() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    invoke<User>("get_user")
-      .then((u) => setUser(u))
-      .catch((err) => {
-        setUser(null);
-      });
+    invoke<ApiResponse<User>>("get_user", {
+      token: getToken(),
+    })
+      .then((u) => setUser(u.data))
+      .catch(() => setUser(null));
   }, []);
 
   useEffect(() => {
@@ -117,7 +123,7 @@ export function LaunchButton() {
   }, []);
 
   async function handle() {
-    if (busy || user?.isBanned) return;
+    if (busy || !user || user?.isBanned) return;
     setBusy(true);
     setStatusText(null);
 
@@ -141,7 +147,7 @@ export function LaunchButton() {
     }
   }
 
-  const isDisabled = state === "unknown" || busy || user?.isBanned;
+  const isDisabled = state === "unknown" || busy || !user || user?.isBanned;
   const isRunning = state === "running";
 
   const speed = progress
@@ -282,6 +288,16 @@ export function LaunchButton() {
             <WarningOctagonIcon weight="fill" className="size-5 fill-red-400" />
             <p className="text-sm text-muted-foreground">
               Your account was banned for breaching the Duels+ ToS
+            </p>
+          </div>
+        </div>
+      )}
+      {!user && (
+        <div className="w-full py-2">
+          <div className="flex items-center gap-2">
+            <SpinnerIcon className="size-5 animate-spin" />
+            <p className="text-sm text-muted-foreground">
+              Connecting to Duels+ services
             </p>
           </div>
         </div>
