@@ -90,7 +90,6 @@ export function LaunchButton() {
     const unlistenProgress = listen<DownloadProgress>(
       "updater:progress",
       (event) => {
-        console.log(event.payload);
         setProgress(event.payload);
       },
     );
