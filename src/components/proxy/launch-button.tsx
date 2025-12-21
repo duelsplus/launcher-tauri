@@ -116,7 +116,7 @@ export function LaunchButton() {
   }, []);
 
   async function handle() {
-    if (busy) return;
+    if (busy || user?.isBanned) return;
     setBusy(true);
     setStatusText(null);
 
