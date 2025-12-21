@@ -52,5 +52,5 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: Duels+ Launcher ${{ github.ref_name }}
           generateReleaseNotes: true
-          uploadUpdaterJson: true
+          #uploadUpdaterJson: true
           args: ${{ matrix.args }}
