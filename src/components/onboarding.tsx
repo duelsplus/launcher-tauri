@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { SpinnerIcon } from "@phosphor-icons/react";
 import { Titlebar } from "./titlebar";
 import { useTheme } from "@/components/theme-provider";
+import { setToken as setCachedToken } from "@/lib/token";
 
 type OnboardingProps = {
   open: boolean;
@@ -100,6 +101,7 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
       });
       if (response?.success) {
         setHasValidToken(true);
+        setCachedToken(token);
         setStep("theme"); //switch to import once implemented
       } else {
         throw new Error();
