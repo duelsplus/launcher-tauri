@@ -113,6 +113,18 @@ pub async fn get_global_stats() -> Result<auth::models::GetGlobalStatsResponse, 
         .map_err(|e| e.to_string())
 }
 
+/// Checks if the API is online and healthy.
+///
+/// Sends a GET request to the /health endpoint.
+///
+/// # Returns
+///
+/// Returns `true` if the API responds with status "ok", `false` otherwise.
+#[tauri::command]
+pub async fn check_api_status() -> bool {
+    auth::api::check_api_status().await
+}
+
 /// Launches the proxy process.
 ///
 /// This command checks for updates, downloads if necessary, and starts the proxy.

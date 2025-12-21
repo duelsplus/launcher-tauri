@@ -31,6 +31,7 @@ pub fn run() {
             get_user,
             get_user_stats,
             get_global_stats,
+            check_api_status,
             // Process management
             launch_proxy,
             stop_proxy,

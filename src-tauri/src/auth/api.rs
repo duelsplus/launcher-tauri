@@ -415,6 +415,38 @@ async fn process_get_stats_response(
     })
 }
 
+/// Checks the API health status.
+///
+/// Sends a GET request to the /health endpoint and checks if the API is healthy.
+///
+/// # Returns
+///
+/// Returns `true` if the API responds with `{"status":"ok"}`, `false` otherwise.
+pub async fn check_api_status() -> bool {
+    let client = reqwest::Client::new();
+    let url = format!("{}/health", API_BASE_URL);
+
+    match client.get(&url).send().await {
+        Ok(response) => {
+            if response.status().is_success() {
+                // Try to parse the response as JSON
+                if let Ok(json) = response.json::<serde_json::Value>().await {
+                    // Check if status is "ok"
+                    json.get("status")
+                        .and_then(|s| s.as_str())
+                        .map(|s| s == "ok")
+                        .unwrap_or(false)
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        }
+        Err(_) => false,
+    }
+}
+
 /// Retrieves global statistics from the public API.
 ///
 /// Sends a request to get global stats from the public API (no auth required).
