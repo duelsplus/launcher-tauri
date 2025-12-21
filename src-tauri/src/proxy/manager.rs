@@ -66,7 +66,9 @@ impl ProxyManager {
             );
             let _ = app.emit(
                 "updater:status",
-                ProxyStatus::Downloading { version: latest.version.clone() },
+                ProxyStatus::Downloading {
+                    version: latest.version.clone(),
+                },
             );
 
             // Download with progress tracking
