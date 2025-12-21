@@ -39,12 +39,27 @@ type ProxyState =
   | "stopping"
   | "stopped";
 
+type User = {
+  id: string;
+  username: string;
+  isBanned: boolean;
+};
+
 export function LaunchButton() {
   const [state, setState] = useState<ProxyState>("unknown");
   const [busy, setBusy] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [statusText, setStatusText] = useState<string | null>(null);
   const [progress, setProgress] = useState<DownloadProgress | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    invoke<User>("get_user")
+      .then((u) => setUser(u))
+      .catch((err) => {
+        setUser(null);
+      });
+  }, []);
 
   useEffect(() => {
     invoke<boolean>("get_proxy_status")
@@ -125,7 +140,7 @@ export function LaunchButton() {
     }
   }
 
-  const isDisabled = state === "unknown" || busy;
+  const isDisabled = state === "unknown" || busy || user?.isBanned;
   const isRunning = state === "running";
 
   const speed = progress
