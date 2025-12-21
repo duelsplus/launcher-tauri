@@ -11,6 +11,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { motion, AnimatePresence } from "framer-motion";
+import { getToken } from "@/lib/token";
 
 type Release = {
   id: string;
@@ -20,6 +21,17 @@ type Release = {
   isLatest: boolean;
   changelog: string;
   whatsNew: string[];
+};
+
+type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+};
+
+type User = {
+  id: string;
+  username: string;
+  isBanned: boolean;
 };
 
 export function renderMarkdown(text: string) {
@@ -43,15 +55,44 @@ export function renderMarkdown(text: string) {
   return escaped;
 }
 
+const bannedReleases: Release[] = [
+  {
+    id: "six-seven",
+    version: "v6.9.420",
+    releaseDate: "",
+    isBeta: false,
+    isLatest: false,
+    changelog: "",
+    whatsNew: [
+      "Everyone gets **fifteen** American dollars per win",
+      "Losses are automatically converted to wins",
+      "Zero ping mode has rolled out globally",
+      "Such a shame you can't experience all those wonderful additions",
+    ],
+  },
+];
+
 export function WhatsNew() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Release | null>(null);
   const [page, setPage] = useState(0); //zero‑based
   const itemsPerPage = 6;
+  const [user, setUser] = useState<User | null>(null);
 
-  const totalPages = Math.ceil(releases.length / itemsPerPage);
-  const pageItems = releases.slice(
+  useEffect(() => {
+    invoke<ApiResponse<User>>("get_user", {
+      token: getToken(),
+    })
+      .then((u) => setUser(u.data))
+      .catch(() => setUser(null));
+  }, []);
+
+  const shownReleases =
+    user?.isBanned === true ? [...bannedReleases, ...releases] : releases;
+
+  const totalPages = Math.ceil(shownReleases.length / itemsPerPage);
+  const pageItems = shownReleases.slice(
     page * itemsPerPage,
     page * itemsPerPage + itemsPerPage,
   );
