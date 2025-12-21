@@ -1941,6 +1941,7 @@ dependencies = [
  "futures-util",
  "mockito",
  "nix 0.29.0",
+ "open",
  "reqwest",
  "serde",
  "serde_json",
