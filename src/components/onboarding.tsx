@@ -4,9 +4,11 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
 import { SpinnerIcon } from "@phosphor-icons/react";
+import { SiDiscord } from "@icons-pack/react-simple-icons";
 import { Titlebar } from "./titlebar";
 import { useTheme } from "@/components/theme-provider";
 import { setToken as setCachedToken } from "@/lib/token";
+import { startDiscordAuth } from "@/lib/discord";
 
 type OnboardingProps = {
   open: boolean;
@@ -58,9 +60,10 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
   const [step, setStep] = useState<Step>("welcome");
   const [hasValidToken, setHasValidToken] = useState<boolean | null>(null);
   const [token, setToken] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState(false);
+  const [discordLoading, setDiscordLoading] = useState(false);
   const { theme: currentTheme, setTheme: setAppTheme } = useTheme();
   const [theme, setTheme] = useState<"system" | "dark" | "light">(currentTheme);
 
@@ -100,6 +103,7 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
         token,
       });
       if (response?.success) {
+        await invoke("save_token", { token });
         setHasValidToken(true);
         setCachedToken(token);
         setStep("theme"); //switch to import once implemented
@@ -110,6 +114,23 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
       setActionError(true);
     } finally {
       setActionLoading(false);
+    }
+  }
+
+  async function handleDiscordAuth() {
+    setDiscordLoading(true);
+    try {
+      const result = await startDiscordAuth();
+      if (result.success && result.token) {
+        setToken(result.token);
+        setCachedToken(result.token);
+        setHasValidToken(true);
+        setStep("theme");
+      }
+    } catch (err) {
+      //
+    } finally {
+      setDiscordLoading(false);
     }
   }
 
@@ -134,39 +155,58 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
 
         {step === "token" && (
           <Panel
-            title="Verification Token"
-            description="You need a verification token tied to your account. Retrieve it from our Discord server."
+            title="Authentication"
+            description="Authenticate using your Discord account or paste a verification token manually."
           >
-            <div className="relative w-full max-w-md">
-              <Input
-                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                value={token}
-                disabled={actionLoading}
-                aria-invalid={actionError}
-                onChange={(e) => {
-                  setToken(e.target.value);
-                  setActionError(false);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && token && !actionLoading) {
-                    handleVerify();
-                  }
-                }}
-                className="pr-24 font-mono"
-              />
+            <div className="w-full max-w-md flex flex-col justify-center items-center gap-4">
               <Button
-                className="absolute right-1 top-1/2 -translate-y-1/2 rounded-lg"
-                size="sm"
-                variant={actionLoading ? "ghost" : "outline"}
-                disabled={actionError || actionLoading}
-                onClick={handleVerify}
+                variant="input"
+                disabled={discordLoading}
+                onClick={handleDiscordAuth}
               >
-                {actionLoading ? (
+                {discordLoading ? (
                   <SpinnerIcon className="animate-spin" />
                 ) : (
-                  "Continue"
+                  <SiDiscord />
                 )}
+                Sign in with Discord
               </Button>
+              <div className="relative flex items-center w-full">
+                <hr className="flex-1 border-t dark:border-input" />
+                <span className="px-2 text-sm text-muted-foreground">or</span>
+                <hr className="flex-1 border-t dark:border-input" />
+              </div>
+              <div className="relative w-full">
+                <Input
+                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  value={token}
+                  disabled={actionLoading}
+                  aria-invalid={actionError}
+                  onChange={(e) => {
+                    setToken(e.target.value);
+                    setActionError(false);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && token && !actionLoading) {
+                      handleVerify();
+                    }
+                  }}
+                  className="pr-24 font-mono"
+                />
+                <Button
+                  className="absolute right-1 top-1/2 -translate-y-1/2 rounded-lg"
+                  size="sm"
+                  variant={actionLoading ? "ghost" : "outline"}
+                  disabled={actionError || actionLoading}
+                  onClick={handleVerify}
+                >
+                  {actionLoading ? (
+                    <SpinnerIcon className="animate-spin" />
+                  ) : (
+                    "Continue"
+                  )}
+                </Button>
+              </div>
             </div>
           </Panel>
         )}
