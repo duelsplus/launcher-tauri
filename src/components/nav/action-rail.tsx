@@ -5,11 +5,21 @@ import {
   ListHeartIcon,
   ChartLineIcon,
   GearFineIcon,
+  SpinnerIcon,
+  DownloadSimpleIcon,
+  ArrowsClockwiseIcon,
+  WarningIcon,
 } from "@phosphor-icons/react";
 import type { IconWeight } from "@phosphor-icons/react";
 import clsx from "clsx";
 import { ThemeSwitcher } from "./theme-switcher";
 import { useTabs } from "@/lib/tabs";
+import { useUpdater } from "@/lib/updater";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ActionButtonProps {
   icon: "home" | "logs" | "stats" | "settings";
@@ -54,6 +64,63 @@ function ActionCategory({ children }: ActionCategoryProps) {
   );
 }
 
+function UpdateButton() {
+  const status = useUpdater((s) => s.status);
+  const icon = (() => {
+    switch (status.state) {
+      case "downloading":
+        return <DownloadSimpleIcon weight="fill" />;
+      case "pending-restart":
+        return <ArrowsClockwiseIcon weight="fill" />;
+      case "error":
+        return <WarningIcon weight="fill" />;
+      default:
+        return <SpinnerIcon className="animate-spin" />;
+    }
+  })();
+
+  const tooltipText = (() => {
+    switch (status.state) {
+      case "checking":
+        return "Checking for updates...";
+      case "downloading":
+        return "Downloading update...";
+        /*return `Downloading update... (+${Math.round(
+          status.chunkLength / 1024,
+        )} KB)`;*/
+      case "pending-restart":
+        return "Restart the launcher to install update.";
+      case "error":
+        return "Update failed.";
+      default:
+        return "";
+    }
+  })();
+
+  if (
+    status.state === "downloading" ||
+    status.state === "pending-restart" ||
+    status.state === "error"
+  ) {
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          <Button
+            variant="warning"
+            size="icon-lg"
+            className="rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6"
+          >
+            {icon}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="right">{tooltipText}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return null;
+}
+
 export function ActionRail() {
   const { activeTab, setActiveTab } = useTabs();
   return (
@@ -81,6 +148,7 @@ export function ActionRail() {
         />
       </ActionCategory>
       <ActionCategory>
+        <UpdateButton />
         <ThemeSwitcher />
       </ActionCategory>
     </nav>
