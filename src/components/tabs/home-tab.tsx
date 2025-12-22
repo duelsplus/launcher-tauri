@@ -6,7 +6,7 @@ import ServiceStatus from "@/components/service-status";
 export function Home() {
   return (
     <div className="relative">
-      <div className="pointer-events-none sticky top-0 h-16 w-full bg-linear-to-b from-background/70 to-transparent z-20" />
+      <div className="pointer-events-none fixed top-0 h-16 w-full bg-linear-to-b from-background/70 to-transparent z-20" />
       <div className="min-h-[20vh]" />
 
       <div className="space-y-6">
