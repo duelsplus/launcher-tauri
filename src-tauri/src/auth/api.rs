@@ -7,9 +7,7 @@ use crate::auth::error::AuthError;
 use crate::auth::models::{
     GetGlobalStatsResponse, GetStatsResponse, GetUserResponse, User, VerifyTokenResponse,
 };
-
-/// Base URL for the authentication API
-const API_BASE_URL: &str = "https://api.venxm.uk";
+use crate::auth::API_BASE_URL;
 
 /// Base URL for the public stats API
 const STATS_API_URL: &str = "https://duelsplus.com/api/stats";

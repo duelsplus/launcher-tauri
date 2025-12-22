@@ -8,6 +8,29 @@ use crate::config;
 use crate::proxy::{download, models, ProxyManager};
 use tauri::{AppHandle, State};
 
+/// Starts the Discord OAuth sign-in flow.
+///
+/// This command:
+/// 1. Starts a temporary localhost server on a random port
+/// 2. Requests the Discord OAuth URL from the API
+/// 3. Opens the URL in the user's browser
+/// 4. Waits for the callback and emits the token via `discord-auth-result` event
+///
+/// # Arguments
+///
+/// * `app` - The Tauri app handle
+///
+/// # Returns
+///
+/// Returns `Ok(())` if the flow started successfully.
+/// The token will be delivered via the `discord-auth-result` event.
+#[tauri::command]
+pub async fn start_discord_signin(app: AppHandle) -> Result<(), String> {
+    auth::discord::start_discord_signin(app)
+        .await
+        .map_err(|e| e.to_string())
+}
+
 /// Checks if a token file exists on disk.
 ///
 /// Returns `true` if the token file exists, `false` otherwise.

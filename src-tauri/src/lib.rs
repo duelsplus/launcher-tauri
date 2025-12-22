@@ -33,6 +33,7 @@ pub fn run() {
             get_user_stats,
             get_global_stats,
             check_api_status,
+            start_discord_signin,
             // Process management
             launch_proxy,
             stop_proxy,
