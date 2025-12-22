@@ -15,6 +15,7 @@
         "title": "Duels+ Launcher",
         "width": 1000,
         "height": 700,
+        "visible": false,
         "shadow": true,
         "decorations": false,
         "dragDropEnabled": false,
