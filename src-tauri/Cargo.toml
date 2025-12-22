@@ -28,6 +28,9 @@ futures-util = "0.3"
 [target.'cfg(unix)'.dependencies]
 nix = { version = "0.29", features = ["signal"] }
 
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "2"
+
 [dev-dependencies]
 mockito = "1"
 tempfile = "3"
