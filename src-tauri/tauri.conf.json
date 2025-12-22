@@ -43,7 +43,7 @@
       "endpoints": [
         "https://github.com/duelsplus/launcher-tauri/releases/latest/download/latest.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUyQTEwRUU0MkI1QUU5ODAKUldTQTZWb3I1QTZoVWd3L05KT0Y4MmRnVmUyWC9JdFd3UjA3UlpzR2twY3hidUwwTlpjRDJhZkUK%"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUyQTEwRUU0MkI1QUU5ODAKUldTQTZWb3I1QTZoVWd3L05KT0Y4MmRnVmUyWC9JdFd3UjA3UlpzR2twY3hidUwwTlpjRDJhZkUK"
     }
   }
 }
