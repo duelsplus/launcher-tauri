@@ -6,13 +6,63 @@ use super::download::{
 };
 use super::error::ProxyError;
 use super::models::{ProxyStatus, RpcUserData};
+use crate::utils::get_home_dir;
+use serde::Deserialize;
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter};
-use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
+use tokio::net::TcpStream;
 use tokio::process::{Child, Command};
 use tokio::sync::Mutex;
+
+/// Lock file data structure written by the proxy
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LockFileData {
+    #[allow(dead_code)]
+    pid: u32,
+    #[allow(dead_code)]
+    port: u16,
+    control_port: Option<u16>,
+}
+
+/// Gets the path to the proxy lock file
+fn get_lock_file_path() -> Option<PathBuf> {
+    get_home_dir().ok().map(|h| h.join(".duelsplus").join("proxy.lock"))
+}
+
+/// Reads the proxy lock file to get the control port
+fn read_lock_file() -> Option<LockFileData> {
+    let path = get_lock_file_path()?;
+    let content = std::fs::read_to_string(&path).ok()?;
+    serde_json::from_str(&content).ok()
+}
+
+/// Sends a shutdown command to the proxy via TCP control socket
+async fn send_shutdown_command(control_port: u16) -> bool {
+    let addr = format!("127.0.0.1:{}", control_port);
+    
+    let result = tokio::time::timeout(
+        std::time::Duration::from_secs(5),
+        async {
+            let mut stream = TcpStream::connect(&addr).await?;
+            stream.write_all(b"shutdown").await?;
+            
+            let mut buf = [0u8; 16];
+            let n = stream.read(&mut buf).await?;
+            let response = String::from_utf8_lossy(&buf[..n]);
+            
+            Ok::<bool, std::io::Error>(response.trim() == "ok")
+        }
+    ).await;
+    
+    match result {
+        Ok(Ok(true)) => true,
+        _ => false,
+    }
+}
 
 /// Proxy process manager
 pub struct ProxyManager {
@@ -263,7 +313,22 @@ impl ProxyManager {
         let mut process_guard = self.process.lock().await;
 
         if let Some(mut child) = process_guard.take() {
-            // Try graceful shutdown first
+            // Try graceful shutdown via control socket first (works on all platforms)
+            if let Some(lock_data) = read_lock_file() {
+                if let Some(control_port) = lock_data.control_port {
+                    if send_shutdown_command(control_port).await {
+                        // Graceful shutdown initiated, wait for process to exit
+                        let _ = tokio::time::timeout(
+                            std::time::Duration::from_secs(5),
+                            child.wait()
+                        ).await;
+                        *self.is_running.lock().await = false;
+                        return Ok(());
+                    }
+                }
+            }
+
+            // Fallback: signal-based shutdown
             #[cfg(unix)]
             {
                 use nix::sys::signal::{kill, Signal};
