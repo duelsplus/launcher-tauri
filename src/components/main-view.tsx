@@ -11,27 +11,24 @@ function TabPanel({
   children: ReactNode;
 }) {
   return (
-    <div
-      className={clsx(
-        "w-full h-full",
-        active
-          ? "inline-block"
-          : "hidden",
-      )}
-    >
+    <div className={clsx("w-full h-full", active ? "inline-block" : "hidden")}>
       {children}
     </div>
   );
 }
 
 export function MainView({ className }: { className?: string }) {
-  const { activeTab } = useTabs();
+  const { activeTab, isDrawerOpen } = useTabs();
 
   return (
-    <div className={`ml-24 py-12 px-8 h-full overflow-auto ${className ?? ""}`}>
-      <TabPanel active={activeTab === "home"}>
-        <Home />
-      </TabPanel>
+    <div
+      className={clsx(
+        `ml-24 py-12 px-8 h-full overflow-auto transition-transform duration-300`,
+        className,
+        isDrawerOpen && "translate-x-80",
+      )}
+    >
+      <Home />
     </div>
   );
 }
