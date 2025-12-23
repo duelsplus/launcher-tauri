@@ -6,40 +6,36 @@ use serde::{Deserialize, Serialize};
 ///
 /// This structure represents all application settings that can be
 /// stored in the configuration file.
-#[allow(non_snake_case)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Config {
     /// Whether to minimize the application to the system tray
-    #[serde(default = "default_false")]
-    pub minimizeToTray: bool,
+    #[serde(default)]
+    pub minimize_to_tray: bool,
 
     /// Whether to automatically check for and install updates
     #[serde(default = "default_true")]
-    pub autoUpdate: bool,
+    pub auto_update: bool,
 
     /// Whether to open logs when the application launches
     #[serde(default = "default_true")]
-    pub openLogsOnLaunch: bool,
+    pub open_logs_on_launch: bool,
 
     /// Whether to reduce motion/animations for accessibility
-    #[serde(default = "default_false")]
-    pub reducedMotion: bool,
+    #[serde(default)]
+    pub reduced_motion: bool,
 
     /// Whether to enable Discord Rich Presence
     #[serde(default = "default_true")]
-    pub enableRpc: bool,
+    pub enable_rpc: bool,
 
     /// Port number for the proxy server (as string)
     #[serde(default = "default_proxy_port")]
-    pub proxyPort: String,
+    pub proxy_port: String,
 
     /// Whether to enable MSA (Microsoft Account) authentication
-    #[serde(default = "default_false")]
-    pub enableMsa: bool,
-}
-
-fn default_false() -> bool {
-    false
+    #[serde(default)]
+    pub enable_msa: bool,
 }
 
 fn default_true() -> bool {
@@ -53,13 +49,13 @@ fn default_proxy_port() -> String {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            minimizeToTray: false,
-            autoUpdate: true,
-            openLogsOnLaunch: true,
-            reducedMotion: false,
-            enableRpc: true,
-            proxyPort: "25565".to_string(),
-            enableMsa: false,
+            minimize_to_tray: false,
+            auto_update: true,
+            open_logs_on_launch: true,
+            reduced_motion: false,
+            enable_rpc: true,
+            proxy_port: "25565".to_string(),
+            enable_msa: false,
         }
     }
 }

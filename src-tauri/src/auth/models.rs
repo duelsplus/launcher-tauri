@@ -8,13 +8,14 @@ use serde::{Deserialize, Serialize};
 /// The API may return additional fields that are not included here,
 /// but they will be preserved in the raw JSON when serialized.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct User {
     /// Unique user identifier
     pub id: String,
     /// User's username
     pub username: String,
     /// Whether the user is banned (optional, defaults to false if not present)
-    #[serde(default, rename = "isBanned")]
+    #[serde(default)]
     pub is_banned: Option<bool>,
 }
 
@@ -22,6 +23,7 @@ pub struct User {
 ///
 /// Contains the authentication token and metadata about when it was verified.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TokenData {
     /// The authentication token string
     pub token: String,
@@ -34,23 +36,24 @@ pub struct TokenData {
 ///
 /// Returns success status, error codes, and user information if successful.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct VerifyTokenResponse {
     /// Whether the verification was successful
     pub success: bool,
     /// Error code if verification failed (can be string like "banned" or HTTP status code)
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<VerifyCode>,
     /// User ID if verification succeeded
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
     /// Username if verification succeeded
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub username: Option<String>,
     /// Error message if verification failed
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
     /// Raw user data from the API response
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub raw: Option<serde_json::Value>,
 }
 
@@ -70,17 +73,18 @@ pub enum VerifyCode {
 ///
 /// Returns success status, error codes, and user data if successful.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GetUserResponse {
     /// Whether the request was successful
     pub success: bool,
     /// Error code if request failed (can be string or HTTP status code)
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<GetUserCode>,
     /// User data as JSON if request succeeded
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub data: Option<serde_json::Value>,
     /// Error message if request failed
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
@@ -98,20 +102,18 @@ pub enum GetUserCode {
 
 /// Response from the get stats endpoint.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GetStatsResponse {
     /// Whether the request was successful
     pub success: bool,
-
     /// Optional error code
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<GetUserCode>,
-
     /// Stats data if successful
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub stats: Option<serde_json::Value>,
-
     /// Error message if any
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
@@ -121,16 +123,13 @@ pub struct GetStatsResponse {
 pub struct GetGlobalStatsResponse {
     /// Whether the request was successful
     pub success: bool,
-
     /// Optional error code
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<GetUserCode>,
-
     /// Global stats data if successful
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub data: Option<serde_json::Value>,
-
     /// Error message if any
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
