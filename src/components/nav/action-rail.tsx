@@ -85,7 +85,7 @@ function UpdateButton() {
         return "Checking for updates...";
       case "downloading":
         return "Downloading update...";
-        /*return `Downloading update... (+${Math.round(
+      /*return `Downloading update... (+${Math.round(
           status.chunkLength / 1024,
         )} KB)`;*/
       case "pending-restart":
@@ -122,35 +122,59 @@ function UpdateButton() {
 }
 
 export function ActionRail() {
-  const { activeTab, setActiveTab } = useTabs();
+  const { activeTab, toggleTab } = useTabs();
   return (
-    <nav className="fixed top-0 bottom-0 left-0 w-24 flex flex-col justify-center items-center bg-muted/50 gap-3 backdrop-blur">
-      <ActionCategory>
-        <ActionButton
-          icon="home"
-          active={activeTab === "home"}
-          onClick={() => setActiveTab("home")}
-        />
-        <ActionButton
-          icon="logs"
-          active={activeTab === "logs"}
-          onClick={() => setActiveTab("logs")}
-        />
-        <ActionButton
-          icon="stats"
-          active={activeTab === "stats"}
-          onClick={() => setActiveTab("stats")}
-        />
-        <ActionButton
-          icon="settings"
-          active={activeTab === "settings"}
-          onClick={() => setActiveTab("settings")}
-        />
-      </ActionCategory>
-      <ActionCategory>
-        <UpdateButton />
-        <ThemeSwitcher />
-      </ActionCategory>
-    </nav>
+    <>
+      <nav className="fixed top-0 bottom-0 left-0 w-24 z-10 flex flex-col justify-center items-center bg-semimuted gap-3">
+        <ActionCategory>
+          <ActionButton
+            icon="home"
+            active={activeTab === "home"}
+            onClick={() => toggleTab("home")}
+          />
+          <ActionButton
+            icon="logs"
+            active={activeTab === "logs"}
+            onClick={() => toggleTab("logs")}
+          />
+          <ActionButton
+            icon="stats"
+            active={activeTab === "stats"}
+            onClick={() => toggleTab("stats")}
+          />
+          <ActionButton
+            icon="settings"
+            active={activeTab === "settings"}
+            onClick={() => toggleTab("settings")}
+          />
+        </ActionCategory>
+        <ActionCategory>
+          <UpdateButton />
+          <ThemeSwitcher />
+        </ActionCategory>
+      </nav>
+
+      <Drawer />
+    </>
+  );
+}
+
+function Drawer() {
+  const { activeTab } = useTabs();
+  const isOpen = activeTab !== "home";
+
+  return (
+    <div
+      className={clsx(
+        "fixed top-0 left-24 h-full w-80 bg-semimuted z-0 transition-transform duration-300",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}
+    >
+      <div className="p-6">
+        {activeTab === "logs" && <div></div>}
+        {activeTab === "stats" && <div></div>}
+        {activeTab === "settings" && <div></div>}
+      </div>
+    </div>
   );
 }
