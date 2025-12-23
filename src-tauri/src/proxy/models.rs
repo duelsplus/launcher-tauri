@@ -18,6 +18,7 @@ pub struct Release {
 
 /// Asset information (downloadable binary)
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Asset {
     pub id: String,
     pub name: String,
@@ -30,7 +31,8 @@ pub struct Asset {
 pub struct DownloadProgress {
     pub downloaded: u64,
     pub total: u64,
-    pub speed: f64, // bytes per second
+    /// Bytes per second
+    pub speed: f64,
 }
 
 /// Proxy status information
@@ -46,6 +48,7 @@ pub enum ProxyStatus {
 
 /// User data extracted from proxy logs for RPC
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RpcUserData {
     pub ign: String,
     pub uuid: String,

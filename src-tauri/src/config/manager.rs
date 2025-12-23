@@ -370,9 +370,9 @@ mod tests {
         assert!(read_config.is_some());
         let read_config = read_config.unwrap();
 
-        assert_eq!(read_config.minimizeToTray, config.minimizeToTray);
-        assert_eq!(read_config.autoUpdate, config.autoUpdate);
-        assert_eq!(read_config.proxyPort, config.proxyPort);
+        assert_eq!(read_config.minimize_to_tray, config.minimize_to_tray);
+        assert_eq!(read_config.auto_update, config.auto_update);
+        assert_eq!(read_config.proxy_port, config.proxy_port);
     }
 
     #[tokio::test]
@@ -390,7 +390,7 @@ mod tests {
 
         // Verify the full config was updated
         let config = get_config().await.unwrap().unwrap();
-        assert!(config.minimizeToTray);
+        assert!(config.minimize_to_tray);
     }
 
     #[tokio::test]
@@ -403,8 +403,8 @@ mod tests {
         fs::create_dir_all(legacy_dir).unwrap();
 
         let config = Config {
-            minimizeToTray: true,
-            autoUpdate: false,
+            minimize_to_tray: true,
+            auto_update: false,
             ..Default::default()
         };
         let json = serde_json::to_string_pretty(&config).unwrap();
@@ -424,10 +424,10 @@ mod tests {
 
         // Save initial config with multiple values
         let initial_config = Config {
-            minimizeToTray: false,
-            autoUpdate: true,
-            proxyPort: "25565".to_string(),
-            enableRpc: true,
+            minimize_to_tray: false,
+            auto_update: true,
+            proxy_port: "25565".to_string(),
+            enable_rpc: true,
             ..Default::default()
         };
         save_config(initial_config.clone()).await.unwrap();
@@ -439,12 +439,12 @@ mod tests {
 
         // Verify the updated key changed
         let config = get_config().await.unwrap().unwrap();
-        assert!(config.minimizeToTray);
+        assert!(config.minimize_to_tray);
 
         // Verify other keys were preserved
-        assert_eq!(config.autoUpdate, initial_config.autoUpdate);
-        assert_eq!(config.proxyPort, initial_config.proxyPort);
-        assert_eq!(config.enableRpc, initial_config.enableRpc);
+        assert_eq!(config.auto_update, initial_config.auto_update);
+        assert_eq!(config.proxy_port, initial_config.proxy_port);
+        assert_eq!(config.enable_rpc, initial_config.enable_rpc);
     }
 
     #[tokio::test]
@@ -468,9 +468,9 @@ mod tests {
 
         // Verify all keys are set correctly
         let config = get_config().await.unwrap().unwrap();
-        assert!(config.minimizeToTray);
-        assert!(!config.autoUpdate);
-        assert_eq!(config.proxyPort, "8080");
+        assert!(config.minimize_to_tray);
+        assert!(!config.auto_update);
+        assert_eq!(config.proxy_port, "8080");
     }
 
     #[tokio::test]
@@ -511,10 +511,10 @@ mod tests {
         fs::create_dir_all(legacy_dir).unwrap();
 
         let legacy_config = Config {
-            minimizeToTray: true,
-            autoUpdate: false,
-            proxyPort: "25565".to_string(),
-            enableRpc: true,
+            minimize_to_tray: true,
+            auto_update: false,
+            proxy_port: "25565".to_string(),
+            enable_rpc: true,
             ..Default::default()
         };
         let json = serde_json::to_string_pretty(&legacy_config).unwrap();
@@ -528,9 +528,9 @@ mod tests {
 
         // Verify new config matches legacy
         let new_config = get_config().await.unwrap().unwrap();
-        assert_eq!(new_config.minimizeToTray, read_legacy.minimizeToTray);
-        assert_eq!(new_config.autoUpdate, read_legacy.autoUpdate);
-        assert_eq!(new_config.proxyPort, read_legacy.proxyPort);
-        assert_eq!(new_config.enableRpc, read_legacy.enableRpc);
+        assert_eq!(new_config.minimize_to_tray, read_legacy.minimize_to_tray);
+        assert_eq!(new_config.auto_update, read_legacy.auto_update);
+        assert_eq!(new_config.proxy_port, read_legacy.proxy_port);
+        assert_eq!(new_config.enable_rpc, read_legacy.enable_rpc);
     }
 }
