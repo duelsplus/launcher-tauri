@@ -25,8 +25,8 @@ export function SettingSwitch({
     <button
       onClick={toggle}
       className={cn(
-        " w-full flex items-center justify-between text-left gap-4 rounded-xl px-4 py-3",
-        "bg-muted/50 hover:bg-muted transition-colors",
+        " w-full flex items-center justify-between text-left gap-4 rounded-2xl px-4 py-3",
+        "bg-muted/70 hover:bg-muted transition-colors",
         disabled && "opacity-50",
       )}
     >
