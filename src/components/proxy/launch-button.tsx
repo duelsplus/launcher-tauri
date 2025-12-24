@@ -20,6 +20,7 @@ import {
 import { getToken } from "@/lib/token";
 import { useLogs } from "@/lib/proxy-logs";
 import { useTabs } from "@/lib/tabs";
+import { config } from "@/lib/config";
 
 type ProxyStatusEvent =
   | { status: "checking" }
@@ -82,7 +83,7 @@ export function LaunchButton() {
   useEffect(() => {
     const unlistenStatus = listen<ProxyStatusEvent>(
       "updater:status",
-      (event) => {
+      async (event) => {
         const status = event.payload.status;
         //setStatusText(status);
 
@@ -98,7 +99,10 @@ export function LaunchButton() {
         }
 
         if (status === "launched") {
-          if (activeTab !== "logs") toggleTab("logs");
+          const cfg = await config.get();
+          if (cfg.openLogsOnLaunch && activeTab !== "logs") {
+            toggleTab("logs");
+          }
           setState("running");
           setStatusText("Launched");
           setBusy(false);
@@ -144,7 +148,10 @@ export function LaunchButton() {
         setBusy(false);
         setStatusText(null);
         useLogs.getState().clear();
-        if (activeTab === "logs") toggleTab("logs");
+        const cfg = await config.get();
+        if (cfg.openLogsOnLaunch && activeTab === "logs") {
+          toggleTab("logs");
+        }
       }
     } catch (err) {
       console.error(err);
