@@ -23,6 +23,7 @@ import {
 import { Stats } from "../tabs/stats-tab";
 import { Settings } from "../tabs/settings-tab";
 import { Logs } from "../tabs/logs-tab";
+import { UserButton } from "./user-button";
 
 interface ActionButtonProps {
   icon: "home" | "logs" | "stats" | "settings";
@@ -108,20 +109,18 @@ function UpdateButton() {
     status.state === "error"
   ) {
     return (
-      <ActionCategory>
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <Button
-              variant="warning"
-              size="icon-lg"
-              className="rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6"
-            >
-              {icon}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right">{tooltipText}</TooltipContent>
-        </Tooltip>
-      </ActionCategory>
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          <Button
+            variant="warning"
+            size="icon-lg"
+            className="rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6"
+          >
+            {icon}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="right">{tooltipText}</TooltipContent>
+      </Tooltip>
     );
   }
 
@@ -155,7 +154,10 @@ export function ActionRail() {
             onClick={() => toggleTab("settings")}
           />
         </ActionCategory>
-        <UpdateButton />
+        <ActionCategory>
+          <UpdateButton />
+          <UserButton />
+        </ActionCategory>
       </nav>
 
       <Drawer />
