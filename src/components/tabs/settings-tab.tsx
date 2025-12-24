@@ -6,8 +6,9 @@ import { settingDefinitions } from "@/settings/definitions";
 import { SettingSwitch } from "@/components/settings/switch";
 import { SettingsSection } from "@/components/settings/section";
 import { defaultSettings } from "@/settings/defaults";
-import { SpinnerIcon } from "@phosphor-icons/react";
+import { ArrowUpRightIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { config as configApi } from "@/lib/config";
+import { Button } from "../ui/button";
 
 export function Settings() {
   const [config, setConfig] = useState<Config | null>(null);
@@ -83,6 +84,15 @@ export function Settings() {
           ))}
         </SettingsSection>
       ))}
+
+      <div className="w-full flex justify-center">
+        <a href="https://dash.duelsplus.com" target="_blank" rel="noopener noreferrer">
+          <Button variant="input" size="sm">
+            Manage your preferences
+            <ArrowUpRightIcon />
+          </Button>
+        </a>
+      </div>
     </div>
   );
 }
