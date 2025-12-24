@@ -91,7 +91,7 @@ export function UserButton() {
       </PopoverTrigger>
 
       <PopoverContent side="right" align="start" className="select-none">
-        <div className="flex flex-col p-2">
+        <div className="flex flex-col p-2 pr-1">
           <div className="text-sm font-medium truncate">{user.username}</div>
           <div className="flex justify-between items-center">
             <span className="text-xs font-mono truncate text-muted-foreground mt-1">
@@ -108,7 +108,7 @@ export function UserButton() {
           </div>
         </div>
 
-        <div className="h-px bg-border my-2" />
+        <div className="h-px bg-border mx-2 my-1" />
 
         <div className="flex flex-col gap-1">
           <PanelButton
@@ -141,7 +141,7 @@ function PanelButton({
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 rounded-2xl px-3 py-2 text-sm transition-colors",
+        "flex items-center gap-3 rounded-2xl px-2 py-2 text-sm transition-colors",
         "hover:bg-muted",
         destructive && "text-destructive hover:bg-destructive/10",
       )}
