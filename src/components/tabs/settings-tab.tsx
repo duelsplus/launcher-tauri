@@ -5,14 +5,21 @@ import type { Config } from "@/types/config";
 import { settingDefinitions } from "@/settings/definitions";
 import { SettingSwitch } from "@/components/settings/switch";
 import { SettingsSection } from "@/components/settings/section";
+import { SettingTheme } from "@/components/settings/theme";
 import { defaultSettings } from "@/settings/defaults";
 import { ArrowUpRightIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { config as configApi } from "@/lib/config";
 import { Button } from "../ui/button";
+import { useTheme } from "../theme-provider";
 
 export function Settings() {
   const [config, setConfig] = useState<Config | null>(null);
   const [savingKey, setSavingKey] = useState<keyof Config | null>(null);
+
+  const { theme: currentTheme, setTheme: setAppTheme } = useTheme();
+  const [theme, setTheme] = useState<"dark" | "light">(
+    currentTheme === "light" ? "light" : "dark",
+  );
 
   useEffect(() => {
     configApi
@@ -70,9 +77,17 @@ export function Settings() {
     <div className="space-y-4">
       <h2 className="text-base font-medium">Settings</h2>
 
-      {Object.entries(grouped).map(([section, settings]) => (
-        <SettingsSection key={section} title={section}>
-          {settings.map((setting) => (
+      {grouped["General"] && (
+        <SettingsSection title="General">
+          <SettingTheme
+            title="Theme"
+            value={theme}
+            onChange={(t) => {
+              setTheme(t);
+              setAppTheme(t);
+            }}
+          />
+          {grouped["General"].map((setting) => (
             <SettingSwitch
               key={setting.key}
               title={setting.title}
@@ -83,10 +98,31 @@ export function Settings() {
             />
           ))}
         </SettingsSection>
-      ))}
+      )}
+
+      {Object.entries(grouped)
+        .filter(([section]) => section !== "General")
+        .map(([section, settings]) => (
+          <SettingsSection key={section} title={section}>
+            {settings.map((setting) => (
+              <SettingSwitch
+                key={setting.key}
+                title={setting.title}
+                description={setting.description}
+                checked={config[setting.key] as boolean}
+                disabled={savingKey === setting.key}
+                onCheckedChange={(value) => updateSetting(setting.key, value)}
+              />
+            ))}
+          </SettingsSection>
+        ))}
 
       <div className="w-full flex justify-center">
-        <a href="https://dash.duelsplus.com" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://dash.duelsplus.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <Button variant="input" size="sm">
             Manage your preferences
             <ArrowUpRightIcon />

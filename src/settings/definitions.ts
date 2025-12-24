@@ -8,12 +8,12 @@ export type SettingDefinition = {
 };
 
 export const settingDefinitions: SettingDefinition[] = [
-  {
+  /*{
     key: "minimizeToTray",
     title: "Minimize to Tray",
     description: "Keep the launcher running in the background when closed.",
     section: "General",
-  },
+  },*/
   {
     key: "autoUpdate",
     title: "Automatic Updates",

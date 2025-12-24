@@ -94,7 +94,8 @@ function UpdateButton() {
       case "pending-restart":
         return "Restart the launcher to install update.";
       case "error":
-        if (import.meta.env.DEV) return "Update failed. This is normal in dev environment.";
+        if (import.meta.env.DEV)
+          return "Update failed. This is normal in dev environment.";
         return "Update failed.";
       default:
         return "";
@@ -107,18 +108,20 @@ function UpdateButton() {
     status.state === "error"
   ) {
     return (
-      <Tooltip delayDuration={0}>
-        <TooltipTrigger asChild>
-          <Button
-            variant="warning"
-            size="icon-lg"
-            className="rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6"
-          >
-            {icon}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="right">{tooltipText}</TooltipContent>
-      </Tooltip>
+      <ActionCategory>
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <Button
+              variant="warning"
+              size="icon-lg"
+              className="rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6"
+            >
+              {icon}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">{tooltipText}</TooltipContent>
+        </Tooltip>
+      </ActionCategory>
     );
   }
 
@@ -152,10 +155,7 @@ export function ActionRail() {
             onClick={() => toggleTab("settings")}
           />
         </ActionCategory>
-        <ActionCategory>
-          <UpdateButton />
-          <ThemeSwitcher />
-        </ActionCategory>
+        <UpdateButton />
       </nav>
 
       <Drawer />
