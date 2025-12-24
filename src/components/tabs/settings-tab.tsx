@@ -70,9 +70,9 @@ export function Settings() {
     <div className="space-y-4">
       <h2 className="text-base font-medium">Settings</h2>
 
-      {Object.entries(grouped).map(([section, settings]) => (
-        <SettingsSection key={section} title={section}>
-          {settings.map((setting) => (
+      {grouped["General"] && (
+        <SettingsSection title="General">
+          {grouped["General"].map((setting) => (
             <SettingSwitch
               key={setting.key}
               title={setting.title}
@@ -83,10 +83,31 @@ export function Settings() {
             />
           ))}
         </SettingsSection>
-      ))}
+      )}
+
+      {Object.entries(grouped)
+        .filter(([section]) => section !== "General")
+        .map(([section, settings]) => (
+          <SettingsSection key={section} title={section}>
+            {settings.map((setting) => (
+              <SettingSwitch
+                key={setting.key}
+                title={setting.title}
+                description={setting.description}
+                checked={config[setting.key] as boolean}
+                disabled={savingKey === setting.key}
+                onCheckedChange={(value) => updateSetting(setting.key, value)}
+              />
+            ))}
+          </SettingsSection>
+        ))}
 
       <div className="w-full flex justify-center">
-        <a href="https://dash.duelsplus.com" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://dash.duelsplus.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <Button variant="input" size="sm">
             Manage your preferences
             <ArrowUpRightIcon />
