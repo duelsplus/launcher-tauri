@@ -18,6 +18,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { getToken } from "@/lib/token";
+import { useLogs } from "@/lib/proxy-logs";
+import { useTabs } from "@/lib/tabs";
 
 type ProxyStatusEvent =
   | { status: "checking" }
@@ -59,6 +61,7 @@ export function LaunchButton() {
   const [statusText, setStatusText] = useState<string | null>(null);
   const [progress, setProgress] = useState<DownloadProgress | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const { activeTab, toggleTab } = useTabs();
 
   useEffect(() => {
     invoke<ApiResponse<User>>("get_user", {
@@ -95,6 +98,7 @@ export function LaunchButton() {
         }
 
         if (status === "launched") {
+          if (activeTab !== "logs") toggleTab("logs");
           setState("running");
           setStatusText("Launched");
           setBusy(false);
@@ -131,6 +135,7 @@ export function LaunchButton() {
       const running = await invoke<boolean>("get_proxy_status");
       if (!running) {
         setState("checking");
+        useLogs.getState().clear();
         await invoke("launch_proxy");
       } else {
         setState("stopping");
@@ -138,6 +143,8 @@ export function LaunchButton() {
         setState("stopped");
         setBusy(false);
         setStatusText(null);
+        useLogs.getState().clear();
+        if (activeTab === "logs") toggleTab("logs");
       }
     } catch (err) {
       console.error(err);
