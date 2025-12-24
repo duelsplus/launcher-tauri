@@ -6,6 +6,7 @@
 use crate::auth;
 use crate::config;
 use crate::proxy::{download, models, ProxyManager};
+use crate::rpc::RpcManager;
 use tauri::{AppHandle, State};
 
 /// Starts the Discord OAuth sign-in flow.
@@ -299,4 +300,57 @@ pub async fn save_config(config: config::models::Config) -> Result<(), String> {
     config::manager::save_config(config)
         .await
         .map_err(|e| e.to_string())
+}
+
+// ============================================================================
+// Discord RPC Commands
+// ============================================================================
+
+/// Enables or disables Discord Rich Presence.
+///
+/// # Arguments
+///
+/// * `rpc` - The RPC manager state
+/// * `enabled` - Whether to enable or disable RPC
+#[tauri::command]
+pub fn rpc_set_enabled(rpc: State<'_, RpcManager>, enabled: bool) {
+    rpc.set_enabled(enabled);
+}
+
+/// Returns whether Discord Rich Presence is enabled.
+///
+/// # Arguments
+///
+/// * `rpc` - The RPC manager state
+///
+/// # Returns
+///
+/// Returns `true` if RPC is enabled, `false` otherwise.
+#[tauri::command]
+pub fn rpc_is_enabled(rpc: State<'_, RpcManager>) -> bool {
+    rpc.is_enabled()
+}
+
+/// Sets the Discord Rich Presence activity.
+///
+/// # Arguments
+///
+/// * `rpc` - The RPC manager state
+/// * `activity` - The activity type: "launcher", "launching", "playing", or "clear"
+/// * `ign` - Optional in-game name (for "playing" activity)
+/// * `uuid` - Optional player UUID (for "playing" activity)
+#[tauri::command]
+pub fn rpc_set_activity(
+    rpc: State<'_, RpcManager>,
+    activity: String,
+    ign: Option<String>,
+    uuid: Option<String>,
+) {
+    match activity.as_str() {
+        "launcher" => rpc.set_in_launcher(),
+        "launching" => rpc.set_launching(),
+        "playing" => rpc.set_playing(ign, uuid),
+        "clear" => rpc.clear_activity(),
+        _ => {}
+    }
 }

@@ -6,12 +6,13 @@ use super::download::{
 };
 use super::error::ProxyError;
 use super::models::{ProxyStatus, RpcUserData};
+use crate::rpc::RpcManager;
 use crate::utils::get_home_dir;
 use serde::Deserialize;
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager};
 use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
 use tokio::process::{Child, Command};
@@ -26,6 +27,15 @@ struct LockFileData {
     #[allow(dead_code)]
     port: u16,
     control_port: Option<u16>,
+}
+
+/// Control socket message types
+#[derive(Debug, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+enum ControlMessage {
+    UserData { ign: String, uuid: String },
+    GameMode { mode: Option<String>, map: Option<String> },
+    Disconnect,
 }
 
 /// Gets the path to the proxy lock file
@@ -61,6 +71,79 @@ async fn send_shutdown_command(control_port: u16) -> bool {
     match result {
         Ok(Ok(true)) => true,
         _ => false,
+    }
+}
+
+/// Connects to the control socket and listens for user data messages
+async fn listen_control_socket(app: AppHandle, is_running: Arc<Mutex<bool>>) {
+    // Wait a bit for the proxy to start and write the lock file
+    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
+    // Retry connecting to the control socket
+    let mut stream = None;
+    for _ in 0..10 {
+        if !*is_running.lock().await {
+            return;
+        }
+
+        if let Some(lock_data) = read_lock_file() {
+            if let Some(control_port) = lock_data.control_port {
+                let addr = format!("127.0.0.1:{}", control_port);
+                if let Ok(s) = TcpStream::connect(&addr).await {
+                    stream = Some(s);
+                    break;
+                }
+            }
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+    }
+
+    let stream = match stream {
+        Some(s) => s,
+        None => return,
+    };
+
+    let reader = BufReader::new(stream);
+    let mut lines = reader.lines();
+
+    while *is_running.lock().await {
+        match lines.next_line().await {
+            Ok(Some(line)) => {
+                if let Ok(msg) = serde_json::from_str::<ControlMessage>(&line) {
+                    match msg {
+                        ControlMessage::UserData { ign, uuid } => {
+                            // Emit event for frontend
+                            let _ = app.emit(
+                                "rpc-user-data",
+                                RpcUserData {
+                                    ign: ign.clone(),
+                                    uuid: uuid.clone(),
+                                },
+                            );
+
+                            // Update Discord RPC directly
+                            if let Some(rpc) = app.try_state::<RpcManager>() {
+                                rpc.set_user_data(Some(ign), Some(uuid));
+                            }
+                        }
+                        ControlMessage::GameMode { mode, map } => {
+                            // Update Discord RPC with game mode (mode can be null when in lobby)
+                            if let Some(rpc) = app.try_state::<RpcManager>() {
+                                rpc.set_game_mode(mode, map);
+                            }
+                        }
+                        ControlMessage::Disconnect => {
+                            // User disconnected from Hypixel, reset RPC to idle
+                            if let Some(rpc) = app.try_state::<RpcManager>() {
+                                rpc.set_disconnected();
+                            }
+                        }
+                    }
+                }
+            }
+            Ok(None) => break,
+            Err(_) => break,
+        }
     }
 }
 
@@ -110,10 +193,9 @@ impl ProxyManager {
         let needs_download = !is_file_valid(&file_path);
 
         if needs_download {
-            let _ = app.emit(
-                "log-message",
-                format!("Downloading version {}", latest.version),
-            );
+            let msg = format!("Downloading version {}", latest.version);
+            println!("[proxy] {}", msg);
+            let _ = app.emit("log-message", msg);
             let _ = app.emit(
                 "updater:status",
                 ProxyStatus::Downloading {
@@ -130,12 +212,12 @@ impl ProxyManager {
             })
             .await?;
 
+            println!("[proxy] Download complete!");
             let _ = app.emit("log-message", "Download complete!");
         } else {
-            let _ = app.emit(
-                "log-message",
-                format!("Proxy already up to date ({})", latest.version),
-            );
+            let msg = format!("Proxy already up to date ({})", latest.version);
+            println!("[proxy] {}", msg);
+            let _ = app.emit("log-message", msg);
         }
 
         // Clean up old executables
@@ -143,6 +225,12 @@ impl ProxyManager {
 
         // Launch the proxy
         let _ = app.emit("updater:status", ProxyStatus::Launching);
+
+        // Update RPC to "Launching"
+        if let Some(rpc) = app.try_state::<RpcManager>() {
+            rpc.set_launching();
+        }
+
         self.launch_process(app, file_path, port).await?;
 
         Ok(())
@@ -191,11 +279,23 @@ impl ProxyManager {
         let _ = app.emit("updater:status", ProxyStatus::Launched);
         let _ = app.emit("updater:hide", ());
 
+        // Clear "Launching" state - RPC goes back to "Idle" until user connects
+        if let Some(rpc) = app.try_state::<RpcManager>() {
+            rpc.set_in_launcher();
+        }
+
         // Spawn tasks to handle stdout and stderr
         let app_clone = app.clone();
         let is_running_clone = self.is_running.clone();
         tokio::spawn(async move {
             Self::handle_output(app_clone, stdout, stderr, is_running_clone).await;
+        });
+
+        // Spawn control socket listener for user data
+        let app_clone = app.clone();
+        let is_running_clone = self.is_running.clone();
+        tokio::spawn(async move {
+            listen_control_socket(app_clone, is_running_clone).await;
         });
 
         Ok(())
@@ -214,9 +314,6 @@ impl ProxyManager {
         let mut stdout_lines = stdout_reader.lines();
         let mut stderr_lines = stderr_reader.lines();
 
-        let mut ign: Option<String> = None;
-        let mut uuid: Option<String> = None;
-
         loop {
             tokio::select! {
                 result = stdout_lines.next_line() => {
@@ -224,33 +321,9 @@ impl ProxyManager {
                         Ok(Some(line)) => {
                             let line = Self::fix_encoding(&line);
 
-                            // Check for special launcher tags
-                            if line.contains("[launcher:ign]") {
-                                if let Some(extracted) = line.split("[launcher:ign]").nth(1) {
-                                    ign = Some(extracted.trim().to_string());
-                                }
-                                continue;
-                            }
-
-                            if line.contains("[launcher:uuid]") {
-                                if let Some(extracted) = line.split("[launcher:uuid]").nth(1) {
-                                    uuid = Some(extracted.trim().to_string());
-                                }
-                                continue;
-                            }
-
-                            // Emit RPC user data if we have both
-                            if let (Some(ign_val), Some(uuid_val)) = (&ign, &uuid) {
-                                let _ = app.emit("rpc-user-data", RpcUserData {
-                                    ign: ign_val.clone(),
-                                    uuid: uuid_val.clone(),
-                                });
-                                ign = None;
-                                uuid = None;
-                            }
-
-                            // Emit log message
+                            // Emit log message and print to console
                             if !line.contains("ExperimentalWarning") && !line.contains("--trace-warnings") {
+                                println!("[proxy] {}", line);
                                 let _ = app.emit("log-message", line);
                             }
                         }
@@ -264,6 +337,7 @@ impl ProxyManager {
                             let line = Self::fix_encoding(&line);
 
                             if !line.contains("ExperimentalWarning") && !line.contains("--trace-warnings") {
+                                eprintln!("[proxy:err] {}", line);
                                 let _ = app.emit("log-message", line);
                             }
                         }
@@ -276,7 +350,13 @@ impl ProxyManager {
 
         *is_running.lock().await = false;
         let _ = app.emit("updater:status", ProxyStatus::Error);
+        println!("[proxy] Proxy process exited");
         let _ = app.emit("log-message", "Proxy process exited");
+
+        // Reset RPC to "In Launcher"
+        if let Some(rpc) = app.try_state::<RpcManager>() {
+            rpc.clear_activity();
+        }
     }
 
     /// Fixes encoding issues on Windows
