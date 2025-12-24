@@ -35,6 +35,8 @@ enum RpcCommand {
     SetGameMode {
         mode: Option<String>,
         map: Option<String>,
+        gametype: Option<String>,
+        lobbyname: Option<String>,
     },
     /// User disconnected from Hypixel
     SetDisconnected,
@@ -54,6 +56,8 @@ struct RpcState {
     current_uuid: Option<String>,
     current_mode: Option<String>,
     current_map: Option<String>,
+    current_gametype: Option<String>,
+    in_lobby: bool,
     is_playing: bool,
 }
 
@@ -77,6 +81,8 @@ impl RpcManager {
             current_ign: None,
             current_uuid: None,
             current_mode: None,
+            current_gametype: None,
+            in_lobby: false,
             current_map: None,
             is_playing: false,
         }));
@@ -197,11 +203,18 @@ impl RpcManager {
                             Self::set_activity_internal(c, &s, dev);
                         }
                     }
-                    RpcCommand::SetGameMode { mode, map } => {
+                    RpcCommand::SetGameMode {
+                        mode,
+                        map,
+                        gametype,
+                        lobbyname,
+                    } => {
                         {
                             let mut s = state.lock().unwrap();
                             s.current_mode = mode;
                             s.current_map = map;
+                            s.current_gametype = gametype;
+                            s.in_lobby = lobbyname.is_some();
                         }
                         let s = state.lock().unwrap();
                         if let Some(ref mut c) = client {
@@ -216,6 +229,8 @@ impl RpcManager {
                             s.is_playing = false;
                             s.current_mode = None;
                             s.current_map = None;
+                            s.current_gametype = None;
+                            s.in_lobby = false;
                         }
                         let s = state.lock().unwrap();
                         if let Some(ref mut c) = client {
@@ -230,6 +245,8 @@ impl RpcManager {
                             s.current_uuid = None;
                             s.current_mode = None;
                             s.current_map = None;
+                            s.current_gametype = None;
+                            s.in_lobby = false;
                             s.is_playing = false;
                         }
                         let s = state.lock().unwrap();
@@ -251,11 +268,106 @@ impl RpcManager {
         *sender_lock = Some(tx);
     }
 
+    /// Formats a SkyBlock location/mode to be human readable
+    fn format_skyblock_location(mode: &str) -> String {
+        match mode {
+            "hub" => "SkyBlock Hub".to_string(),
+            "dynamic" => "SkyBlock Island".to_string(),
+            "farming_1" => "SkyBlock Farm".to_string(),
+            "mining_1" => "SkyBlock Deep Caverns".to_string(),
+            "mining_2" => "SkyBlock Dwarven Mines".to_string(),
+            "mining_3" => "SkyBlock Crystal Hollows".to_string(),
+            "combat_1" => "SkyBlock Spider's Den".to_string(),
+            "combat_2" => "SkyBlock Blazing Fortress".to_string(),
+            "combat_3" => "SkyBlock The End".to_string(),
+            "foraging_1" => "SkyBlock Park".to_string(),
+            "dungeon_hub" => "SkyBlock Dungeon Hub".to_string(),
+            "dungeon" => "SkyBlock Dungeons".to_string(),
+            "crimson_isle" => "SkyBlock Crimson Isle".to_string(),
+            "rift" => "SkyBlock Rift".to_string(),
+            "garden" => "SkyBlock Garden".to_string(),
+            "kuudra_normal" => "SkyBlock Kuudra (Basic)".to_string(),
+            "kuudra_hot" => "SkyBlock Kuudra (Hot)".to_string(),
+            "kuudra_burning" => "SkyBlock Kuudra (Burning)".to_string(),
+            "kuudra_fiery" => "SkyBlock Kuudra (Fiery)".to_string(),
+            "kuudra_infernal" => "SkyBlock Kuudra (Infernal)".to_string(),
+            "instanced" => "SkyBlock Instance".to_string(),
+            "dark_auction" => "SkyBlock Dark Auction".to_string(),
+            "winter" => "SkyBlock Jerry's Workshop".to_string(),
+            // Fallback: clean up the string
+            _ => {
+                let cleaned = mode.replace('_', " ");
+                let mut result = String::new();
+                for (i, word) in cleaned.split_whitespace().enumerate() {
+                    if i > 0 {
+                        result.push(' ');
+                    }
+                    let mut chars = word.chars();
+                    if let Some(first) = chars.next() {
+                        result.push_str(&first.to_uppercase().to_string());
+                        result.push_str(&chars.as_str().to_lowercase());
+                    }
+                }
+                format!("SkyBlock {}", result)
+            }
+        }
+    }
+
+    /// Formats a gametype string to be human readable for lobby display
+    fn format_gametype(gametype: &str) -> String {
+        match gametype {
+            "DUELS" => "Duels".to_string(),
+            "BEDWARS" => "BedWars".to_string(),
+            "SKYWARS" => "SkyWars".to_string(),
+            "ARCADE" => "Arcade".to_string(),
+            "MURDER_MYSTERY" => "Murder Mystery".to_string(),
+            "BUILD_BATTLE" => "Build Battle".to_string(),
+            "HOUSING" => "Housing".to_string(),
+            "SURVIVAL_GAMES" => "Blitz SG".to_string(),
+            "SUPER_SMASH" => "Smash Heroes".to_string(),
+            "WALLS3" => "Mega Walls".to_string(),
+            "MCGO" => "Cops and Crims".to_string(),
+            "UHC" => "UHC".to_string(),
+            "SPEED_UHC" => "Speed UHC".to_string(),
+            "TNTGAMES" => "TNT Games".to_string(),
+            "BATTLEGROUND" => "Warlords".to_string(),
+            "PIT" => "The Pit".to_string(),
+            "PROTOTYPE" => "Prototype".to_string(),
+            "SKYBLOCK" => "SkyBlock".to_string(),
+            "WOOL_GAMES" => "Wool Wars".to_string(),
+            "PAINTBALL" => "Paintball".to_string(),
+            "QUAKECRAFT" => "Quake".to_string(),
+            "VAMPIREZ" => "VampireZ".to_string(),
+            "WALLS" => "The Walls".to_string(),
+            "ARENA" => "Arena Brawl".to_string(),
+            "LEGACY" => "Classic Games".to_string(),
+            "SMP" => "SMP".to_string(),
+            "LIMBO" => "Limbo".to_string(),
+            "MAIN" => "Main".to_string(),
+            "TOURNAMENT" => "Tournament".to_string(),
+            "REPLAY" => "Replay".to_string(),
+            // Fallback: title case the gametype
+            _ => gametype
+                .split('_')
+                .map(|word| {
+                    let mut chars = word.chars();
+                    match chars.next() {
+                        None => String::new(),
+                        Some(first) => {
+                            first.to_uppercase().to_string() + &chars.as_str().to_lowercase()
+                        }
+                    }
+                })
+                .collect::<Vec<_>>()
+                .join(" "),
+        }
+    }
+
     /// Formats a game mode string to be human readable for the "Playing X" display
     fn format_mode(mode: &str) -> String {
         // Map of internal mode names to display names
         match mode {
-            // Solo duel modes (1v1)
+            // === DUELS - Solo modes (1v1) ===
             "DUELS_COMBO_DUEL" => "Combo Duel".to_string(),
             "DUELS_CLASSIC_DUEL" => "Classic Duel".to_string(),
             "DUELS_POTION_DUEL" => "NoDebuff Duel".to_string(),
@@ -272,31 +384,182 @@ impl RpcManager {
             "DUELS_BOWSPLEEF_DUEL" => "Bow Spleef Duel".to_string(),
             "DUELS_SPLEEF_DUEL" => "Spleef Duel".to_string(),
             "DUELS_QUAKE_DUEL" => "Quake Duel".to_string(),
-            // Doubles modes (2v2)
+            // === DUELS - Doubles modes (2v2) ===
             "DUELS_CLASSIC_DOUBLES" => "Classic Doubles".to_string(),
             "DUELS_OP_DOUBLES" => "OP Doubles".to_string(),
             "DUELS_UHC_DOUBLES" => "UHC Doubles".to_string(),
             "DUELS_BRIDGE_DOUBLES" => "Bridge Doubles".to_string(),
             "DUELS_SW_DOUBLES" => "SkyWars Doubles".to_string(),
             "DUELS_MW_DOUBLES" => "MegaWalls Doubles".to_string(),
-            // Bridge team modes (not 1v1 duels)
+            // === DUELS - Bridge team modes ===
             "DUELS_BRIDGE_THREES" => "Bridge 3v3".to_string(),
             "DUELS_BRIDGE_FOUR" => "Bridge 4v4".to_string(),
             "DUELS_BRIDGE_2V2V2V2" => "Bridge 2v2v2v2".to_string(),
             "DUELS_BRIDGE_3V3V3V3" => "Bridge 3v3v3v3".to_string(),
             "DUELS_CAPTURE_THREES" => "CTF 3v3".to_string(),
-            // Arena/Party modes (not duels)
+            // === DUELS - Party/Arena modes ===
             "DUELS_DUEL_ARENA" => "Arena".to_string(),
             "DUELS_DISASTERS" => "Disasters".to_string(),
             "DUELS_PARKOUR_EIGHT" => "Parkour".to_string(),
-            // BedWars Duels
+
+            // === BEDWARS ===
             "BEDWARS_TWO_ONE_DUELS" => "BedWars Duel".to_string(),
-            "BEDWARS_TWO_ONE_DUELS_RUSH" => "BedWars Rush".to_string(),
-            // Fallback: clean up the string (remove DUEL/DUELS suffix for non-1v1 modes)
+            "BEDWARS_TWO_ONE_DUELS_RUSH" => "BedWars Rush Duel".to_string(),
+            "BEDWARS_EIGHT_ONE" => "BedWars Solo".to_string(),
+            "BEDWARS_EIGHT_TWO" => "BedWars Doubles".to_string(),
+            "BEDWARS_FOUR_THREE" => "BedWars 3v3v3v3".to_string(),
+            "BEDWARS_FOUR_FOUR" => "BedWars 4v4v4v4".to_string(),
+            "BEDWARS_TWO_FOUR" => "BedWars 4v4".to_string(),
+            "BEDWARS_CASTLE" => "BedWars Castle".to_string(),
+            "BEDWARS_EIGHT_ONE_RUSH" => "BedWars Rush Solo".to_string(),
+            "BEDWARS_EIGHT_TWO_RUSH" => "BedWars Rush Doubles".to_string(),
+            "BEDWARS_FOUR_FOUR_RUSH" => "BedWars Rush 4v4v4v4".to_string(),
+            "BEDWARS_EIGHT_ONE_ULTIMATE" => "BedWars Ultimate Solo".to_string(),
+            "BEDWARS_EIGHT_TWO_ULTIMATE" => "BedWars Ultimate Doubles".to_string(),
+            "BEDWARS_FOUR_FOUR_ULTIMATE" => "BedWars Ultimate 4v4v4v4".to_string(),
+            "BEDWARS_EIGHT_ONE_ARMED" => "BedWars Armed Solo".to_string(),
+            "BEDWARS_EIGHT_TWO_ARMED" => "BedWars Armed Doubles".to_string(),
+            "BEDWARS_FOUR_FOUR_ARMED" => "BedWars Armed 4v4v4v4".to_string(),
+            "BEDWARS_EIGHT_ONE_LUCKY" => "BedWars Lucky Solo".to_string(),
+            "BEDWARS_EIGHT_TWO_LUCKY" => "BedWars Lucky Doubles".to_string(),
+            "BEDWARS_FOUR_FOUR_LUCKY" => "BedWars Lucky 4v4v4v4".to_string(),
+            "BEDWARS_EIGHT_ONE_VOIDLESS" => "BedWars Voidless Solo".to_string(),
+            "BEDWARS_EIGHT_TWO_VOIDLESS" => "BedWars Voidless Doubles".to_string(),
+            "BEDWARS_FOUR_FOUR_VOIDLESS" => "BedWars Voidless 4v4v4v4".to_string(),
+            "BEDWARS_PRACTICE" => "BedWars Practice".to_string(),
+
+            // === SKYWARS ===
+            "solo_normal" => "SkyWars Solo Normal".to_string(),
+            "solo_insane" => "SkyWars Solo Insane".to_string(),
+            "teams_normal" => "SkyWars Teams Normal".to_string(),
+            "teams_insane" => "SkyWars Teams Insane".to_string(),
+            "ranked_normal" => "SkyWars Ranked".to_string(),
+            "mega_normal" => "SkyWars Mega".to_string(),
+            "mega_doubles" => "SkyWars Mega Doubles".to_string(),
+            "solo_insane_lucky" => "SkyWars Lucky Solo".to_string(),
+            "teams_insane_lucky" => "SkyWars Lucky Teams".to_string(),
+            "solo_insane_slime" => "SkyWars Slime Solo".to_string(),
+            "teams_insane_slime" => "SkyWars Slime Teams".to_string(),
+            "solo_insane_rush" => "SkyWars Rush Solo".to_string(),
+            "teams_insane_rush" => "SkyWars Rush Teams".to_string(),
+            "solo_insane_tnt_madness" => "SkyWars TNT Madness Solo".to_string(),
+            "teams_insane_tnt_madness" => "SkyWars TNT Madness Teams".to_string(),
+
+            // === MURDER MYSTERY ===
+            "MURDER_CLASSIC" => "Murder Mystery Classic".to_string(),
+            "MURDER_DOUBLE_UP" => "Murder Mystery Double Up".to_string(),
+            "MURDER_ASSASSINS" => "Murder Mystery Assassins".to_string(),
+            "MURDER_INFECTION" => "Murder Mystery Infection".to_string(),
+            "MURDER_SHOWDOWN" => "Murder Mystery Showdown".to_string(),
+
+            // === ARCADE ===
+            "PARTY" => "Party Games".to_string(),
+            "HOLE_IN_THE_WALL" => "Hole in the Wall".to_string(),
+            "FARM_HUNT" => "Farm Hunt".to_string(),
+            "SOCCER" => "Football".to_string(),
+            "BOUNTY_HUNTERS" => "Bounty Hunters".to_string(),
+            "MINI_WALLS" => "Mini Walls".to_string(),
+            "HIDE_AND_SEEK_PROP_HUNT" => "Prop Hunt".to_string(),
+            "HIDE_AND_SEEK_PARTY_POOPER" => "Party Pooper".to_string(),
+            "ZOMBIES_DEAD_END" => "Zombies Dead End".to_string(),
+            "ZOMBIES_BAD_BLOOD" => "Zombies Bad Blood".to_string(),
+            "ZOMBIES_ALIEN_ARCADIUM" => "Zombies Alien Arcadium".to_string(),
+            "PIXEL_PAINTERS" => "Pixel Painters".to_string(),
+            "THROW_OUT" => "Throw Out".to_string(),
+            "ENDER_SPLEEF" => "Ender Spleef".to_string(),
+            "STARWARS" => "Galaxy Wars".to_string(),
+            "DRAGON_WARS" => "Dragon Wars".to_string(),
+            "BLOCKING_DEAD" => "Blocking Dead".to_string(),
+            "CAPTURE_THE_WOOL" => "Capture the Wool".to_string(),
+            "PVP_CTW" => "Capture the Wool".to_string(),
+            "EASTER_SIMULATOR" => "Easter Simulator".to_string(),
+            "SCUBA_SIMULATOR" => "Scuba Simulator".to_string(),
+            "HALLOWEEN_SIMULATOR" => "Halloween Simulator".to_string(),
+            "GRINCH_SIMULATOR_V2" => "Grinch Simulator".to_string(),
+            "SANTA_SIMULATOR" => "Santa Simulator".to_string(),
+            "HYPIXEL_SAYS" => "Hypixel Says".to_string(),
+            "CREEPER_ATTACK" => "Creeper Attack".to_string(),
+            "SIMON_SAYS" => "Simon Says".to_string(),
+            "SANTA_SAYS" => "Santa Says".to_string(),
+            "DAY_ONE" => "Day One".to_string(),
+
+            // === WOOL GAMES ===
+            "WOOL_WARS_TWO_FOUR" => "Wool Wars".to_string(),
+            "SHEEP_WARS" => "Sheep Wars".to_string(),
+
+            // === UHC ===
+            "SOLO" => "UHC Solo".to_string(),
+            "TEAMS" => "UHC Teams".to_string(),
+
+            // === THE PIT ===
+            "PIT" => "The Pit".to_string(),
+
+            // === BUILD BATTLE ===
+            "BUILD_BATTLE_SOLO_NORMAL" => "Build Battle Solo".to_string(),
+            "BUILD_BATTLE_TEAMS_NORMAL" => "Build Battle Teams".to_string(),
+            "BUILD_BATTLE_SOLO_PRO" => "Build Battle Pro".to_string(),
+            "BUILD_BATTLE_GUESS_THE_BUILD" => "Guess the Build".to_string(),
+            "BUILD_BATTLE_SOLO_NORMAL_LATEST" => "Build Battle Solo".to_string(),
+            "BUILD_BATTLE_TEAMS_NORMAL_LATEST" => "Build Battle Teams".to_string(),
+
+            // === SKYBLOCK ===
+            "dynamic" => "SkyBlock".to_string(),
+            "hub" => "SkyBlock Hub".to_string(),
+            "farming_1" => "SkyBlock Farming".to_string(),
+            "mining_1" => "SkyBlock Deep Caverns".to_string(),
+            "mining_2" => "SkyBlock Dwarven Mines".to_string(),
+            "mining_3" => "SkyBlock Crystal Hollows".to_string(),
+            "combat_1" => "SkyBlock Spider's Den".to_string(),
+            "combat_2" => "SkyBlock Blazing Fortress".to_string(),
+            "combat_3" => "SkyBlock The End".to_string(),
+            "foraging_1" => "SkyBlock Park".to_string(),
+            "dungeon_hub" => "SkyBlock Dungeon Hub".to_string(),
+            "dungeon" => "SkyBlock Dungeons".to_string(),
+            "crimson_isle" => "SkyBlock Crimson Isle".to_string(),
+            "rift" => "SkyBlock Rift".to_string(),
+            "garden" => "SkyBlock Garden".to_string(),
+            "kuudra_normal" => "Kuudra Basic".to_string(),
+            "kuudra_hot" => "Kuudra Hot".to_string(),
+            "kuudra_burning" => "Kuudra Burning".to_string(),
+            "kuudra_fiery" => "Kuudra Fiery".to_string(),
+            "kuudra_infernal" => "Kuudra Infernal".to_string(),
+            "instanced" => "SkyBlock Instanced".to_string(),
+            "dark_auction" => "SkyBlock Dark Auction".to_string(),
+            "winter" => "SkyBlock Jerry's Workshop".to_string(),
+
+            // === MEGA WALLS ===
+            "standard" => "Mega Walls".to_string(),
+            "face_off" => "Mega Walls Face Off".to_string(),
+
+            // === COPS AND CRIMS ===
+            "normal" => "Cops and Crims".to_string(),
+            "deathmatch" => "Cops and Crims Deathmatch".to_string(),
+            "normal_party" => "Cops and Crims Party".to_string(),
+
+            // === TNT GAMES ===
+            "TNTRUN" => "TNT Run".to_string(),
+            "PVPRUN" => "PVP Run".to_string(),
+            "BOWSPLEEF" => "Bow Spleef".to_string(),
+            "TNTAG" => "TNT Tag".to_string(),
+            "CAPTURE" => "TNT Wizards".to_string(),
+
+            // === WARLORDS ===
+            "ctf_mini" => "Warlords CTF".to_string(),
+            "domination" => "Warlords Domination".to_string(),
+            "team_deathmatch" => "Warlords TDM".to_string(),
+
+            // === SMASH HEROES ===
+            "1v1_normal" => "Smash 1v1".to_string(),
+            "2v2_normal" => "Smash 2v2".to_string(),
+
+            // Fallback: clean up the string
             _ => {
                 let cleaned = mode
                     .strip_prefix("DUELS_")
                     .or_else(|| mode.strip_prefix("BEDWARS_"))
+                    .or_else(|| mode.strip_prefix("SKYWARS_"))
+                    .or_else(|| mode.strip_prefix("MURDER_"))
+                    .or_else(|| mode.strip_prefix("BUILD_BATTLE_"))
                     .unwrap_or(mode);
                 cleaned
                     .split('_')
@@ -334,11 +597,26 @@ impl RpcManager {
 
         // Determine details text based on current activity
         let details: String = if state.is_playing {
-            if let Some(ref mode) = formatted_mode {
+            // Special handling for SkyBlock - modes are locations, not games
+            if state.current_gametype.as_deref() == Some("SKYBLOCK") {
+                if let Some(ref mode) = state.current_mode {
+                    // SkyBlock location - "In SkyBlock Hub", "In SkyBlock Dungeons", etc.
+                    format!("In {}", Self::format_skyblock_location(mode))
+                } else {
+                    "In SkyBlock".to_string()
+                }
+            } else if let Some(ref mode) = formatted_mode {
                 // Playing with a known game mode - "Playing Combo Duel"
                 format!("Playing {}", mode)
+            } else if state.in_lobby {
+                // In a specific game lobby - format based on gametype
+                if let Some(ref gametype) = state.current_gametype {
+                    format!("In {} Lobby", Self::format_gametype(gametype))
+                } else {
+                    "In Hypixel Lobby".to_string()
+                }
             } else {
-                // Connected to Hypixel but in lobby
+                // Connected to Hypixel but no specific location
                 "In Hypixel Lobby".to_string()
             }
         } else if state.current_mode.as_deref() == Some("Launching") {
@@ -421,8 +699,19 @@ impl RpcManager {
     }
 
     /// Updates game mode for RPC display
-    pub fn set_game_mode(&self, mode: Option<String>, map: Option<String>) {
-        self.send(RpcCommand::SetGameMode { mode, map });
+    pub fn set_game_mode(
+        &self,
+        mode: Option<String>,
+        map: Option<String>,
+        gametype: Option<String>,
+        lobbyname: Option<String>,
+    ) {
+        self.send(RpcCommand::SetGameMode {
+            mode,
+            map,
+            gametype,
+            lobbyname,
+        });
     }
 
     /// Called when user disconnects from Hypixel, clears playing state but keeps user data

@@ -34,7 +34,12 @@ struct LockFileData {
 #[serde(tag = "type", rename_all = "snake_case")]
 enum ControlMessage {
     UserData { ign: String, uuid: String },
-    GameMode { mode: Option<String>, map: Option<String> },
+    GameMode { 
+        mode: Option<String>, 
+        map: Option<String>,
+        gametype: Option<String>,
+        lobbyname: Option<String>,
+    },
     Disconnect,
 }
 
@@ -126,10 +131,10 @@ async fn listen_control_socket(app: AppHandle, is_running: Arc<Mutex<bool>>) {
                                 rpc.set_user_data(Some(ign), Some(uuid));
                             }
                         }
-                        ControlMessage::GameMode { mode, map } => {
+                        ControlMessage::GameMode { mode, map, gametype, lobbyname } => {
                             // Update Discord RPC with game mode (mode can be null when in lobby)
                             if let Some(rpc) = app.try_state::<RpcManager>() {
-                                rpc.set_game_mode(mode, map);
+                                rpc.set_game_mode(mode, map, gametype, lobbyname);
                             }
                         }
                         ControlMessage::Disconnect => {
