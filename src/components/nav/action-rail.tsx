@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Stats } from "../tabs/stats-tab";
 import { Settings } from "../tabs/settings-tab";
+import { Logs } from "../tabs/logs-tab";
 
 interface ActionButtonProps {
   icon: "home" | "logs" | "stats" | "settings";
@@ -166,22 +167,17 @@ function Drawer() {
   const isOpen = activeTab !== "home";
 
   return (
-    <>
-      {isOpen && (
-        <div className="pointer-events-none fixed top-0 left-24 w-6 h-full z-20 bg-gradient-to-r from-semimuted/70 to-transparent transition-opacity duration-300" />
+    <div
+      className={clsx(
+        "fixed top-0 left-24 h-full w-80 bg-semimuted z-0 transition-transform duration-300 flex flex-col",
+        isOpen ? "translate-x-0" : "-translate-x-full",
       )}
-      <div
-        className={clsx(
-          "fixed top-0 left-24 h-full w-80 bg-semimuted z-0 transition-transform duration-300",
-          isOpen ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        <div className="p-6">
-          {activeTab === "logs" && <div></div>}
-          {activeTab === "stats" && <Stats />}
-          {activeTab === "settings" && <Settings />}
-        </div>
+    >
+      <div className="p-6 pl-0">
+        {activeTab === "logs" && <Logs />}
+        {activeTab === "stats" && <Stats />}
+        {activeTab === "settings" && <Settings />}
       </div>
-    </>
+    </div>
   );
 }
