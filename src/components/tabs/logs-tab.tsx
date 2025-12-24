@@ -2,6 +2,20 @@ import { useEffect, useRef } from "react";
 import { useLogs } from "@/lib/proxy-logs";
 import { FunnelXIcon } from "@phosphor-icons/react";
 
+function renderLog(text: string) {
+  let escaped = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  escaped = escaped.replace(
+    /(https?:\/\/[^\s]+)/g,
+    '<a href="$1" target="_blank" class="underline hover:no-underline" rel="noopener noreferrer">$1</a>',
+  );
+
+  return escaped;
+}
+
 export function Logs() {
   const logs = useLogs((s) => s.logs);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -28,9 +42,11 @@ export function Logs() {
           </div>
         ) : (
           logs.map((line, i) => (
-            <div key={i} className="whitespace-pre-wrap break-words select-text">
-              {line}
-            </div>
+            <div
+              key={i}
+              className="whitespace-pre-wrap break-words select-text"
+              dangerouslySetInnerHTML={{ __html: renderLog(line) }}
+            />
           ))
         )}
       </div>
