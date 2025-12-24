@@ -21,6 +21,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Stats } from "../tabs/stats-tab";
+import { Settings } from "../tabs/settings-tab";
 
 interface ActionButtonProps {
   icon: "home" | "logs" | "stats" | "settings";
@@ -178,7 +179,7 @@ function Drawer() {
         <div className="p-6">
           {activeTab === "logs" && <div></div>}
           {activeTab === "stats" && <Stats />}
-          {activeTab === "settings" && <div></div>}
+          {activeTab === "settings" && <Settings />}
         </div>
       </div>
     </>
