@@ -7,10 +7,13 @@ mod auth;
 mod commands;
 mod config;
 mod proxy;
+mod rpc;
 mod utils;
 
 use commands::*;
 use proxy::ProxyManager;
+use rpc::RpcManager;
+use tauri::Manager;
 
 /// Initializes and runs the Tauri application.
 ///
@@ -18,10 +21,14 @@ use proxy::ProxyManager;
 /// all authentication-related commands for frontend access.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Create RPC manager (is_dev will be set in setup hook)
+    let rpc_manager = RpcManager::new(false); // Temporary, will be updated in setup
+
     tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .manage(ProxyManager::new())
+        .manage(rpc_manager)
         .invoke_handler(tauri::generate_handler![
             // Authentication handling
             token_exists,
@@ -47,9 +54,28 @@ pub fn run() {
             get_legacy_config_value,
             get_config_value,
             set_config_key,
-            save_config
+            save_config,
+            // Discord RPC
+            rpc_set_enabled,
+            rpc_is_enabled,
+            rpc_set_activity,
         ])
-        .setup(|_app| {
+        .setup(|app| {
+            // Detect if running in dev mode using Tauri's environment
+            // In dev mode, Tauri sets TAURI_DEV environment variable
+            let is_dev = std::env::var("TAURI_DEV").is_ok() || cfg!(debug_assertions);
+
+            // Update RPC manager with correct dev flag
+            if let Some(rpc) = app.try_state::<RpcManager>() {
+                rpc.set_dev_mode(is_dev);
+            }
+
+            // Start and connect RPC
+            if let Some(rpc) = app.try_state::<RpcManager>() {
+                rpc.start();
+                rpc.connect();
+            }
+
             // Cleanup will be handled by the on_window_event hook
             // or by explicit stop_proxy calls from the frontend
             Ok(())
