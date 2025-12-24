@@ -7,19 +7,21 @@ import { SettingSwitch } from "@/components/settings/switch";
 import { SettingsSection } from "@/components/settings/section";
 import { defaultSettings } from "@/settings/defaults";
 import { SpinnerIcon } from "@phosphor-icons/react";
+import { config as configApi } from "@/lib/config";
 
 export function Settings() {
   const [config, setConfig] = useState<Config | null>(null);
   const [savingKey, setSavingKey] = useState<keyof Config | null>(null);
 
   useEffect(() => {
-    invoke<Config | null>("get_config").then((cfg) => {
-      if (cfg) {
+    configApi
+      .get()
+      .then((cfg) => {
         setConfig(cfg);
-      } else {
+      })
+      .catch(() => {
         setConfig(defaultSettings);
-      }
-    });
+      });
   }, []);
 
   const grouped = useMemo(() => {
@@ -42,10 +44,7 @@ export function Settings() {
     setSavingKey(key);
 
     try {
-      await invoke("set_config_key", {
-        key,
-        value,
-      });
+      await configApi.setValue(key, value);
     } catch {
       //rollback on error
       setConfig(config);
