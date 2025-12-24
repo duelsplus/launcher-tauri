@@ -56,8 +56,12 @@ export function Settings() {
 
   if (!config) {
     return (
-      <div className="flex justify-center items-center w-full">
-        <SpinnerIcon className="animate-spin text-muted-foreground" />
+      <div className="space-y-4">
+        <h2 className="text-base font-medium">Settings</h2>
+
+        <div className="flex justify-center items-center w-full">
+          <SpinnerIcon className="animate-spin text-muted-foreground" />
+        </div>
       </div>
     );
   }
