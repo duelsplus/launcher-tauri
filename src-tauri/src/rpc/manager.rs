@@ -620,7 +620,7 @@ impl RpcManager {
                 "In Hypixel Lobby".to_string()
             }
         } else if state.current_mode.as_deref() == Some("Launching") {
-            "Launching Proxy".to_string()
+            "Launching".to_string()
         } else {
             "Idle".to_string()
         };
