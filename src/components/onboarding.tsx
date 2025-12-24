@@ -156,7 +156,7 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
         {step === "token" && (
           <Panel
             title="Authentication"
-            description="Authenticate using your Discord account or paste a verification token manually."
+            description="Authenticate using your Discord account or paste a Duels+ verification token manually."
           >
             <div className="w-full max-w-md flex flex-col justify-center items-center gap-4">
               <Button
