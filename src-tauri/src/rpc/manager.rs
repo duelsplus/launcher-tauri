@@ -597,8 +597,11 @@ impl RpcManager {
 
         // Determine details text based on current activity
         let details: String = if state.is_playing {
+            // Special handling for Limbo
+            if state.current_gametype.as_deref() == Some("LIMBO") {
+                "In Limbo".to_string()
             // Special handling for SkyBlock - modes are locations, not games
-            if state.current_gametype.as_deref() == Some("SKYBLOCK") {
+            } else if state.current_gametype.as_deref() == Some("SKYBLOCK") {
                 if let Some(ref mode) = state.current_mode {
                     // SkyBlock location - "In SkyBlock Hub", "In SkyBlock Dungeons", etc.
                     format!("In {}", Self::format_skyblock_location(mode))
