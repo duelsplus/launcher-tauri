@@ -94,6 +94,7 @@ function UpdateButton() {
       case "pending-restart":
         return "Restart the launcher to install update.";
       case "error":
+        if (import.meta.env.DEV) return "Update failed. This is normal in dev environment.";
         return "Update failed.";
       default:
         return "";
