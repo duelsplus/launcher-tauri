@@ -3,11 +3,19 @@ import { ActionRail } from "./nav/action-rail";
 import { MainView } from "./main-view";
 import { useEffect } from "react";
 import { useUpdater } from "@/lib/updater";
+import { config } from "@/lib/config";
 
 export function Shell() {
   const checkAndInstall = useUpdater((s) => s.checkAndInstall);
   useEffect(() => {
-    checkAndInstall();
+    const update = async () => {
+      const cfg = await config.get();
+      if (cfg.autoUpdate) {
+        await checkAndInstall();
+      }
+    };
+
+    update();
   }, [checkAndInstall]);
 
   return (
