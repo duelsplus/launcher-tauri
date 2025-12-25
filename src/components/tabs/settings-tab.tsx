@@ -61,6 +61,21 @@ export function Settings() {
     }
   };
 
+  const isDisabled = (setting: (typeof settingDefinitions)[number]) => {
+    if (!config) return true;
+    let disabled = savingKey === setting.key;
+
+    if (setting.dependsOn) {
+      if (typeof setting.dependsOn === "string") {
+        disabled ||= !config[setting.dependsOn];
+      } else if (typeof setting.dependsOn === "function") {
+        disabled ||= !setting.dependsOn(config);
+      }
+    }
+
+    return disabled;
+  };
+
   if (!config) {
     return (
       <div className="space-y-4">
@@ -93,7 +108,7 @@ export function Settings() {
               title={setting.title}
               description={setting.description}
               checked={config[setting.key] as boolean}
-              disabled={savingKey === setting.key}
+              disabled={isDisabled(setting)}
               onCheckedChange={(value) => updateSetting(setting.key, value)}
             />
           ))}
@@ -110,7 +125,7 @@ export function Settings() {
                 title={setting.title}
                 description={setting.description}
                 checked={config[setting.key] as boolean}
-                disabled={savingKey === setting.key}
+                disabled={isDisabled(setting)}
                 onCheckedChange={(value) => updateSetting(setting.key, value)}
               />
             ))}

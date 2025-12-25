@@ -6,6 +6,8 @@ export const defaultSettings: Config = {
   openLogsOnLaunch: true,
   reducedMotion: false,
   enableRpc: true,
+  rpcAnonymizeProfile: false,
+  rpcAnonymizeLocation: false,
   proxyPort: "25565",
   enableMsa: false,
 };
