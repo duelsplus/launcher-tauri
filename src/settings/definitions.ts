@@ -5,6 +5,7 @@ export type SettingDefinition = {
   title: string;
   description?: string;
   section: string;
+  dependsOn?: keyof Config | ((config: Config) => boolean);
 };
 
 export const settingDefinitions: SettingDefinition[] = [
@@ -37,6 +38,20 @@ export const settingDefinitions: SettingDefinition[] = [
     title: "Discord Rich Presence",
     description: "Show your activity on Discord.",
     section: "Integrations",
+  },
+  {
+    key: "rpcAnonymizeProfile",
+    title: "Anonymize Profile",
+    description: "Hide your in-game profile from Discord Rich Presence.",
+    section: "Integrations",
+    dependsOn: "enableRpc",
+  },
+  {
+    key: "rpcAnonymizeLocation",
+    title: "Anonymize Location",
+    description: "Hide your in-game location from Discord Rich Presence.",
+    section: "Integrations",
+    dependsOn: "enableRpc",
   },
   /*{
     key: "enableMsa",
