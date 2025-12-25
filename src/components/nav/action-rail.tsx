@@ -24,6 +24,7 @@ import { Stats } from "../tabs/stats-tab";
 import { Settings } from "../tabs/settings-tab";
 import { Logs } from "../tabs/logs-tab";
 import { UserButton } from "./user-button";
+import { notify } from "@/lib/notification";
 
 interface ActionButtonProps {
   icon: "home" | "logs" | "stats" | "settings";
@@ -93,6 +94,10 @@ function UpdateButton() {
           status.chunkLength / 1024,
         )} KB)`;*/
       case "pending-restart":
+        notify({
+          title: "Pending Restart",
+          body: "An update is ready. Restart the launcher to install.",
+        });
         return "Restart the launcher to install update.";
       case "error":
         if (import.meta.env.DEV)
