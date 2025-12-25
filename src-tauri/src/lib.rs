@@ -13,7 +13,7 @@ mod utils;
 use commands::*;
 use proxy::ProxyManager;
 use rpc::RpcManager;
-use tauri::Manager;
+use tauri::{Manager, WindowEvent};
 
 /// Initializes and runs the Tauri application.
 ///
@@ -88,9 +88,19 @@ pub fn run() {
                 rpc.connect();
             }
 
-            // Cleanup will be handled by the on_window_event hook
-            // or by explicit stop_proxy calls from the frontend
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            // Stop the proxy when the window is closed
+            if let WindowEvent::CloseRequested { .. } = event {
+                let app = window.app_handle();
+                if let Some(proxy) = app.try_state::<ProxyManager>() {
+                    // Use tauri's async runtime to stop the proxy
+                    tauri::async_runtime::block_on(async {
+                        let _ = proxy.stop().await;
+                    });
+                }
+            }
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
