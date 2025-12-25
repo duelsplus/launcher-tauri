@@ -5,7 +5,7 @@ use super::download::{
     find_platform_asset, get_install_dir, get_platform_tag, is_file_valid,
 };
 use super::error::ProxyError;
-use super::models::{ProxyStatus, RpcUserData};
+use super::models::{ErrorCategory, ErrorSeverity, ProxyErrorData, ProxyStatus, RpcUserData};
 use crate::rpc::RpcManager;
 use crate::utils::get_home_dir;
 use serde::Deserialize;
@@ -44,6 +44,18 @@ enum ControlMessage {
         lobbyname: Option<String>,
     },
     Disconnect,
+    ProxyError {
+        code: String,
+        title: String,
+        message: String,
+        suggestion: String,
+        severity: ErrorSeverity,
+        category: ErrorCategory,
+        #[serde(rename = "originalMessage")]
+        original_message: String,
+        context: Option<String>,
+        timestamp: u64,
+    },
 }
 
 /// Gets the path to the proxy lock file
@@ -150,6 +162,31 @@ async fn listen_control_socket(app: AppHandle, is_running: Arc<Mutex<bool>>) {
                             if let Some(rpc) = app.try_state::<RpcManager>() {
                                 rpc.set_disconnected();
                             }
+                        }
+                        ControlMessage::ProxyError {
+                            code,
+                            title,
+                            message,
+                            suggestion,
+                            severity,
+                            category,
+                            original_message,
+                            context,
+                            timestamp,
+                        } => {
+                            // Emit error event for frontend to handle
+                            let error_data = ProxyErrorData {
+                                code,
+                                title,
+                                message,
+                                suggestion,
+                                severity,
+                                category,
+                                original_message,
+                                context,
+                                timestamp,
+                            };
+                            let _ = app.emit("proxy-error", error_data);
                         }
                     }
                 }
