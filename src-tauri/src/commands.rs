@@ -279,15 +279,44 @@ pub async fn get_config_value(key: String) -> Result<Option<serde_json::Value>, 
 
 /// Sets a specific key in the configuration file.
 ///
+/// Also syncs RPC-related settings with the RPC manager automatically.
+///
 /// # Arguments
 ///
 /// * `key` - The configuration key to set
 /// * `value` - The value to set (must be a valid JSON value)
+/// * `rpc` - The RPC manager state (for syncing RPC settings)
 #[tauri::command]
-pub async fn set_config_key(key: String, value: serde_json::Value) -> Result<(), String> {
-    config::manager::set_config_key(&key, value)
+pub async fn set_config_key(
+    key: String,
+    value: serde_json::Value,
+    rpc: State<'_, RpcManager>,
+) -> Result<(), String> {
+    config::manager::set_config_key(&key, value.clone())
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+
+    // Sync RPC-related settings with the RPC manager
+    match key.as_str() {
+        "enableRpc" => {
+            if let Some(enabled) = value.as_bool() {
+                rpc.set_enabled(enabled);
+            }
+        }
+        "rpcAnonymizeProfile" => {
+            if let Some(anonymize) = value.as_bool() {
+                rpc.set_anonymize_profile(anonymize);
+            }
+        }
+        "rpcAnonymizeLocation" => {
+            if let Some(anonymize) = value.as_bool() {
+                rpc.set_anonymize_location(anonymize);
+            }
+        }
+        _ => {}
+    }
+
+    Ok(())
 }
 
 /// Saves the entire configuration structure to the configuration file.

@@ -42,6 +42,11 @@ enum RpcCommand {
     SetDisconnected,
     /// Clear activity (reset to base)
     ClearActivity,
+    /// Update anonymization settings
+    SetAnonymization {
+        anonymize_profile: bool,
+        anonymize_location: bool,
+    },
     /// Shutdown the RPC thread
     Shutdown,
 }
@@ -59,6 +64,10 @@ struct RpcState {
     current_gametype: Option<String>,
     in_lobby: bool,
     is_playing: bool,
+    /// Whether to hide profile (IGN/avatar) from Discord Rich Presence
+    anonymize_profile: bool,
+    /// Whether to hide location/game mode from Discord Rich Presence
+    anonymize_location: bool,
 }
 
 /// Manager for Discord Rich Presence
@@ -85,6 +94,8 @@ impl RpcManager {
             in_lobby: false,
             current_map: None,
             is_playing: false,
+            anonymize_profile: false,
+            anonymize_location: false,
         }));
 
         Self {
@@ -248,6 +259,21 @@ impl RpcManager {
                             s.current_gametype = None;
                             s.in_lobby = false;
                             s.is_playing = false;
+                        }
+                        let s = state.lock().unwrap();
+                        if let Some(ref mut c) = client {
+                            let dev = *is_dev.lock().unwrap();
+                            Self::set_activity_internal(c, &s, dev);
+                        }
+                    }
+                    RpcCommand::SetAnonymization {
+                        anonymize_profile,
+                        anonymize_location,
+                    } => {
+                        {
+                            let mut s = state.lock().unwrap();
+                            s.anonymize_profile = anonymize_profile;
+                            s.anonymize_location = anonymize_location;
                         }
                         let s = state.lock().unwrap();
                         if let Some(ref mut c) = client {
@@ -597,8 +623,11 @@ impl RpcManager {
 
         // Determine details text based on current activity
         let details: String = if state.is_playing {
+            // If location is anonymized, show generic text
+            if state.anonymize_location {
+                "Playing on Hypixel".to_string()
             // Special handling for Limbo
-            if state.current_gametype.as_deref() == Some("LIMBO") {
+            } else if state.current_gametype.as_deref() == Some("LIMBO") {
                 "In Limbo".to_string()
             // Special handling for SkyBlock - modes are locations, not games
             } else if state.current_gametype.as_deref() == Some("SKYBLOCK") {
@@ -633,14 +662,21 @@ impl RpcManager {
             .timestamps(activity::Timestamps::new().start(state.start_timestamp));
 
         // Build assets - need to store avatar_url to extend its lifetime
+        // Only show profile (avatar/IGN) if not anonymized
         let avatar_url: String;
-        let assets = if let (Some(ign), Some(uuid)) = (&state.current_ign, &state.current_uuid) {
-            avatar_url = format!("https://mc-heads.net/avatar/{}/64.png", uuid);
-            activity::Assets::new()
-                .large_image(large_image)
-                .large_text(large_text)
-                .small_image(&avatar_url)
-                .small_text(ign)
+        let assets = if !state.anonymize_profile {
+            if let (Some(ign), Some(uuid)) = (&state.current_ign, &state.current_uuid) {
+                avatar_url = format!("https://mc-heads.net/avatar/{}/64.png", uuid);
+                activity::Assets::new()
+                    .large_image(large_image)
+                    .large_text(large_text)
+                    .small_image(&avatar_url)
+                    .small_text(ign)
+            } else {
+                activity::Assets::new()
+                    .large_image(large_image)
+                    .large_text(large_text)
+            }
         } else {
             activity::Assets::new()
                 .large_image(large_image)
@@ -743,6 +779,32 @@ impl RpcManager {
     /// Returns whether RPC is enabled
     pub fn is_enabled(&self) -> bool {
         self.state.lock().unwrap().enabled
+    }
+
+    /// Sets the anonymization settings for RPC
+    pub fn set_anonymization(&self, anonymize_profile: bool, anonymize_location: bool) {
+        self.send(RpcCommand::SetAnonymization {
+            anonymize_profile,
+            anonymize_location,
+        });
+    }
+
+    /// Sets whether to anonymize profile (IGN/avatar) in RPC
+    pub fn set_anonymize_profile(&self, anonymize: bool) {
+        let current_location = self.state.lock().unwrap().anonymize_location;
+        self.send(RpcCommand::SetAnonymization {
+            anonymize_profile: anonymize,
+            anonymize_location: current_location,
+        });
+    }
+
+    /// Sets whether to anonymize location/game mode in RPC
+    pub fn set_anonymize_location(&self, anonymize: bool) {
+        let current_profile = self.state.lock().unwrap().anonymize_profile;
+        self.send(RpcCommand::SetAnonymization {
+            anonymize_profile: current_profile,
+            anonymize_location: anonymize,
+        });
     }
 
     /// Returns whether RPC is connected

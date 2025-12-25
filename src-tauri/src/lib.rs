@@ -70,6 +70,18 @@ pub fn run() {
                 rpc.set_dev_mode(is_dev);
             }
 
+            // Load config and apply RPC settings
+            let rpc_state = app.try_state::<RpcManager>();
+            if let Some(rpc) = rpc_state {
+                // Try to load saved config and apply RPC settings
+                // Use tokio runtime to run the async config loading
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                if let Ok(Some(cfg)) = rt.block_on(config::manager::get_config()) {
+                    rpc.set_enabled(cfg.enable_rpc);
+                    rpc.set_anonymization(cfg.rpc_anonymize_profile, cfg.rpc_anonymize_location);
+                }
+            }
+
             // Start and connect RPC
             if let Some(rpc) = app.try_state::<RpcManager>() {
                 rpc.start();
