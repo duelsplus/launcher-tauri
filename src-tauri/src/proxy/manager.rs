@@ -33,9 +33,12 @@ struct LockFileData {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 enum ControlMessage {
-    UserData { ign: String, uuid: String },
-    GameMode { 
-        mode: Option<String>, 
+    UserData {
+        ign: String,
+        uuid: String,
+    },
+    GameMode {
+        mode: Option<String>,
         map: Option<String>,
         gametype: Option<String>,
         lobbyname: Option<String>,
@@ -45,7 +48,9 @@ enum ControlMessage {
 
 /// Gets the path to the proxy lock file
 fn get_lock_file_path() -> Option<PathBuf> {
-    get_home_dir().ok().map(|h| h.join(".duelsplus").join("proxy.lock"))
+    get_home_dir()
+        .ok()
+        .map(|h| h.join(".duelsplus").join("proxy.lock"))
 }
 
 /// Reads the proxy lock file to get the control port
@@ -58,21 +63,19 @@ fn read_lock_file() -> Option<LockFileData> {
 /// Sends a shutdown command to the proxy via TCP control socket
 async fn send_shutdown_command(control_port: u16) -> bool {
     let addr = format!("127.0.0.1:{}", control_port);
-    
-    let result = tokio::time::timeout(
-        std::time::Duration::from_secs(5),
-        async {
-            let mut stream = TcpStream::connect(&addr).await?;
-            stream.write_all(b"shutdown").await?;
-            
-            let mut buf = [0u8; 16];
-            let n = stream.read(&mut buf).await?;
-            let response = String::from_utf8_lossy(&buf[..n]);
-            
-            Ok::<bool, std::io::Error>(response.trim() == "ok")
-        }
-    ).await;
-    
+
+    let result = tokio::time::timeout(std::time::Duration::from_secs(5), async {
+        let mut stream = TcpStream::connect(&addr).await?;
+        stream.write_all(b"shutdown").await?;
+
+        let mut buf = [0u8; 16];
+        let n = stream.read(&mut buf).await?;
+        let response = String::from_utf8_lossy(&buf[..n]);
+
+        Ok::<bool, std::io::Error>(response.trim() == "ok")
+    })
+    .await;
+
     match result {
         Ok(Ok(true)) => true,
         _ => false,
@@ -131,7 +134,12 @@ async fn listen_control_socket(app: AppHandle, is_running: Arc<Mutex<bool>>) {
                                 rpc.set_user_data(Some(ign), Some(uuid));
                             }
                         }
-                        ControlMessage::GameMode { mode, map, gametype, lobbyname } => {
+                        ControlMessage::GameMode {
+                            mode,
+                            map,
+                            gametype,
+                            lobbyname,
+                        } => {
                             // Update Discord RPC with game mode (mode can be null when in lobby)
                             if let Some(rpc) = app.try_state::<RpcManager>() {
                                 rpc.set_game_mode(mode, map, gametype, lobbyname);
@@ -261,6 +269,13 @@ impl ProxyManager {
         {
             cmd.env("LANG", "en_US.UTF-8");
             cmd.env("LC_ALL", "en_US.UTF-8");
+        }
+
+        // Hide the console window on Windows
+        #[cfg(windows)]
+        {
+            const CREATE_NO_WINDOW: u32 = 0x08000000;
+            cmd.creation_flags(CREATE_NO_WINDOW);
         }
 
         let mut child = cmd
@@ -403,10 +418,9 @@ impl ProxyManager {
                 if let Some(control_port) = lock_data.control_port {
                     if send_shutdown_command(control_port).await {
                         // Graceful shutdown initiated, wait for process to exit
-                        let _ = tokio::time::timeout(
-                            std::time::Duration::from_secs(5),
-                            child.wait()
-                        ).await;
+                        let _ =
+                            tokio::time::timeout(std::time::Duration::from_secs(5), child.wait())
+                                .await;
                         *self.is_running.lock().await = false;
                         return Ok(());
                     }
