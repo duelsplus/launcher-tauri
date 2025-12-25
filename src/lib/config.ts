@@ -41,6 +41,7 @@ export const config = {
 
   /**
    * Set a single config key.
+   * RPC-related settings are automatically synced by the backend.
    */
   async setValue<K extends keyof Config>(
     key: K,

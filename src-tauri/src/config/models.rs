@@ -28,6 +28,14 @@ pub struct Config {
     /// Whether to enable Discord Rich Presence
     #[serde(default = "default_true")]
     pub enable_rpc: bool,
+    
+    /// Whether to hide profile (IGN/avatar) from Discord Rich Presence
+    #[serde(default)]
+    pub rpc_anonymize_profile: bool,
+
+    /// Whether to hide location/game mode from Discord Rich Presence
+    #[serde(default)]
+    pub rpc_anonymize_location: bool,
 
     /// Port number for the proxy server (as string)
     #[serde(default = "default_proxy_port")]
@@ -54,6 +62,8 @@ impl Default for Config {
             open_logs_on_launch: true,
             reduced_motion: false,
             enable_rpc: true,
+            rpc_anonymize_profile: false,
+            rpc_anonymize_location: false,
             proxy_port: "25565".to_string(),
             enable_msa: false,
         }
