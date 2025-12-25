@@ -30,6 +30,10 @@
   "bundle": {
     "active": true,
     "createUpdaterArtifacts": true,
+    "publisher": "Duels+",
+    "category": "Game",
+    "homepage": "https://duelsplus.com",
+    "shortDescription": "Lightweight Minecraft proxy for Hypixel Duels",
     "targets": ["deb", "appimage", "nsis", "dmg"],
     "icon": [
       "icons/32x32.png",
