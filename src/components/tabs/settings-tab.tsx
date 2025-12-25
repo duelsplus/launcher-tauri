@@ -11,15 +11,24 @@ import { ArrowUpRightIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { config as configApi } from "@/lib/config";
 import { Button } from "../ui/button";
 import { useTheme } from "../theme-provider";
+import type { Theme } from "../theme-provider";
 
 export function Settings() {
   const [config, setConfig] = useState<Config | null>(null);
   const [savingKey, setSavingKey] = useState<keyof Config | null>(null);
 
   const { theme: currentTheme, setTheme: setAppTheme } = useTheme();
-  const [theme, setTheme] = useState<"dark" | "light">(
-    currentTheme === "light" ? "light" : "dark",
-  );
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (
+      currentTheme === "light" ||
+      currentTheme === "dark" ||
+      currentTheme === "classic"
+    ) {
+      return currentTheme;
+    }
+
+    return "dark";
+  });
 
   useEffect(() => {
     configApi

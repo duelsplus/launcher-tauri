@@ -10,7 +10,7 @@ export function Home() {
       <div className="min-h-[20vh]" />
 
       <div className="space-y-6">
-        <Logo className="h-16 w-auto text-primary dark:text-foreground" />
+        <Logo className="h-16 w-auto text-primary dark:text-foreground classic:text-foreground" />
         <div className="flex items-center gap-4">
         <LaunchButton />
         <ServiceStatus />
