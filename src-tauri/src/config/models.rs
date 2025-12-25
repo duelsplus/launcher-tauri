@@ -28,7 +28,7 @@ pub struct Config {
     /// Whether to enable Discord Rich Presence
     #[serde(default = "default_true")]
     pub enable_rpc: bool,
-    
+
     /// Whether to hide profile (IGN/avatar) from Discord Rich Presence
     #[serde(default)]
     pub rpc_anonymize_profile: bool,
