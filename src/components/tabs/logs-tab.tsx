@@ -2,11 +2,16 @@ import { useEffect, useRef } from "react";
 import { useLogs } from "@/lib/proxy-logs";
 import { FunnelXIcon } from "@phosphor-icons/react";
 
+import AnsiToHtml from "ansi-to-html";
+const ansiConvert = new AnsiToHtml({ escapeXML: true });
+
 function renderLog(text: string) {
   let escaped = text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+
+  escaped = ansiConvert.toHtml(escaped);
 
   escaped = escaped.replace(
     /(https?:\/\/[^\s]+)/g,
