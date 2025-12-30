@@ -8,6 +8,7 @@ import {
   SpinnerIcon,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Popover,
   PopoverTrigger,
@@ -22,11 +23,37 @@ type ApiResponse<T> = {
   data: T;
 };
 
+export type Tier =
+  | "admin"
+  | "developer"
+  | "moderator"
+  | "tester"
+  | "partner"
+  | "leaderboard"
+  | "supportcombo"
+  | "support"
+  | "combo"
+  | "standard";
+
 type User = {
   id: string;
   discordId: string;
   username: string;
+  tier: Tier;
   isBanned: boolean;
+};
+
+const tierLabels: Record<Tier, string> = {
+  admin: "Admin",
+  developer: "Developer",
+  moderator: "Moderator",
+  tester: "Tester",
+  partner: "Partner",
+  leaderboard: "Leaderboard",
+  supportcombo: "Supporter + Combo",
+  support: "Supporter",
+  combo: "Combo",
+  standard: "Standard",
 };
 
 export function UserButton() {
@@ -92,7 +119,10 @@ export function UserButton() {
 
       <PopoverContent side="right" align="start" className="select-none">
         <div className="flex flex-col p-2 pr-1">
-          <div className="text-sm font-medium truncate">{user.username}</div>
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-medium truncate">{user.username}</div>
+            <Badge variant="input">{tierLabels[user.tier]}</Badge>
+          </div>
           <div className="flex justify-between items-center">
             <span className="text-xs font-mono truncate text-muted-foreground mt-1">
               {user.discordId}
