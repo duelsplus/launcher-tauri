@@ -23,8 +23,10 @@ pub const VALID_IMAGE_KEYS: &[&str] = &[
     "logo-shiny",
     "logo-v1",
     "logo-v1-purple",
-    "logo-diamond",
-    "logo-diamond-plus",
+    "logo-blue",
+    "logo-blue-plus",
+    "logo-white",
+    "logo-gray",
 ];
 
 /// Commands sent to the RPC worker thread

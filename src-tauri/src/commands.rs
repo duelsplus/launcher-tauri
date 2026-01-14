@@ -411,18 +411,20 @@ pub fn rpc_set_activity(
 /// - `logo-shiny`
 /// - `logo-v1`
 /// - `logo-v1-purple`
-/// - `logo-diamond`
-/// - `logo-diamond-plus`
+/// - `logo-blue`
+/// - `logo-blue-plus`
+/// - `logo-white`
+/// - `logo-gray`
 #[tauri::command]
 pub async fn rpc_set_image(rpc: State<'_, RpcManager>, image_key: String) -> Result<(), String> {
     // Validate and set the image in RPC manager
     rpc.set_image(&image_key)?;
-    
+
     // Persist to config
     config::manager::set_config_key("rpcImage", serde_json::Value::String(image_key))
         .await
         .map_err(|e| e.to_string())?;
-    
+
     Ok(())
 }
 
