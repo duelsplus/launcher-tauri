@@ -8,6 +8,7 @@ export const defaultSettings: Config = {
   enableRpc: true,
   rpcAnonymizeProfile: false,
   rpcAnonymizeLocation: false,
+  rpcImage: "logo-v1",
   proxyPort: "25565",
   enableMsa: false,
 };

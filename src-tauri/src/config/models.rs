@@ -37,6 +37,10 @@ pub struct Config {
     #[serde(default)]
     pub rpc_anonymize_location: bool,
 
+    /// Custom Discord Rich Presence image asset key
+    #[serde(default = "default_rpc_image")]
+    pub rpc_image: String,
+
     /// Port number for the proxy server (as string)
     #[serde(default = "default_proxy_port")]
     pub proxy_port: String,
@@ -54,6 +58,10 @@ fn default_proxy_port() -> String {
     "25565".to_string()
 }
 
+fn default_rpc_image() -> String {
+    "logo-v1".to_string()
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -64,6 +72,7 @@ impl Default for Config {
             enable_rpc: true,
             rpc_anonymize_profile: false,
             rpc_anonymize_location: false,
+            rpc_image: "logo-v1".to_string(),
             proxy_port: "25565".to_string(),
             enable_msa: false,
         }

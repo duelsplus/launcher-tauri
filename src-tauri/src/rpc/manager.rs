@@ -13,6 +13,20 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// Discord Application Client ID for Duels+
 const CLIENT_ID: &str = "1391866803889770526";
 
+/// Valid Discord RPC image asset keys
+pub const VALID_IMAGE_KEYS: &[&str] = &[
+    "logo-emerald",
+    "logo-emerald-plus",
+    "logo-golden-mark",
+    "logo-golden-plus",
+    "logo-green",
+    "logo-shiny",
+    "logo-v1",
+    "logo-v1-purple",
+    "logo-diamond",
+    "logo-diamond-plus",
+];
+
 /// Commands sent to the RPC worker thread
 #[derive(Debug, Clone)]
 enum RpcCommand {
@@ -47,6 +61,8 @@ enum RpcCommand {
         anonymize_profile: bool,
         anonymize_location: bool,
     },
+    /// Set custom image asset key
+    SetImage { image_key: String },
     /// Shutdown the RPC thread
     Shutdown,
 }
@@ -68,6 +84,8 @@ struct RpcState {
     anonymize_profile: bool,
     /// Whether to hide location/game mode from Discord Rich Presence
     anonymize_location: bool,
+    /// Custom image asset key (None = use default based on dev mode)
+    custom_image: Option<String>,
 }
 
 /// Manager for Discord Rich Presence
@@ -96,6 +114,7 @@ impl RpcManager {
             is_playing: false,
             anonymize_profile: false,
             anonymize_location: false,
+            custom_image: None,
         }));
 
         Self {
@@ -125,6 +144,38 @@ impl RpcManager {
             let mut client: Option<DiscordIpcClient> = None;
             let mut should_run = true;
 
+            // Helper closure to attempt connection to Discord
+            // Returns true if connected (either already or newly)
+            let try_connect =
+                |client: &mut Option<DiscordIpcClient>, state: &Arc<Mutex<RpcState>>| -> bool {
+                    if client.is_some() {
+                        return true;
+                    }
+
+                    // Check if RPC is enabled before attempting connection
+                    let enabled = {
+                        let s = state.lock().unwrap();
+                        s.enabled
+                    };
+                    if !enabled {
+                        return false;
+                    }
+
+                    match DiscordIpcClient::new(CLIENT_ID) {
+                        Ok(mut c) => {
+                            if c.connect().is_ok() {
+                                let mut s = state.lock().unwrap();
+                                s.connected = true;
+                                *client = Some(c);
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                        Err(_) => false,
+                    }
+                };
+
             while should_run {
                 let command = match rx.recv() {
                     Ok(cmd) => cmd,
@@ -134,22 +185,12 @@ impl RpcManager {
                 match command {
                     RpcCommand::Connect => {
                         if client.is_none() {
-                            match DiscordIpcClient::new(CLIENT_ID) {
-                                Ok(mut c) => {
-                                    if c.connect().is_ok() {
-                                        let mut s = state.lock().unwrap();
-                                        s.connected = true;
-                                        client = Some(c);
-
-                                        // Set initial activity
-                                        if let Some(ref mut c) = client {
-                                            let dev = *is_dev.lock().unwrap();
-                                            Self::set_activity_internal(c, &s, dev);
-                                        }
-                                    }
-                                }
-                                Err(_) => {
-                                    // Discord not running, ignore
+                            if try_connect(&mut client, &state) {
+                                // Set initial activity after successful connection
+                                let s = state.lock().unwrap();
+                                if let Some(ref mut c) = client {
+                                    let dev = *is_dev.lock().unwrap();
+                                    Self::set_activity_internal(c, &s, dev);
                                 }
                             }
                         }
@@ -168,6 +209,8 @@ impl RpcManager {
                             s.current_mode = None;
                             s.current_map = None;
                         }
+                        // Try to connect if not connected, then set activity
+                        try_connect(&mut client, &state);
                         let s = state.lock().unwrap();
                         if let Some(ref mut c) = client {
                             let dev = *is_dev.lock().unwrap();
@@ -180,6 +223,8 @@ impl RpcManager {
                             s.is_playing = false;
                             s.current_mode = Some("Launching".to_string());
                         }
+                        // Try to connect if not connected, then set activity
+                        try_connect(&mut client, &state);
                         let s = state.lock().unwrap();
                         if let Some(ref mut c) = client {
                             let dev = *is_dev.lock().unwrap();
@@ -208,6 +253,8 @@ impl RpcManager {
                                 s.current_uuid = uuid;
                             }
                         }
+                        // Try to connect if not connected, then set activity
+                        try_connect(&mut client, &state);
                         let s = state.lock().unwrap();
                         if let Some(ref mut c) = client {
                             let dev = *is_dev.lock().unwrap();
@@ -227,6 +274,8 @@ impl RpcManager {
                             s.current_gametype = gametype;
                             s.in_lobby = lobbyname.is_some();
                         }
+                        // Try to connect if not connected, then set activity
+                        try_connect(&mut client, &state);
                         let s = state.lock().unwrap();
                         if let Some(ref mut c) = client {
                             let dev = *is_dev.lock().unwrap();
@@ -243,6 +292,8 @@ impl RpcManager {
                             s.current_gametype = None;
                             s.in_lobby = false;
                         }
+                        // Try to connect if not connected, then set activity
+                        try_connect(&mut client, &state);
                         let s = state.lock().unwrap();
                         if let Some(ref mut c) = client {
                             let dev = *is_dev.lock().unwrap();
@@ -260,6 +311,8 @@ impl RpcManager {
                             s.in_lobby = false;
                             s.is_playing = false;
                         }
+                        // Try to connect if not connected, then set activity
+                        try_connect(&mut client, &state);
                         let s = state.lock().unwrap();
                         if let Some(ref mut c) = client {
                             let dev = *is_dev.lock().unwrap();
@@ -275,6 +328,21 @@ impl RpcManager {
                             s.anonymize_profile = anonymize_profile;
                             s.anonymize_location = anonymize_location;
                         }
+                        // Try to connect if not connected, then set activity
+                        try_connect(&mut client, &state);
+                        let s = state.lock().unwrap();
+                        if let Some(ref mut c) = client {
+                            let dev = *is_dev.lock().unwrap();
+                            Self::set_activity_internal(c, &s, dev);
+                        }
+                    }
+                    RpcCommand::SetImage { image_key } => {
+                        {
+                            let mut s = state.lock().unwrap();
+                            s.custom_image = Some(image_key);
+                        }
+                        // Try to connect if not connected, then set activity
+                        try_connect(&mut client, &state);
                         let s = state.lock().unwrap();
                         if let Some(ref mut c) = client {
                             let dev = *is_dev.lock().unwrap();
@@ -607,7 +675,12 @@ impl RpcManager {
 
     /// Sets the Discord activity based on current state
     fn set_activity_internal(client: &mut DiscordIpcClient, state: &RpcState, is_dev: bool) {
-        let large_image = if is_dev { "logo-v1-purple" } else { "logo-v1" };
+        // Use custom image if set, otherwise fall back to default based on dev mode
+        let large_image = state.custom_image.as_deref().unwrap_or(if is_dev {
+            "logo-v1-purple"
+        } else {
+            "logo-v1"
+        });
         let large_text = if is_dev {
             "Launcher (dev build)"
         } else {
@@ -685,7 +758,11 @@ impl RpcManager {
 
         activity_builder = activity_builder.assets(assets);
 
-        // Ignore errors - Discord might not be running
+        // Clear existing activity first to ensure Duels+ takes priority
+        // over any other application's activity
+        let _ = client.clear_activity();
+
+        // Set the new activity - ignore errors as Discord might not be running
         let _ = client.set_activity(activity_builder);
     }
 
@@ -805,6 +882,33 @@ impl RpcManager {
             anonymize_profile: current_profile,
             anonymize_location: anonymize,
         });
+    }
+
+    /// Sets the RPC image asset key.
+    ///
+    /// # Arguments
+    /// * `image_key` - The asset key for the image. Must be one of the valid keys.
+    ///
+    /// # Returns
+    /// * `Ok(())` if the image key is valid and was set
+    /// * `Err(String)` if the image key is invalid
+    pub fn set_image(&self, image_key: &str) -> Result<(), String> {
+        if !VALID_IMAGE_KEYS.contains(&image_key) {
+            return Err(format!(
+                "Invalid image key '{}'. Valid keys are: {}",
+                image_key,
+                VALID_IMAGE_KEYS.join(", ")
+            ));
+        }
+        self.send(RpcCommand::SetImage {
+            image_key: image_key.to_string(),
+        });
+        Ok(())
+    }
+
+    /// Returns the list of valid RPC image keys
+    pub fn get_valid_image_keys() -> &'static [&'static str] {
+        VALID_IMAGE_KEYS
     }
 
     /// Returns whether RPC is connected

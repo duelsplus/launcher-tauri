@@ -313,6 +313,11 @@ pub async fn set_config_key(
                 rpc.set_anonymize_location(anonymize);
             }
         }
+        "rpcImage" => {
+            if let Some(image_key) = value.as_str() {
+                let _ = rpc.set_image(image_key);
+            }
+        }
         _ => {}
     }
 
@@ -382,4 +387,51 @@ pub fn rpc_set_activity(
         "clear" => rpc.clear_activity(),
         _ => {}
     }
+}
+
+/// Sets the Discord Rich Presence image.
+///
+/// # Arguments
+///
+/// * `rpc` - The RPC manager state
+/// * `image_key` - The asset key for the image (e.g., "logo-v1", "logo-diamond")
+///
+/// # Returns
+///
+/// * `Ok(())` if the image was set successfully
+/// * `Err(String)` if the image key is invalid
+///
+/// # Valid Image Keys
+///
+/// - `logo-emerald`
+/// - `logo-emerald-plus`
+/// - `logo-golden-mark`
+/// - `logo-golden-plus`
+/// - `logo-green`
+/// - `logo-shiny`
+/// - `logo-v1`
+/// - `logo-v1-purple`
+/// - `logo-diamond`
+/// - `logo-diamond-plus`
+#[tauri::command]
+pub async fn rpc_set_image(rpc: State<'_, RpcManager>, image_key: String) -> Result<(), String> {
+    // Validate and set the image in RPC manager
+    rpc.set_image(&image_key)?;
+    
+    // Persist to config
+    config::manager::set_config_key("rpcImage", serde_json::Value::String(image_key))
+        .await
+        .map_err(|e| e.to_string())?;
+    
+    Ok(())
+}
+
+/// Returns the list of valid RPC image keys.
+///
+/// # Returns
+///
+/// A vector of valid image key strings.
+#[tauri::command]
+pub fn rpc_get_valid_image_keys() -> Vec<&'static str> {
+    RpcManager::get_valid_image_keys().to_vec()
 }
