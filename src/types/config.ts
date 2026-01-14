@@ -6,6 +6,7 @@ export interface Config {
   enableRpc: boolean;
   rpcAnonymizeProfile: boolean;
   rpcAnonymizeLocation: boolean;
+  rpcImage: string;
   proxyPort: string;
   enableMsa: boolean;
 }

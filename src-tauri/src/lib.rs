@@ -60,6 +60,8 @@ pub fn run() {
             rpc_set_enabled,
             rpc_is_enabled,
             rpc_set_activity,
+            rpc_set_image,
+            rpc_get_valid_image_keys,
         ])
         .setup(|app| {
             // Detect if running in dev mode using Tauri's environment
@@ -80,6 +82,8 @@ pub fn run() {
                 if let Ok(Some(cfg)) = rt.block_on(config::manager::get_config()) {
                     rpc.set_enabled(cfg.enable_rpc);
                     rpc.set_anonymization(cfg.rpc_anonymize_profile, cfg.rpc_anonymize_location);
+                    // Apply saved RPC image (ignore errors for invalid keys)
+                    let _ = rpc.set_image(&cfg.rpc_image);
                 }
             }
 
