@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { getToken, setToken } from "@/lib/token";
 import { useOnboarding } from "@/lib/onboarding";
+import { Skeleton } from "../ui/skeleton";
 
 type ApiResponse<T> = {
   success: boolean;
@@ -94,7 +95,7 @@ export function UserButton() {
     }
   };
 
-  if (!user)
+  /*if (!user)
     return (
       <Button
         variant="muted"
@@ -103,7 +104,7 @@ export function UserButton() {
       >
         <UserIcon />
       </Button>
-    );
+      );*/
 
   return (
     <Popover>
@@ -120,21 +121,40 @@ export function UserButton() {
       <PopoverContent side="right" align="start" className="select-none">
         <div className="flex flex-col p-2 pr-1">
           <div className="flex items-center gap-2">
-            <div className="text-sm font-medium truncate">{user.username}</div>
-            <Badge variant="input">{tierLabels[user.tier]}</Badge>
+            {user ? (
+              <>
+                <div className="text-sm font-medium truncate">
+                  {user.username}
+                </div>
+                <Badge variant="input">{tierLabels[user.tier]}</Badge>
+              </>
+            ) : (
+              <>
+                <Skeleton className="bg-foreground/10 h-6.5 w-16 rounded-xl" />
+                <Skeleton className="bg-foreground/10 h-6.5 w-8 rounded-xl" />
+              </>
+            )}
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-xs font-mono truncate text-muted-foreground mt-1">
-              {user.discordId}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="size-6 text-muted-foreground hover:text-foreground"
-              onClick={handleCopy}
-            >
-              {copied ? <CheckIcon /> : <CopyIcon />}
-            </Button>
+            {user ? (
+              <>
+                <span className="text-xs font-mono truncate text-muted-foreground mt-1">
+                  {user.discordId}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="size-6 text-muted-foreground hover:text-foreground"
+                  onClick={handleCopy}
+                >
+                  {copied ? <CheckIcon /> : <CopyIcon />}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Skeleton className="bg-foreground/10 h-4 w-38 rounded-xl mt-1" />
+              </>
+            )}
           </div>
         </div>
 
