@@ -12,6 +12,8 @@ import { config as configApi } from "@/lib/config";
 import { Button } from "../ui/button";
 import { useTheme } from "../theme-provider";
 import type { Theme } from "../theme-provider";
+import { SettingButton } from "../settings/button";
+import { RpcCustomizeDialog } from "@/components/dialogs/rpc-customize";
 
 export function Settings() {
   const [config, setConfig] = useState<Config | null>(null);
@@ -29,6 +31,8 @@ export function Settings() {
 
     return "dark";
   });
+
+  const [rpcCustomizeOpen, setRpcCustomizeOpen] = useState(false);
 
   useEffect(() => {
     configApi
@@ -124,22 +128,26 @@ export function Settings() {
         </SettingsSection>
       )}
 
-      {Object.entries(grouped)
-        .filter(([section]) => section !== "General")
-        .map(([section, settings]) => (
-          <SettingsSection key={section} title={section}>
-            {settings.map((setting) => (
-              <SettingSwitch
-                key={setting.key}
-                title={setting.title}
-                description={setting.description}
-                checked={config[setting.key] as boolean}
-                disabled={isDisabled(setting)}
-                onCheckedChange={(value) => updateSetting(setting.key, value)}
-              />
-            ))}
-          </SettingsSection>
-        ))}
+      {grouped["Integrations"] && (
+        <SettingsSection title="Integrations">
+          {grouped["Integrations"].map((setting) => (
+            <SettingSwitch
+              key={setting.key}
+              title={setting.title}
+              description={setting.description}
+              checked={config[setting.key] as boolean}
+              disabled={isDisabled(setting)}
+              onCheckedChange={(value) => updateSetting(setting.key, value)}
+            />
+          ))}
+
+          <SettingButton
+            title="Customize Rich Presence"
+            description="Change the appearance of the Discord Rich Presence."
+            onClick={() => setRpcCustomizeOpen(true)}
+          />
+        </SettingsSection>
+      )}
 
       <div className="w-full flex justify-center">
         <a
@@ -153,6 +161,11 @@ export function Settings() {
           </Button>
         </a>
       </div>
+
+      <RpcCustomizeDialog
+        open={rpcCustomizeOpen}
+        onOpenChange={setRpcCustomizeOpen}
+      />
     </div>
   );
 }

@@ -181,7 +181,7 @@ function Drawer() {
         isOpen ? "translate-x-0" : "-translate-x-full",
       )}
     >
-      <div className="p-6 pl-0">
+      <div className="flex-1 overflow-y-auto p-6 pl-0">
         {activeTab === "logs" && <Logs />}
         {activeTab === "stats" && <Stats />}
         {activeTab === "settings" && <Settings />}
