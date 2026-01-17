@@ -17,7 +17,7 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         warning:
-          "bg-amber-100/50 text-amber-600 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-500 dark:hover:bg-amber-950",
+          "bg-amber-100/50 text-amber-600 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-500 dark:hover:bg-amber-950 classic:bg-amber-950/50 classic:text-amber-500 classic:hover:bg-amber-950",
         input: "bg-input/50 dark:text-muted-foreground hover:bg-input/80",
         muted: "bg-card text-muted-foreground hover:bg-popover",
         ghost:
