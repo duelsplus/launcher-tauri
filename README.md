@@ -47,8 +47,10 @@ The first run may take a while because Cargo compiles the Rust backend; subseque
 ### Build binaries
 
 ```bash
-bun run tauri build
+bun run tauri build -c '{"bundle": { "createUpdaterArtifacts": false }}'
 ```
+
+Unless you've reconfigured the updater plugin so it points to your server, generated your own public/private keys, and set the `TAURI_SIGNING_PRIVATE_KEY` env var to the contents or path of your private key... or you somehow managed to retrieve our private key (which we absolutely hope not), you must keep the `-c '{"bundle": { "createUpdaterArtifacts": false }}'` parameter otherwise the build will fail. Alternatively, you can set the flag permanently in `src-tauri/tauri.conf.json` so you don't have to append it when building every time. Just make sure __not__ to commit such a change in a PR.
 
 Binaries can be found in `src-tauri/target/release/bundle`.
 
