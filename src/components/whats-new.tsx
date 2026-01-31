@@ -13,6 +13,13 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { getToken } from "@/lib/token";
 
+import {
+  BugIcon,
+  PlusIcon,
+  SparkleIcon,
+  WrenchIcon,
+  InfoIcon,
+} from "@phosphor-icons/react";
 type Release = {
   id: string;
   version: string;
@@ -53,6 +60,30 @@ export function renderMarkdown(text: string) {
   );
 
   return escaped;
+}
+
+function changeMeta(item: string) {
+  const lower = item.toLowerCase();
+
+  if (lower.startsWith("fix") || lower.startsWith("fixed"))
+    return { type: "fix", Icon: BugIcon, className: "text-red-500 dark:text-red-400 classic:text-red-400" };
+
+  if (
+    lower.startsWith("add") ||
+    lower.startsWith("added") ||
+    lower.startsWith("new") ||
+    lower.startsWith("enable") ||
+    lower.startsWith("enabled")
+  )
+    return { type: "new", Icon: PlusIcon, className: "text-green-600 dark:text-green-400 classic:text-green-400" };
+
+  if (lower.startsWith("improve") || lower.startsWith("improved") || lower.startsWith("rework") || lower.startsWith("reworked") || lower.startsWith("optimise") || lower.startsWith("optimised"))
+    return { type: "improve", Icon: SparkleIcon, className: "text-blue-500 dark:text-blue-400 classic:text-blue-400" };
+
+  if (lower.startsWith("change") || lower.startsWith("update") || lower.startsWith("revert") || lower.startsWith("reverted") || lower.startsWith("rename") || lower.startsWith("renamed"))
+    return { type: "change", Icon: WrenchIcon, className: "text-amber-500 dark:text-amber-400 classic:text-amber-400" };
+
+  return { type: "info", Icon: InfoIcon, className: "text-muted-foreground" };
 }
 
 export function WhatsNew() {
@@ -116,12 +147,22 @@ export function WhatsNew() {
                 )}
               </div>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                {whatsNew.slice(0, maxBullets).map((item, idx) => (
-                  <li
-                    key={idx}
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(item) }}
-                  />
-                ))}
+                {whatsNew.slice(0, maxBullets).map((item, idx) => {
+                  const meta = changeMeta(item);
+                  return (
+                    <li key={idx} className="flex gap-2 items-start text-sm">
+                      <meta.Icon
+                        className={`mt-0.5 shrink-0 size-3.5 ${meta.className}`}
+                      />
+                      <span
+                        className="line-clamp-2"
+                        dangerouslySetInnerHTML={{
+                          __html: renderMarkdown(item),
+                        }}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
               {showMore && (
                 <p className="text-xs text-muted-foreground mt-2">
@@ -155,12 +196,22 @@ export function WhatsNew() {
               </div>
 
               <ul className="list-disc list-inside space-y-2 text-sm">
-                {selected.whatsNew.map((item, i) => (
-                  <li
-                    key={i}
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(item) }}
-                  />
-                ))}
+                {selected.whatsNew.map((item, i) => {
+                  const meta = changeMeta(item);
+                  return (
+                    <li key={i} className="flex gap-3 items-start">
+                      <meta.Icon
+                        className={`mt-0.5 shrink-0 size-4 ${meta.className}`}
+                      />
+                      <span
+                        className="leading-relaxed"
+                        dangerouslySetInnerHTML={{
+                          __html: renderMarkdown(item),
+                        }}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
             </motion.div>
           </motion.div>
