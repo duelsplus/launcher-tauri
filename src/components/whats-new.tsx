@@ -55,23 +55,6 @@ export function renderMarkdown(text: string) {
   return escaped;
 }
 
-const bannedReleases: Release[] = [
-  {
-    id: "six-seven",
-    version: "v6.9.420",
-    releaseDate: "",
-    isBeta: false,
-    isLatest: false,
-    changelog: "",
-    whatsNew: [
-      "Everyone gets **fifteen** American dollars per win",
-      "Losses are automatically converted to wins",
-      "Zero ping mode has rolled out globally",
-      "Such a shame you can't experience all those wonderful additions",
-    ],
-  },
-];
-
 export function WhatsNew() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,11 +71,8 @@ export function WhatsNew() {
       .catch(() => setUser(null));
   }, []);
 
-  const shownReleases =
-    user?.isBanned === true ? [...bannedReleases, ...releases] : releases;
-
-  const totalPages = Math.ceil(shownReleases.length / itemsPerPage);
-  const pageItems = shownReleases.slice(
+  const totalPages = Math.ceil(releases.length / itemsPerPage);
+  const pageItems = releases.slice(
     page * itemsPerPage,
     page * itemsPerPage + itemsPerPage,
   );
