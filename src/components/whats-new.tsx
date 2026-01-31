@@ -66,7 +66,11 @@ function changeMeta(item: string) {
   const lower = item.toLowerCase();
 
   if (lower.startsWith("fix") || lower.startsWith("fixed"))
-    return { type: "fix", Icon: BugIcon, className: "text-red-500 dark:text-red-400 classic:text-red-400" };
+    return {
+      type: "fix",
+      Icon: BugIcon,
+      className: "text-red-500 dark:text-red-400 classic:text-red-400",
+    };
 
   if (
     lower.startsWith("add") ||
@@ -75,13 +79,39 @@ function changeMeta(item: string) {
     lower.startsWith("enable") ||
     lower.startsWith("enabled")
   )
-    return { type: "new", Icon: PlusIcon, className: "text-green-600 dark:text-green-400 classic:text-green-400" };
+    return {
+      type: "new",
+      Icon: PlusIcon,
+      className: "text-green-600 dark:text-green-400 classic:text-green-400",
+    };
 
-  if (lower.startsWith("improve") || lower.startsWith("improved") || lower.startsWith("rework") || lower.startsWith("reworked") || lower.startsWith("optimise") || lower.startsWith("optimised"))
-    return { type: "improve", Icon: SparkleIcon, className: "text-blue-500 dark:text-blue-400 classic:text-blue-400" };
+  if (
+    lower.startsWith("improve") ||
+    lower.startsWith("improved") ||
+    lower.startsWith("rework") ||
+    lower.startsWith("reworked") ||
+    lower.startsWith("optimise") ||
+    lower.startsWith("optimised")
+  )
+    return {
+      type: "improve",
+      Icon: SparkleIcon,
+      className: "text-blue-500 dark:text-blue-400 classic:text-blue-400",
+    };
 
-  if (lower.startsWith("change") || lower.startsWith("update") || lower.startsWith("revert") || lower.startsWith("reverted") || lower.startsWith("rename") || lower.startsWith("renamed"))
-    return { type: "change", Icon: WrenchIcon, className: "text-amber-500 dark:text-amber-400 classic:text-amber-400" };
+  if (
+    lower.startsWith("change") ||
+    lower.startsWith("update") ||
+    lower.startsWith("revert") ||
+    lower.startsWith("reverted") ||
+    lower.startsWith("rename") ||
+    lower.startsWith("renamed")
+  )
+    return {
+      type: "change",
+      Icon: WrenchIcon,
+      className: "text-amber-500 dark:text-amber-400 classic:text-amber-400",
+    };
 
   return { type: "info", Icon: InfoIcon, className: "text-muted-foreground" };
 }
@@ -195,24 +225,30 @@ export function WhatsNew() {
                 )}
               </div>
 
-              <ul className="list-disc list-inside space-y-2 text-sm">
-                {selected.whatsNew.map((item, i) => {
-                  const meta = changeMeta(item);
-                  return (
-                    <li key={i} className="flex gap-3 items-start">
-                      <meta.Icon
-                        className={`mt-0.5 shrink-0 size-4 ${meta.className}`}
-                      />
-                      <span
-                        className="leading-relaxed"
-                        dangerouslySetInnerHTML={{
-                          __html: renderMarkdown(item),
-                        }}
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
+              {selected.whatsNew.length === 0 ? (
+                <p className="text-sm text-center text-muted-foreground">
+                  This release has no changelog
+                </p>
+              ) : (
+                <ul className="list-disc list-inside space-y-2 text-sm">
+                  {selected.whatsNew.map((item, i) => {
+                    const meta = changeMeta(item);
+                    return (
+                      <li key={i} className="flex gap-3 items-start">
+                        <meta.Icon
+                          className={`mt-0.5 shrink-0 size-4 ${meta.className}`}
+                        />
+                        <span
+                          className="leading-relaxed"
+                          dangerouslySetInnerHTML={{
+                            __html: renderMarkdown(item),
+                          }}
+                        />
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </motion.div>
           </motion.div>
         )}
