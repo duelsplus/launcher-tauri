@@ -13,6 +13,13 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { getToken } from "@/lib/token";
 
+import {
+  BugIcon,
+  PlusIcon,
+  SparkleIcon,
+  WrenchIcon,
+  InfoIcon,
+} from "@phosphor-icons/react";
 type Release = {
   id: string;
   version: string;
@@ -55,22 +62,83 @@ export function renderMarkdown(text: string) {
   return escaped;
 }
 
-const bannedReleases: Release[] = [
-  {
-    id: "six-seven",
-    version: "v6.9.420",
-    releaseDate: "",
-    isBeta: false,
-    isLatest: false,
-    changelog: "",
-    whatsNew: [
-      "Everyone gets **fifteen** American dollars per win",
-      "Losses are automatically converted to wins",
-      "Zero ping mode has rolled out globally",
-      "Such a shame you can't experience all those wonderful additions",
-    ],
-  },
-];
+function formatDate(date: string) {
+  const now = new Date();
+  const then = new Date(date);
+  const diffMs = now.getTime() - then.getTime();
+
+  const seconds = Math.floor(diffMs / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const weeks = Math.floor(days / 7);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(days / 365);
+
+  if (seconds < 30) return "just now";
+  if (seconds < 60) return `${seconds} seconds ago`;
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  if (days === 1) return "yesterday";
+  if (days < 7) return `${days} days ago`;
+  if (weeks < 5) return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
+  if (months < 12) return `${months} month${months === 1 ? "" : "s"} ago`;
+  return `${years} year${years === 1 ? "" : "s"} ago`;
+}
+
+function changeMeta(item: string) {
+  const lower = item.toLowerCase();
+
+  if (lower.startsWith("fix") || lower.startsWith("fixed"))
+    return {
+      type: "fix",
+      Icon: BugIcon,
+      className: "text-red-500 dark:text-red-400 classic:text-red-400",
+    };
+
+  if (
+    lower.startsWith("add") ||
+    lower.startsWith("added") ||
+    lower.startsWith("new") ||
+    lower.startsWith("enable") ||
+    lower.startsWith("enabled")
+  )
+    return {
+      type: "new",
+      Icon: PlusIcon,
+      className: "text-green-600 dark:text-green-400 classic:text-green-400",
+    };
+
+  if (
+    lower.startsWith("improve") ||
+    lower.startsWith("improved") ||
+    lower.startsWith("rework") ||
+    lower.startsWith("reworked") ||
+    lower.startsWith("optimise") ||
+    lower.startsWith("optimised")
+  )
+    return {
+      type: "improve",
+      Icon: SparkleIcon,
+      className: "text-blue-500 dark:text-blue-400 classic:text-blue-400",
+    };
+
+  if (
+    lower.startsWith("change") ||
+    lower.startsWith("update") ||
+    lower.startsWith("revert") ||
+    lower.startsWith("reverted") ||
+    lower.startsWith("rename") ||
+    lower.startsWith("renamed")
+  )
+    return {
+      type: "change",
+      Icon: WrenchIcon,
+      className: "text-amber-500 dark:text-amber-400 classic:text-amber-400",
+    };
+
+  return { type: "info", Icon: InfoIcon, className: "text-muted-foreground" };
+}
 
 export function WhatsNew() {
   const [releases, setReleases] = useState<Release[]>([]);
@@ -88,11 +156,8 @@ export function WhatsNew() {
       .catch(() => setUser(null));
   }, []);
 
-  const shownReleases =
-    user?.isBanned === true ? [...bannedReleases, ...releases] : releases;
-
-  const totalPages = Math.ceil(shownReleases.length / itemsPerPage);
-  const pageItems = shownReleases.slice(
+  const totalPages = Math.ceil(releases.length / itemsPerPage);
+  const pageItems = releases.slice(
     page * itemsPerPage,
     page * itemsPerPage + itemsPerPage,
   );
@@ -136,12 +201,22 @@ export function WhatsNew() {
                 )}
               </div>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                {whatsNew.slice(0, maxBullets).map((item, idx) => (
-                  <li
-                    key={idx}
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(item) }}
-                  />
-                ))}
+                {whatsNew.slice(0, maxBullets).map((item, idx) => {
+                  const meta = changeMeta(item);
+                  return (
+                    <li key={idx} className="flex gap-2 items-start text-sm">
+                      <meta.Icon
+                        className={`mt-0.5 shrink-0 size-3.5 ${meta.className}`}
+                      />
+                      <span
+                        className="line-clamp-2"
+                        dangerouslySetInnerHTML={{
+                          __html: renderMarkdown(item),
+                        }}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
               {showMore && (
                 <p className="text-xs text-muted-foreground mt-2">
@@ -174,14 +249,38 @@ export function WhatsNew() {
                 )}
               </div>
 
-              <ul className="list-disc list-inside space-y-2 text-sm">
-                {selected.whatsNew.map((item, i) => (
-                  <li
-                    key={i}
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(item) }}
-                  />
-                ))}
-              </ul>
+              {selected.whatsNew.length === 0 ? (
+                <p className="text-sm text-center text-muted-foreground">
+                  This release has no changelog
+                </p>
+              ) : (
+                <ul className="list-disc list-inside space-y-2 text-sm">
+                  {selected.whatsNew.map((item, i) => {
+                    const meta = changeMeta(item);
+                    return (
+                      <li key={i} className="flex gap-3 items-start">
+                        <meta.Icon
+                          className={`mt-0.5 shrink-0 size-4 ${meta.className}`}
+                        />
+                        <span
+                          className="leading-relaxed"
+                          dangerouslySetInnerHTML={{
+                            __html: renderMarkdown(item),
+                          }}
+                        />
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground/70">
+                <span>
+                  Released{" "}
+                  <span className="text-muted-foreground">
+                    {formatDate(selected.releaseDate)}
+                  </span>
+                </span>
+              </div>
             </motion.div>
           </motion.div>
         )}
