@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   HouseIcon,
@@ -26,6 +26,7 @@ import { Logs } from "../tabs/logs-tab";
 import { UserButton } from "./user-button";
 import { notify } from "@/lib/notification";
 import { DonateButton } from "./donate-button";
+import { getVersion } from "@tauri-apps/api/app";
 
 interface ActionButtonProps {
   icon: "home" | "logs" | "stats" | "settings";
@@ -135,6 +136,14 @@ function UpdateButton() {
 
 export function ActionRail() {
   const { activeTab, toggleTab } = useTabs();
+  const [version, setVersion] = useState("");
+
+  useEffect(() => {
+    getVersion()
+      .then(setVersion)
+      .catch(() => {});
+  }, []);
+
   return (
     <>
       <nav className="fixed top-0 bottom-0 left-0 w-24 z-10 flex flex-col justify-center items-center bg-semimuted gap-3">
@@ -165,6 +174,9 @@ export function ActionRail() {
           <DonateButton />
           <UserButton />
         </ActionCategory>
+        <div className="fixed bottom-3 text-xs tracking-tight text-foreground/50">
+          v{version}
+        </div>
       </nav>
 
       <Drawer />
