@@ -62,6 +62,7 @@ export function DonateButton() {
         size="icon-lg"
         onClick={() => setDialogOpen(true)}
         className="rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6"
+        ripple={false}
       >
         <HeartIcon />
       </Button>

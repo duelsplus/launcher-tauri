@@ -113,6 +113,7 @@ export function UserButton() {
           variant="muted"
           size="icon-lg"
           className="rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6"
+          ripple={false}
         >
           <UserIcon />
         </Button>
