@@ -14,6 +14,7 @@ import { useTheme } from "../theme-provider";
 import type { Theme } from "../theme-provider";
 import { SettingButton } from "../settings/button";
 import { RpcCustomizeDialog } from "@/components/dialogs/rpc-customize";
+import { SettingInput } from "../settings/input";
 
 export function Settings() {
   const [config, setConfig] = useState<Config | null>(null);
@@ -89,6 +90,16 @@ export function Settings() {
     return disabled;
   };
 
+  const handlePortChange = (raw: string) => {
+    if (!/^\d*$/.test(raw)) return;
+    if (raw === "") return;
+    let port = Number(raw);
+    if (!Number.isInteger(port)) return;
+    if (port < 1) port = 1;
+    if (port > 65535) port = 65535;
+    updateSetting("proxyPort", String(port));
+  };
+
   if (!config) {
     return (
       <div className="space-y-4">
@@ -148,6 +159,19 @@ export function Settings() {
           />
         </SettingsSection>
       )}
+
+      <SettingsSection title="Advanced">
+        <SettingInput
+          title="Proxy Port"
+          description="Set the localhost port"
+          //type="number"
+          value={config.proxyPort}
+          min={1}
+          max={100}
+          step={1}
+          onChange={handlePortChange}
+        />
+      </SettingsSection>
 
       <div className="w-full flex justify-center">
         <a
