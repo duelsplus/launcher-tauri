@@ -140,7 +140,10 @@ export function LaunchButton() {
       if (!running) {
         setState("checking");
         useLogs.getState().clear();
-        await invoke("launch_proxy");
+        const cfg = await config.get();
+        await invoke("launch_proxy", {
+          port: Number(cfg.proxyPort),
+        });
       } else {
         setState("stopping");
         await invoke("stop_proxy");
