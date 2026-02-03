@@ -34,6 +34,8 @@ const buttonVariants = cva(
         "icon-lg": "size-10",
         "pill-lg":
           "h-12 rounded-[32px] hover:rounded-3xl gap-3 font-medium text-base px-6 [&_svg:not([class*='size-'])]:size-5 has-[>svg]:px-4",
+        "pill":
+          "h-9 rounded-[24px] hover:rounded-2xl gap-2 font-medium text-sm px-4 [&_svg:not([class*='size-'])]:size-5.5 has-[>svg]:px-3",
       },
     },
     defaultVariants: {
