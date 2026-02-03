@@ -67,9 +67,11 @@ export function GridItem({
           </div>
         </a>
       </TooltipTrigger>
-      <TooltipContent side="top">
-        <p>This dude doesn't accept donations. :(</p>
-      </TooltipContent>
+      {disabled && (
+        <TooltipContent side="top">
+          <p>This dude doesn't accept donations. :(</p>
+        </TooltipContent>
+      )}
     </Tooltip>
   );
 }
