@@ -19,14 +19,16 @@ export function Home() {
             <ServiceStatus />
           </div>
           <div>
-            <Button
-              variant="muted"
-              size="pill"
-              className="z-10"
+            <a
+              href="https://discord.gg/YD4JZnuGYv"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <SiDiscord />
-              Support server
-            </Button>
+              <Button variant="muted" size="pill" className="z-10">
+                <SiDiscord />
+                Support server
+              </Button>
+            </a>
           </div>
         </div>
         <div className="space-y-3">
