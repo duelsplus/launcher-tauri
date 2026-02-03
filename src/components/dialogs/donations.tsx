@@ -59,7 +59,7 @@ export function GridItem({
         >
           {image && (
             <div className="shrink-0">
-              <img src={image} className="rounded-full size-6" />
+              <img src={image} draggable={false} className="rounded-full size-6 select-none pointer-events-none" />
             </div>
           )}
           <div className="flex flex-col">
