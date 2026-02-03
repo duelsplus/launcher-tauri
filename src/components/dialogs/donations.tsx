@@ -152,12 +152,12 @@ export function DonationsDialog({
               <GridItem
                 name="Venxm"
                 image="https://avatars.githubusercontent.com/u/96634931"
-                url=""
+                url="https://paypal.me/venxmediting"
               />
               <GridItem
                 name="Noowz"
                 image="https://avatars.githubusercontent.com/u/44096711"
-                url=""
+                url="https://github.com/sponsors/noowz"
               />
               <GridItem
                 name="Stu"
