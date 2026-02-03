@@ -7,6 +7,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { ArrowUpRightIcon } from "@phosphor-icons/react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export type Tier =
   | "admin"
@@ -35,25 +36,41 @@ interface GridItemProps {
   name: string;
   image?: string;
   url: string;
+  disabled?: boolean;
 }
 
-export function GridItem({ name, image, url }: GridItemProps) {
+export function GridItem({
+  name,
+  image,
+  url,
+  disabled = false,
+}: GridItemProps) {
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex gap-2 rounded-xl border p-3 items-center hover:bg-accent transition cursor-default"
-    >
-      {image && (
-        <div className="shrink-0">
-          <img src={image} className="rounded-full size-6" />
-        </div>
-      )}
-      <div className="flex flex-col">
-        <p className="text-sm font-medium">{name}</p>
-      </div>
-    </a>
+    <Tooltip>
+      <TooltipTrigger>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            "flex gap-2 rounded-xl border p-3 items-center hover:bg-accent transition cursor-default",
+            disabled && "opacity-50 pointer-events-none",
+          )}
+        >
+          {image && (
+            <div className="shrink-0">
+              <img src={image} className="rounded-full size-6" />
+            </div>
+          )}
+          <div className="flex flex-col">
+            <p className="text-sm font-medium">{name}</p>
+          </div>
+        </a>
+      </TooltipTrigger>
+      <TooltipContent side="top">
+        <p>This dude doesn't accept donations. :(</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -149,6 +166,7 @@ export function DonationsDialog({
                 name="ref"
                 image="https://avatars.githubusercontent.com/u/104659005"
                 url=""
+                disabled
               />
             </div>
 
