@@ -25,6 +25,7 @@ import { Settings } from "../tabs/settings-tab";
 import { Logs } from "../tabs/logs-tab";
 import { UserButton } from "./user-button";
 import { notify } from "@/lib/notification";
+import { DonateButton } from "./donate-button";
 
 interface ActionButtonProps {
   icon: "home" | "logs" | "stats" | "settings";
@@ -161,6 +162,7 @@ export function ActionRail() {
         </ActionCategory>
         <ActionCategory>
           <UpdateButton />
+          <DonateButton />
           <UserButton />
         </ActionCategory>
       </nav>
