@@ -163,7 +163,7 @@ export function Settings() {
       <SettingsSection title="Advanced">
         <SettingInput
           title="Proxy Port"
-          description="Set the localhost port"
+          description="Set the localhost port."
           //type="number"
           value={config.proxyPort}
           min={1}
