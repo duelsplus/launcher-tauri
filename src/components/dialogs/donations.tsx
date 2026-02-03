@@ -163,6 +163,7 @@ export function DonationsDialog({
                 name="Stu"
                 image="https://avatars.githubusercontent.com/u/73356864"
                 url=""
+                disabled
               />
               <GridItem
                 name="ref"
