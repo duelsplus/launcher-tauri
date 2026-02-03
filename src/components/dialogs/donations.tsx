@@ -59,7 +59,11 @@ export function GridItem({
         >
           {image && (
             <div className="shrink-0">
-              <img src={image} draggable={false} className="rounded-full size-6 select-none pointer-events-none" />
+              <img
+                src={image}
+                draggable={false}
+                className="rounded-full size-6 select-none pointer-events-none"
+              />
             </div>
           )}
           <div className="flex flex-col">
@@ -97,7 +101,12 @@ export function DonationsDialog({
         <div className="space-y-6">
           <section className="space-y-3 text-sm leading-relaxed text-muted-foreground">
             {user?.id && isVeryCool && (
-              <Button size="sm" variant="rose" className="pointer-events-none">
+              <Button
+                size="sm"
+                variant="rose"
+                className="pointer-events-none"
+                ripple={false}
+              >
                 YOOO, you're already part of the cool club!
               </Button>
             )}

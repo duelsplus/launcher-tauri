@@ -52,6 +52,7 @@ function ActionButton({ icon, active, onClick }: ActionButtonProps) {
         active &&
           "rounded-3xl bg-popover text-popover-foreground hover:bg-popover/70",
       )}
+      ripple={false}
       onClick={onClick}
     >
       {iconsMap[icon]}
@@ -122,6 +123,7 @@ function UpdateButton() {
             variant="warning"
             size="icon-lg"
             className="rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6"
+            ripple={false}
           >
             {icon}
           </Button>

@@ -1,11 +1,12 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Ripple } from "m3-ripple";
 
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none aria-invalid:border-destructive",
+  "relative overflow-hidden inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none aria-invalid:border-destructive",
   {
     variants: {
       variant: {
@@ -34,8 +35,7 @@ const buttonVariants = cva(
         "icon-lg": "size-10",
         "pill-lg":
           "h-12 rounded-[32px] hover:rounded-3xl gap-3 font-medium text-base px-6 [&_svg:not([class*='size-'])]:size-5 has-[>svg]:px-4",
-        "pill":
-          "h-9 rounded-[24px] hover:rounded-2xl gap-2 font-medium text-sm px-4 [&_svg:not([class*='size-'])]:size-5.5 has-[>svg]:px-3",
+        pill: "h-9 rounded-[24px] hover:rounded-2xl gap-2 font-medium text-sm px-4 [&_svg:not([class*='size-'])]:size-5.5 has-[>svg]:px-3",
       },
     },
     defaultVariants: {
@@ -50,10 +50,12 @@ function Button({
   variant = "default",
   size = "default",
   asChild = false,
+  ripple = true,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    ripple?: boolean;
   }) {
   const Comp = asChild ? Slot : "button";
 
@@ -64,7 +66,10 @@ function Button({
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {ripple && <Ripple />}
+      {props.children}
+    </Comp>
   );
 }
 
