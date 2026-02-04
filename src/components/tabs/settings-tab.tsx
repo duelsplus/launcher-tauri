@@ -15,10 +15,26 @@ import type { Theme } from "../theme-provider";
 import { SettingButton } from "../settings/button";
 import { RpcCustomizeDialog } from "@/components/dialogs/rpc-customize";
 import { SettingInput } from "../settings/input";
+import { User, hasPerm } from "@/lib/perm";
+import { getToken } from "@/lib/token";
+
+type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+};
 
 export function Settings() {
+  const [user, setUser] = useState<User | null>(null);
   const [config, setConfig] = useState<Config | null>(null);
   const [savingKey, setSavingKey] = useState<keyof Config | null>(null);
+
+  useEffect(() => {
+    invoke<ApiResponse<User>>("get_user", {
+      token: getToken(),
+    })
+      .then((u) => setUser(u.data))
+      .catch(() => setUser(null));
+  }, []);
 
   const { theme: currentTheme, setTheme: setAppTheme } = useTheme();
   const [theme, setTheme] = useState<Theme>(() => {
@@ -34,6 +50,11 @@ export function Settings() {
   });
 
   const [rpcCustomizeOpen, setRpcCustomizeOpen] = useState(false);
+
+  const isBetaEligible =
+    hasPerm(user, "tester") ||
+    hasPerm(user, "developer") ||
+    hasPerm(user, "admin");
 
   useEffect(() => {
     configApi
@@ -100,7 +121,7 @@ export function Settings() {
     updateSetting("proxyPort", String(port));
   };
 
-  if (!config) {
+  if (!config || !user) {
     return (
       <div className="space-y-4">
         <h2 className="text-base font-medium">Settings</h2>
@@ -126,6 +147,17 @@ export function Settings() {
               setAppTheme(t);
             }}
           />
+          {isBetaEligible && (
+            <SettingSwitch
+              key="receiveBetaReleases"
+              title="Receive Beta Releases"
+              description="Receive new proxy updates early with new features and fixes."
+              checked={config["receiveBetaReleases"] as boolean}
+              onCheckedChange={(value) =>
+                updateSetting("receiveBetaReleases", value)
+              }
+            />
+          )}
           {grouped["General"].map((setting) => (
             <SettingSwitch
               key={setting.key}
