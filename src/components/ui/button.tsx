@@ -67,7 +67,7 @@ function Button({
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     >
-      {ripple && <Ripple />}
+      {ripple && <Ripple hoverOpacity={0} />}
       {props.children}
     </Comp>
   );

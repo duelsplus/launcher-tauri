@@ -70,7 +70,7 @@ function DialogContent({
             data-slot="dialog-close"
             className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 -right-10 p-2 rounded-full opacity-70 transition hover:opacity-100 bg-background hover:bg-accent focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
-            <Ripple />
+            <Ripple hoverOpacity={0} />
             <XIcon />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
