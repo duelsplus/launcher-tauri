@@ -48,6 +48,10 @@ pub struct Config {
     /// Whether to enable MSA (Microsoft Account) authentication
     #[serde(default)]
     pub enable_msa: bool,
+
+    /// Whether to receive beta releases instead of stable releases
+    #[serde(default)]
+    pub receive_beta_releases: bool,
 }
 
 fn default_true() -> bool {
@@ -75,6 +79,7 @@ impl Default for Config {
             rpc_image: "logo-v1".to_string(),
             proxy_port: "25565".to_string(),
             enable_msa: false,
+            receive_beta_releases: false,
         }
     }
 }

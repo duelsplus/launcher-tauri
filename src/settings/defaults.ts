@@ -11,4 +11,5 @@ export const defaultSettings: Config = {
   rpcImage: "logo-v1",
   proxyPort: "25565",
   enableMsa: false,
+  receiveBetaReleases: false,
 };
