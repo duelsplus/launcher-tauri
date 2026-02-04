@@ -8,23 +8,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { ArrowUpRightIcon } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-
-export type Tier =
-  | "admin"
-  | "developer"
-  | "moderator"
-  | "tester"
-  | "partner"
-  | "leaderboard"
-  | "supportcombo"
-  | "support"
-  | "combo"
-  | "standard";
-
-type User = {
-  id: string;
-  tier: Tier;
-};
+import { User, hasPerm } from "@/lib/perm";
 
 interface DonationsDialogProps {
   user?: User | null;
@@ -86,10 +70,9 @@ export function DonationsDialog({
   onOpenChange,
 }: DonationsDialogProps) {
   const isVeryCool =
-    user?.tier === "support" ||
-    user?.tier === "supportcombo" ||
-    user?.tier === "developer" ||
-    user?.tier === "admin";
+    hasPerm(user, "supporter") ||
+    hasPerm(user, "developer") ||
+    hasPerm(user, "admin");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

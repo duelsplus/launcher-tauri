@@ -6,6 +6,15 @@ import {
   CopyIcon,
   CheckIcon,
   SpinnerIcon,
+  UserGearIcon,
+  ShieldCheckIcon,
+  WrenchIcon,
+  TestTubeIcon,
+  BracketsCurlyIcon,
+  StarFourIcon,
+  TrophyIcon,
+  HeartIcon,
+  ClockIcon,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,44 +27,29 @@ import { cn } from "@/lib/utils";
 import { getToken, setToken } from "@/lib/token";
 import { useOnboarding } from "@/lib/onboarding";
 import { Skeleton } from "../ui/skeleton";
+import { User, Perm } from "@/lib/perm";
 
 type ApiResponse<T> = {
   success: boolean;
   data: T;
 };
 
-export type Tier =
-  | "admin"
-  | "developer"
-  | "moderator"
-  | "tester"
-  | "partner"
-  | "leaderboard"
-  | "supportcombo"
-  | "support"
-  | "combo"
-  | "standard";
-
-type User = {
-  id: string;
-  discordId: string;
-  username: string;
-  tier: Tier;
-  isBanned: boolean;
+const permIcons: Record<Perm, any> = {
+  admin: UserGearIcon,
+  developer: BracketsCurlyIcon,
+  moderator: ShieldCheckIcon,
+  tester: TestTubeIcon,
+  partner: StarFourIcon,
+  leaderboard: TrophyIcon,
+  supporter: HeartIcon,
+  combo: ClockIcon,
+  standard: WrenchIcon, // to satisfy typescript
 };
 
-const tierLabels: Record<Tier, string> = {
-  admin: "Admin",
-  developer: "Developer",
-  moderator: "Moderator",
-  tester: "Tester",
-  partner: "Partner",
-  leaderboard: "Leaderboard",
-  supportcombo: "Supporter + Combo",
-  support: "Supporter",
-  combo: "Combo",
-  standard: "Standard",
-};
+export function PermIcon({ perm }: { perm: Perm }) {
+  const Icon = permIcons[perm];
+  return <Icon className="text-muted-foreground/30 size-4" weight="fill" />;
+}
 
 export function UserButton() {
   const [user, setUser] = useState<User | null>(null);
@@ -127,7 +121,13 @@ export function UserButton() {
                 <div className="text-sm font-medium truncate">
                   {user.username}
                 </div>
-                <Badge variant="input">{tierLabels[user.tier]}</Badge>
+                <div className="flex items-center gap-1.5">
+                  {user?.perms
+                    .filter((p) => p !== "standard") //skip standard perm
+                    .map((p) => (
+                      <PermIcon key={p} perm={p} />
+                    ))}
+                </div>
               </>
             ) : (
               <>

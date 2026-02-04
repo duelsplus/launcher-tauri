@@ -20,27 +20,11 @@ import { getToken, setToken } from "@/lib/token";
 import { useOnboarding } from "@/lib/onboarding";
 import { Skeleton } from "../ui/skeleton";
 import { DonationsDialog } from "../dialogs/donations";
+import { User, hasPerm } from "@/lib/perm";
 
 type ApiResponse<T> = {
   success: boolean;
   data: T;
-};
-
-export type Tier =
-  | "admin"
-  | "developer"
-  | "moderator"
-  | "tester"
-  | "partner"
-  | "leaderboard"
-  | "supportcombo"
-  | "support"
-  | "combo"
-  | "standard";
-
-type User = {
-  id: string;
-  tier: Tier;
 };
 
 export function DonateButton() {
