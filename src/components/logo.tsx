@@ -96,6 +96,81 @@ export function Logo({ className = "", width = 378, height = 76 }: LogoProps) {
   );
 }
 
+export function LogoBeta({
+  className = "",
+  width = 148,
+  height = 76,
+}: LogoProps) {
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 148 76"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <svg
+        width="148"
+        height="76"
+        viewBox="0 0 148 76"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g filter="url(#filter0_d_149_3)">
+          <rect width="148" height="66" fill="var(--foreground)" />
+        </g>
+        <path
+          d="M45 45H40V30H45V45ZM45 25H40V20H45V25ZM40 50H20V15H40V20H25V25H40V30H25V45H40V50Z"
+          fill="var(--background)"
+        />
+        <path d="M73 50H48V15H73V20H53V25H63V30H53V45H73V50Z" fill="var(--background)" />
+        <path d="M91 50H86V20H76V15H101V20H91V50Z" fill="var(--background)" />
+        <path
+          d="M109 50H104V20H109V25H124V20H129V50H124V30H109V50ZM124 20H109V15H124V20Z"
+          fill="var(--background)"
+        />
+        <defs>
+          <filter
+            id="filter0_d_149_3"
+            x="0"
+            y="0"
+            width="148"
+            height="75.4"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="9.4" />
+            <feComposite in2="hardAlpha" operator="out" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_149_3"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_149_3"
+              result="shape"
+            />
+          </filter>
+        </defs>
+      </svg>
+    </svg>
+  );
+}
+
 export function Logomark({
   className = "",
   width = 40,

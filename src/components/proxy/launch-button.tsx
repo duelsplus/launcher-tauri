@@ -55,7 +55,11 @@ type User = {
   isBanned: boolean;
 };
 
-export function LaunchButton() {
+type LaunchButtonProps = {
+  isBeta?: boolean;
+};
+
+export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
   const [state, setState] = useState<ProxyState>("unknown");
   const [busy, setBusy] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -274,7 +278,7 @@ export function LaunchButton() {
                 ) : (
                   <>
                     <PlayCircleIcon weight="fill" />
-                    Launch
+                    {isBeta ? "Launch Beta" : "Launch"}
                   </>
                 )}
               </Button>
