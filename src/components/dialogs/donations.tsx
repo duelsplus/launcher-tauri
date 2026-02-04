@@ -9,6 +9,7 @@ import { Button } from "../ui/button";
 import { ArrowUpRightIcon } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { User, hasPerm } from "@/lib/perm";
+import { Ripple } from "m3-ripple";
 
 interface DonationsDialogProps {
   user?: User | null;
@@ -37,10 +38,11 @@ export function GridItem({
           target="_blank"
           rel="noopener noreferrer"
           className={cn(
-            "flex gap-2 rounded-xl border p-3 items-center hover:bg-accent transition cursor-default",
+            "relative overflow-hidden flex gap-2 rounded-xl border p-3 items-center hover:bg-accent transition cursor-default",
             disabled && "opacity-50 pointer-events-none",
           )}
         >
+          <Ripple hoverOpacity={0} />
           {image && (
             <div className="shrink-0">
               <img
