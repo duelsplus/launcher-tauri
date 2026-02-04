@@ -104,7 +104,7 @@ export function LaunchButton() {
             toggleTab("logs");
           }
           setState("running");
-          setStatusText("Launched");
+          //setStatusText("Launched");
           setBusy(false);
           setProgress(null);
         }
