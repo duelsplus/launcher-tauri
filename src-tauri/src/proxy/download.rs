@@ -9,7 +9,8 @@ use tokio::io::AsyncWriteExt;
 
 use crate::utils;
 
-const API_BASE: &str = "https://duelsplus.com/api/releases";
+const API_BASE: &str = "https://proxy-updates.duelsplus.com/v1/releases";
+const API_BASE_BETA: &str = "https://proxy-updates.duelsplus.com/v1/releases/beta";
 const MIN_FILE_SIZE_MB: f64 = 50.0;
 
 /// Gets the platform-specific tag for binary selection
@@ -32,9 +33,10 @@ pub fn get_install_dir() -> Result<PathBuf, ProxyError> {
 }
 
 /// Fetches the list of releases from the API
-pub async fn fetch_releases() -> Result<Vec<Release>, ProxyError> {
+pub async fn fetch_releases(use_beta: bool) -> Result<Vec<Release>, ProxyError> {
     let client = reqwest::Client::new();
-    let response = client.get(API_BASE).send().await?;
+    let url = if use_beta { API_BASE_BETA } else { API_BASE };
+    let response = client.get(url).send().await?;
 
     if !response.status().is_success() {
         return Err(ProxyError::Network(
@@ -84,12 +86,14 @@ pub fn is_file_valid(path: &PathBuf) -> bool {
 pub async fn download_artifact<F>(
     asset_id: &str,
     dest_path: &PathBuf,
+    use_beta: bool,
     mut progress_callback: F,
 ) -> Result<(), ProxyError>
 where
     F: FnMut(DownloadProgress),
 {
-    let url = format!("{}/signed?assetId={}", API_BASE, asset_id);
+    let base_url = if use_beta { API_BASE_BETA } else { API_BASE };
+    let url = format!("{}/signed?assetId={}", base_url, asset_id);
     let client = reqwest::Client::new();
 
     let response = client.get(&url).send().await?;

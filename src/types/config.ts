@@ -9,4 +9,5 @@ export interface Config {
   rpcImage: string;
   proxyPort: string;
   enableMsa: boolean;
+  receiveBetaReleases: boolean;
 }

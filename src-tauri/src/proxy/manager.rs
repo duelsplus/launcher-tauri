@@ -6,6 +6,7 @@ use super::download::{
 };
 use super::error::ProxyError;
 use super::models::{ErrorCategory, ErrorSeverity, ProxyErrorData, ProxyStatus, RpcUserData};
+use crate::config::manager::get_config;
 use crate::rpc::RpcManager;
 use crate::utils::get_home_dir;
 use serde::Deserialize;
@@ -228,12 +229,25 @@ impl ProxyManager {
         let _ = app.emit("updater:show", ());
         let _ = app.emit("updater:status", ProxyStatus::Checking);
 
+        // Check if beta releases are enabled
+        let use_beta = get_config()
+            .await
+            .ok()
+            .flatten()
+            .map(|c| c.receive_beta_releases)
+            .unwrap_or(false);
+
+        if use_beta {
+            println!("[proxy] Beta releases enabled");
+            let _ = app.emit("log-message", "Beta releases enabled");
+        }
+
         // Get platform and install directory
         let platform_tag = get_platform_tag()?;
         let install_dir = get_install_dir()?;
 
         // Fetch releases
-        let releases = fetch_releases().await?;
+        let releases = fetch_releases(use_beta).await?;
         let latest = find_latest_release(&releases)?;
         let asset = find_platform_asset(latest, &platform_tag)?;
 
@@ -255,7 +269,7 @@ impl ProxyManager {
 
             // Download with progress tracking
             let app_clone = app.clone();
-            download_artifact(&asset.id, &file_path, move |progress| {
+            download_artifact(&asset.id, &file_path, use_beta, move |progress| {
                 if let Err(e) = app_clone.emit("updater:progress", &progress) {
                     eprintln!("Failed to emit progress event: {:?}", e);
                 }

@@ -196,13 +196,22 @@ pub async fn get_proxy_status(manager: State<'_, ProxyManager>) -> Result<bool, 
 /// Fetches the list of releases from the API.
 ///
 /// Returns a list of all available releases with their version, assets, and metadata.
+/// Respects the `receiveBetaReleases` config setting to determine which API to use.
 ///
 /// # Returns
 ///
 /// Returns a `Vec<Release>` containing all releases from the API.
 #[tauri::command]
 pub async fn fetch_releases() -> Result<Vec<models::Release>, String> {
-    download::fetch_releases().await.map_err(|e| e.to_string())
+    let use_beta = config::manager::get_config()
+        .await
+        .ok()
+        .flatten()
+        .map(|c| c.receive_beta_releases)
+        .unwrap_or(false);
+    download::fetch_releases(use_beta)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 /// Checks if the legacy configuration file exists.
