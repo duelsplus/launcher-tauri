@@ -29,10 +29,23 @@ import { useOnboarding } from "@/lib/onboarding";
 import { Skeleton } from "../ui/skeleton";
 import { User, Perm } from "@/lib/perm";
 import { Ripple } from "m3-ripple";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type ApiResponse<T> = {
   success: boolean;
   data: T;
+};
+
+const permLabels: Record<Perm, string> = {
+  admin: "Admin",
+  developer: "Developer",
+  moderator: "Moderator",
+  tester: "Tester",
+  partner: "Partner",
+  leaderboard: "Leaderboard",
+  supporter: "Supporter",
+  combo: "Combo",
+  standard: "Standard", // to satisfy typescript
 };
 
 const permIcons: Record<Perm, any> = {
@@ -122,11 +135,20 @@ export function UserButton() {
                 <div className="text-sm font-medium truncate">
                   {user.username}
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1">
                   {user?.perms
                     .filter((p) => p !== "standard") //skip standard perm
                     .map((p) => (
-                      <PermIcon key={p} perm={p} />
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex">
+                            <PermIcon key={p} perm={p} />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="text-xs font-medium">
+                          {permLabels[p]}
+                        </TooltipContent>
+                      </Tooltip>
                     ))}
                 </div>
               </>
