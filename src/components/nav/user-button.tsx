@@ -28,6 +28,7 @@ import { getToken, setToken } from "@/lib/token";
 import { useOnboarding } from "@/lib/onboarding";
 import { Skeleton } from "../ui/skeleton";
 import { User, Perm } from "@/lib/perm";
+import { Ripple } from "m3-ripple";
 
 type ApiResponse<T> = {
   success: boolean;
@@ -192,11 +193,11 @@ function PanelButton({
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 rounded-2xl px-2 py-2 text-sm transition-colors",
-        "hover:bg-muted",
-        destructive && "text-destructive hover:bg-destructive/10",
+        "relative overflow-hidden flex items-center gap-3 rounded-2xl px-2 py-2 text-sm transition-colors",
+        destructive && "text-destructive",
       )}
     >
+      <Ripple />
       {isLoading ? (
         <SpinnerIcon className="size-4 animate-spin" />
       ) : (
