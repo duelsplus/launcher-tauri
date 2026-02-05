@@ -17,10 +17,10 @@ export function Titlebar() {
       className="w-full fixed top-0 flex items-center justify-end px-2 z-100"
     >
       <div className="flex items-center">
-        <Button className="rounded-none!" onClick={minimize} variant="ghost">
+        <Button size="sm" className="rounded-none!" onClick={minimize} variant="ghost">
           <MinusIcon />
         </Button>
-        <Button className="rounded-none!" onClick={close} variant="ghost">
+        <Button size="sm" className="rounded-none!" onClick={close} variant="ghost">
           <XIcon />
         </Button>
       </div>
