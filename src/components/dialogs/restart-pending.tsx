@@ -7,8 +7,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
+import { invoke } from "@tauri-apps/api/core";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { useEffect, useState } from "react";
+import { SpinnerIcon } from "@phosphor-icons/react";
 
 interface RestartPendingDialogProps {
   open: boolean;
@@ -21,10 +23,14 @@ export function RestartPendingDialog({
   onOpenChange,
   name,
 }: RestartPendingDialogProps) {
+  const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [notNowEnabled, setNotNowEnabled] = useState(false);
 
-  useEffect(() => { // is this overengineered guys..
+  const canClose = notNowEnabled && !loading;
+
+  useEffect(() => {
+    // is this overengineered guys..
     if (!open) return;
     setCountdown(5);
     setNotNowEnabled(false);
@@ -42,6 +48,11 @@ export function RestartPendingDialog({
   }, [open]);
 
   const handleRestart = async () => {
+    setLoading(true);
+    const running = await invoke<boolean>("get_proxy_status");
+    if (running) {
+      await invoke("stop_proxy");
+    }
     await relaunch();
   };
 
@@ -52,11 +63,11 @@ export function RestartPendingDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        onEscapeKeyDown={notNowEnabled ? undefined : (e) => e.preventDefault()} // shadcn should add these as a native feature like they did with `showCloseButton`
+        onEscapeKeyDown={canClose ? undefined : (e) => e.preventDefault()} // shadcn should add these as a native feature like they did with `showCloseButton`
         onInteractOutside={
-          notNowEnabled ? undefined : (e) => e.preventDefault()
+          canClose ? undefined : (e) => e.preventDefault()
         }
-        showCloseButton={notNowEnabled}
+        showCloseButton={canClose}
       >
         <DialogHeader>
           <DialogTitle>Restart Required</DialogTitle>
@@ -71,11 +82,12 @@ export function RestartPendingDialog({
           <Button
             variant="outline"
             onClick={handleNotNow}
-            disabled={!notNowEnabled}
+            disabled={!notNowEnabled || loading}
           >
             {notNowEnabled ? "Not Now" : `Not Now (${countdown}s)`}
           </Button>
-          <Button variant="input" onClick={handleRestart}>
+          <Button variant="input" disabled={loading} onClick={handleRestart}>
+            {loading && <SpinnerIcon className="animate-spin" />}
             Restart Now
           </Button>
         </DialogFooter>
