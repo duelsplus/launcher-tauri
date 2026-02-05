@@ -139,7 +139,10 @@ export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
 
   useEffect(() => {
     const unlisten = listen<ProxyError>("proxy-error", (event) => {
-      setProxyError(event.payload);
+      const { severity } = event.payload;
+      if (severity === "error" || severity === "critical") {
+        setProxyError(event.payload);
+      }
     });
 
     return () => {
