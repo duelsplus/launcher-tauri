@@ -140,6 +140,8 @@ export function ActionRail() {
   const { activeTab, toggleTab } = useTabs();
   const [version, setVersion] = useState("");
 
+  const [major, minor, patch] = version.split(".");
+
   useEffect(() => {
     getVersion()
       .then(setVersion)
@@ -177,7 +179,28 @@ export function ActionRail() {
           <UserButton />
         </ActionCategory>
         <div className="fixed bottom-3 text-xs tracking-tight text-foreground/50">
-          v{version}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-help">v{version}</span>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              className="font-medium text-xs leading-relaxed"
+            >
+              This is the launcher version.
+              <br />
+              <div className="text-[10px]">
+                Major: <span className="font-semibold">{major}</span> (breaking
+                changes - this may never change)
+                <br />
+                Minor: <span className="font-semibold">{minor}</span> (new
+                features)
+                <br />
+                Patch: <span className="font-semibold">{patch}</span> (bug
+                fixes)
+              </div>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </nav>
 
