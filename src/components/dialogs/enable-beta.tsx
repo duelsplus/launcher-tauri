@@ -56,12 +56,12 @@ export function EnableBetaDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Enable Beta Builds</DialogTitle>
+          <DialogTitle>Enable Beta Releases</DialogTitle>
         </DialogHeader>
 
         <section className="space-y-3 text-sm leading-relaxed text-muted-foreground">
           <p>
-            Beta builds are pre-release versions of the Duels+ proxy and have
+            Beta releases are pre-release builds of the Duels+ proxy and have
             features that are unfinished, unstable, or subject to change.
           </p>
           <p>
