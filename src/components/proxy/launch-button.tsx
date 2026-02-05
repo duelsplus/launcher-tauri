@@ -21,6 +21,8 @@ import { getToken } from "@/lib/token";
 import { useLogs } from "@/lib/proxy-logs";
 import { useTabs } from "@/lib/tabs";
 import { config } from "@/lib/config";
+import { ProxyErrorDialog } from "../dialogs/proxy-error";
+import type { ProxyError } from "@/types/proxy";
 
 type ProxyStatusEvent =
   | { status: "checking" }
@@ -61,6 +63,7 @@ type LaunchButtonProps = {
 
 export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
   const [state, setState] = useState<ProxyState>("unknown");
+  const [proxyError, setProxyError] = useState<ProxyError | null>(null);
   const [busy, setBusy] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [statusText, setStatusText] = useState<string | null>(null);
@@ -131,6 +134,16 @@ export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
     return () => {
       unlistenStatus.then((u) => u());
       unlistenProgress.then((u) => u());
+    };
+  }, []);
+
+  useEffect(() => {
+    const unlisten = listen<ProxyError>("proxy-error", (event) => {
+      setProxyError(event.payload);
+    });
+
+    return () => {
+      unlisten.then((fn) => fn());
     };
   }, []);
 
@@ -323,6 +336,12 @@ export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
           </div>
         </div>
       )}
+
+      <ProxyErrorDialog
+        open={!!proxyError}
+        onOpenChange={() => setProxyError(null)}
+        error={proxyError}
+      />
     </>
   );
 }
