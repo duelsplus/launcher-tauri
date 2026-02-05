@@ -178,7 +178,7 @@ export function ActionRail() {
           <DonateButton />
           <UserButton />
         </ActionCategory>
-        <div className="fixed bottom-3 text-xs tracking-tight text-foreground/50">
+        <div className="fixed bottom-5 text-xs tracking-tight text-foreground/50">
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="cursor-help">v{version}</span>
