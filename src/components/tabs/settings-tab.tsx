@@ -61,6 +61,7 @@ export function Settings() {
 
   const isBetaEligible =
     hasPerm(user, "tester") ||
+    hasPerm(user, "partner") ||
     hasPerm(user, "developer") ||
     hasPerm(user, "admin");
 
