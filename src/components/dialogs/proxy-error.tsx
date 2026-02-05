@@ -42,7 +42,7 @@ export function ProxyErrorDialog({
             >
               Suggestion
             </Button>
-            <div className="p-4 rounded-xl rounded-tl-none bg-rose-200/50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 classic:bg-rose-950/50 classic:text-rose-400">
+            <div className="p-3 rounded-xl rounded-tl-none bg-rose-200/50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 classic:bg-rose-950/50 classic:text-rose-400">
               <p>{error.suggestion}</p>
             </div>
             {/* i replicated the rose button variant */}
