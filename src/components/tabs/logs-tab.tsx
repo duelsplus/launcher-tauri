@@ -1,29 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLogs } from "@/lib/proxy-logs";
-import { FunnelXIcon } from "@phosphor-icons/react";
+import { FunnelXIcon, PaletteIcon } from "@phosphor-icons/react";
 
 import AnsiToHtml from "ansi-to-html";
+import { Button } from "../ui/button";
 const ansiConvert = new AnsiToHtml({ escapeXML: true });
-
-function renderLog(text: string) {
-  let escaped = text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-
-  escaped = ansiConvert.toHtml(escaped);
-
-  escaped = escaped.replace(
-    /(https?:\/\/[^\s]+)/g,
-    '<a href="$1" target="_blank" class="underline hover:no-underline" rel="noopener noreferrer">$1</a>',
-  );
-
-  return escaped;
-}
 
 export function Logs() {
   const logs = useLogs((s) => s.logs);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [colors, setColors] = useState(true);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -31,9 +17,44 @@ export function Logs() {
     el.scrollTop = el.scrollHeight;
   }, [logs]);
 
+  function renderLog(text: string) {
+    let escaped = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    if (colors) {
+      escaped = ansiConvert.toHtml(escaped);
+    } else {
+      escaped = strip(escaped);
+    }
+
+    escaped = escaped.replace(
+      /(https?:\/\/[^\s]+)/g,
+      '<a href="$1" target="_blank" class="underline hover:no-underline" rel="noopener noreferrer">$1</a>',
+    );
+
+    return escaped;
+  }
+
+  function strip(text: string) {
+    return text.replace(/\x1B\[[0-9;]*m/g, "");
+  }
+
   return (
     <div className="flex flex-col space-y-4">
-      <h2 className="text-base font-medium">Logs</h2>
+      <div className="flex justify-between items-center gap-2">
+        <h2 className="text-base font-medium">Logs</h2>
+        <div className="flex items-center gap-2">
+          <Button
+            size="icon-xs"
+            onClick={() => setColors((prev) => !prev)}
+            variant={colors ? "input" : "outline"}
+          >
+            <PaletteIcon weight={colors ? "fill" : "regular"} />
+          </Button>
+        </div>
+      </div>
 
       <div
         style={{ height: "calc(100vh - 5.5rem)" }}
