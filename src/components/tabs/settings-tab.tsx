@@ -17,6 +17,7 @@ import { RpcCustomizeDialog } from "@/components/dialogs/rpc-customize";
 import { SettingInput } from "../settings/input";
 import { User, hasPerm } from "@/lib/perm";
 import { getToken } from "@/lib/token";
+import { RestartPendingDialog } from "../dialogs/restart-pending";
 
 type ApiResponse<T> = {
   success: boolean;
@@ -27,6 +28,8 @@ export function Settings() {
   const [user, setUser] = useState<User | null>(null);
   const [config, setConfig] = useState<Config | null>(null);
   const [savingKey, setSavingKey] = useState<keyof Config | null>(null);
+  const [restartPending, setRestartPending] = useState(false);
+  const [restartPendingName, setRestartPendingName] = useState("");
 
   useEffect(() => {
     invoke<ApiResponse<User>>("get_user", {
@@ -88,6 +91,11 @@ export function Settings() {
 
     try {
       await configApi.setValue(key, value);
+      const settingDef = settingDefinitions.find((s) => s.key === key);
+      if (settingDef?.restartRequired) {
+        setRestartPending(true);
+        setRestartPendingName(settingDef.title);
+      }
     } catch {
       //rollback on error
       setConfig(config);
@@ -153,9 +161,11 @@ export function Settings() {
               title="Receive Beta Releases"
               description="Receive new proxy updates early with new features and fixes."
               checked={config["receiveBetaReleases"] as boolean}
-              onCheckedChange={(value) =>
-                updateSetting("receiveBetaReleases", value)
-              }
+              onCheckedChange={(value) => {
+                setRestartPending(true);
+                setRestartPendingName("Receive Beta Releases");
+                updateSetting("receiveBetaReleases", value);
+              }}
             />
           )}
           {grouped["General"].map((setting) => (
@@ -221,6 +231,12 @@ export function Settings() {
       <RpcCustomizeDialog
         open={rpcCustomizeOpen}
         onOpenChange={setRpcCustomizeOpen}
+      />
+
+      <RestartPendingDialog
+        open={restartPending}
+        onOpenChange={setRestartPending}
+        name={restartPendingName}
       />
     </div>
   );
