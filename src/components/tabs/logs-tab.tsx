@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLogs } from "@/lib/proxy-logs";
-import { FunnelXIcon, PaletteIcon } from "@phosphor-icons/react";
+import { BackspaceIcon, FunnelXIcon, PaletteIcon } from "@phosphor-icons/react";
 
 import AnsiToHtml from "ansi-to-html";
 import { Button } from "../ui/button";
@@ -9,7 +9,14 @@ const ansiConvert = new AnsiToHtml({ escapeXML: true });
 export function Logs() {
   const logs = useLogs((s) => s.logs);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [colors, setColors] = useState(true);
+  const [colors, setColors] = useState(() => {
+    const saved = localStorage.getItem("logs-colors");
+    return saved === null ? true : saved === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("logs-colors", colors.toString());
+  }, [colors]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -45,7 +52,14 @@ export function Logs() {
     <div className="flex flex-col space-y-4">
       <div className="flex justify-between items-center gap-2">
         <h2 className="text-base font-medium">Logs</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <Button
+            size="icon-xs"
+            onClick={() => useLogs.getState().clear()}
+            variant="input"
+          >
+            <BackspaceIcon weight="fill" />
+          </Button>
           <Button
             size="icon-xs"
             onClick={() => setColors((prev) => !prev)}
