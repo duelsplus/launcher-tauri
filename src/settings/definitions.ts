@@ -6,6 +6,7 @@ export type SettingDefinition = {
   description?: string;
   section: string;
   dependsOn?: keyof Config | ((config: Config) => boolean);
+  restartRequired?: boolean;
 };
 
 export const settingDefinitions: SettingDefinition[] = [
@@ -38,6 +39,7 @@ export const settingDefinitions: SettingDefinition[] = [
     title: "Discord Rich Presence",
     description: "Show your activity on Discord.",
     section: "Integrations",
+    restartRequired: true,
   },
   {
     key: "rpcAnonymizeProfile",
@@ -45,6 +47,7 @@ export const settingDefinitions: SettingDefinition[] = [
     description: "Hide your in-game profile from Discord Rich Presence.",
     section: "Integrations",
     dependsOn: "enableRpc",
+    restartRequired: true,
   },
   {
     key: "rpcAnonymizeLocation",
@@ -52,6 +55,7 @@ export const settingDefinitions: SettingDefinition[] = [
     description: "Hide your in-game location from Discord Rich Presence.",
     section: "Integrations",
     dependsOn: "enableRpc",
+    restartRequired: true,
   },
   /*{
     key: "enableMsa",
