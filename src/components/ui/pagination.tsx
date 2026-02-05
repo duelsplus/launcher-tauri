@@ -1,12 +1,13 @@
-import * as React from "react"
+import * as React from "react";
 import {
   CaretLeftIcon,
   CaretRightIcon,
   DotsThreeIcon,
-} from "@phosphor-icons/react"
+} from "@phosphor-icons/react";
 
-import { cn } from "@/lib/utils"
-import { buttonVariants, type Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { buttonVariants, type Button } from "@/components/ui/button";
+import { Ripple } from "m3-ripple";
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
@@ -17,7 +18,7 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
       className={cn("mx-auto flex w-full justify-center", className)}
       {...props}
     />
-  )
+  );
 }
 
 function PaginationContent({
@@ -30,17 +31,17 @@ function PaginationContent({
       className={cn("flex flex-row items-center gap-1", className)}
       {...props}
     />
-  )
+  );
 }
 
 function PaginationItem({ ...props }: React.ComponentProps<"li">) {
-  return <li data-slot="pagination-item" {...props} />
+  return <li data-slot="pagination-item" {...props} />;
 }
 
 type PaginationLinkProps = {
-  isActive?: boolean
+  isActive?: boolean;
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
-  React.ComponentProps<"a">
+  React.ComponentProps<"a">;
 
 function PaginationLink({
   className,
@@ -58,11 +59,14 @@ function PaginationLink({
           variant: isActive ? "input" : "ghost",
           size,
         }),
-        className
+        className,
       )}
       {...props}
-    />
-  )
+    >
+      <Ripple hoverOpacity={0} />
+      {props.children}
+    </a>
+  );
 }
 
 function PaginationPrevious({
@@ -79,7 +83,7 @@ function PaginationPrevious({
       <CaretLeftIcon />
       <span className="hidden sm:block">Previous</span>
     </PaginationLink>
-  )
+  );
 }
 
 function PaginationNext({
@@ -96,7 +100,7 @@ function PaginationNext({
       <span className="hidden sm:block">Next</span>
       <CaretRightIcon />
     </PaginationLink>
-  )
+  );
 }
 
 function PaginationEllipsis({
@@ -113,7 +117,7 @@ function PaginationEllipsis({
       <DotsThreeIcon className="size-4" />
       <span className="sr-only">More pages</span>
     </span>
-  )
+  );
 }
 
 export {
@@ -124,4 +128,4 @@ export {
   PaginationPrevious,
   PaginationNext,
   PaginationEllipsis,
-}
+};
