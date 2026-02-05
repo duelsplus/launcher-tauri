@@ -24,6 +24,7 @@ export function RestartPendingDialog({
   name,
 }: RestartPendingDialogProps) {
   const [loading, setLoading] = useState(false);
+  const [proxyRunning, setProxyRunning] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [notNowEnabled, setNotNowEnabled] = useState(false);
 
@@ -47,6 +48,25 @@ export function RestartPendingDialog({
     return () => clearInterval(interval);
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    let canceled = false;
+
+    const checkProxy = async () => {
+      try {
+        const running = await invoke<boolean>("get_proxy_status");
+        if (!canceled) setProxyRunning(running);
+      } catch {
+        if (!canceled) setProxyRunning(false);
+      }
+    };
+    checkProxy();
+
+    return () => {
+      canceled = true;
+    };
+  }, [open]);
+
   const handleRestart = async () => {
     setLoading(true);
     const running = await invoke<boolean>("get_proxy_status");
@@ -64,19 +84,25 @@ export function RestartPendingDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         onEscapeKeyDown={canClose ? undefined : (e) => e.preventDefault()} // shadcn should add these as a native feature like they did with `showCloseButton`
-        onInteractOutside={
-          canClose ? undefined : (e) => e.preventDefault()
-        }
+        onInteractOutside={canClose ? undefined : (e) => e.preventDefault()}
         showCloseButton={canClose}
       >
         <DialogHeader>
           <DialogTitle>Restart Required</DialogTitle>
         </DialogHeader>
 
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          You need to restart the launcher for{" "}
-          {name ? <strong>{name}</strong> : "changes"} to take effect.
-        </p>
+        <section className="space-y-3 text-sm leading-relaxed text-muted-foreground">
+          <p>
+            You need to restart the launcher for{" "}
+            {name ? <strong>{name}</strong> : "changes"} to take effect.
+          </p>
+
+          {proxyRunning && (
+            <p className="font-medium text-destructive">
+              Duels+ is currently running. This will also quit your proxy!
+            </p>
+          )}
+        </section>
 
         <DialogFooter>
           <Button
