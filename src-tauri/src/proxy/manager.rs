@@ -372,6 +372,240 @@ impl ProxyManager {
         Ok(())
     }
 
+    /// Parses a log line for error patterns and returns a ProxyErrorData if detected.
+    /// Based on proxy's theme.js log format:
+    ///   [i] - info, [✓] - success, [~] - warning, [X] - error
+    /// And errorMessages.js error categorization.
+    fn parse_error_from_log(line: &str) -> Option<ProxyErrorData> {
+        let line_lower = line.to_lowercase();
+
+        // Proxy log prefixes (chalk colors stripped but prefix remains)
+        let has_error_prefix = line.contains("[X]") || line.contains("[x]");
+        let has_warn_prefix = line.contains("[~]");
+
+        // Critical patterns that should always trigger error dialog
+        let is_critical = line_lower.contains("token verification error")
+            || line_lower.contains("authentication failed")
+            || line_lower.contains("session expired")
+            || line_lower.contains("api error")
+            || line_lower.contains("duels+ error");
+
+        // Only process errors, or warnings that contain critical error info
+        if !has_error_prefix && !(has_warn_prefix && is_critical) {
+            return None;
+        }
+
+        // Extract message content (remove prefix)
+        let message = line
+            .replace("[X]", "")
+            .replace("[x]", "")
+            .replace("[~]", "")
+            .replace("[i]", "")
+            .trim()
+            .to_string();
+
+        // Categorize using proxy's errorMessages.js patterns
+        let (code, category, title, suggestion, severity) =
+            Self::categorize_error(&message, &line_lower);
+
+        Some(ProxyErrorData {
+            code,
+            title,
+            message,
+            suggestion,
+            severity,
+            category,
+            original_message: line.to_string(),
+            context: Some("stdout".to_string()),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_millis() as u64)
+                .unwrap_or(0),
+        })
+    }
+
+    /// Categorizes an error based on patterns from proxy's errorMessages.js
+    fn categorize_error(
+        message: &str,
+        message_lower: &str,
+    ) -> (String, ErrorCategory, String, String, ErrorSeverity) {
+        // Network errors - Node.js error codes
+        if message.contains("ECONNRESET") {
+            return (
+                "ECONNRESET".to_string(),
+                ErrorCategory::Network,
+                "Connection Reset".to_string(),
+                "The connection was unexpectedly closed. Wait a moment and try reconnecting."
+                    .to_string(),
+                ErrorSeverity::Warning,
+            );
+        }
+        if message.contains("ECONNREFUSED") {
+            return (
+                "ECONNREFUSED".to_string(),
+                ErrorCategory::Network,
+                "Connection Refused".to_string(),
+                "The server refused the connection. It might be down or undergoing maintenance."
+                    .to_string(),
+                ErrorSeverity::Error,
+            );
+        }
+        if message.contains("ETIMEDOUT") {
+            return (
+                "ETIMEDOUT".to_string(),
+                ErrorCategory::Network,
+                "Connection Timed Out".to_string(),
+                "Check your internet connection and try again.".to_string(),
+                ErrorSeverity::Warning,
+            );
+        }
+        if message.contains("ENOTFOUND") || message.contains("EAI_AGAIN") {
+            return (
+                if message.contains("EAI_AGAIN") {
+                    "EAI_AGAIN"
+                } else {
+                    "ENOTFOUND"
+                }
+                .to_string(),
+                ErrorCategory::Network,
+                "Server Not Found".to_string(),
+                "Could not resolve the server. Check your internet connection and DNS settings."
+                    .to_string(),
+                ErrorSeverity::Error,
+            );
+        }
+        if message.contains("EHOSTUNREACH") {
+            return (
+                "EHOSTUNREACH".to_string(),
+                ErrorCategory::Network,
+                "Host Unreachable".to_string(),
+                "Cannot reach the server. Check your internet connection or firewall settings."
+                    .to_string(),
+                ErrorSeverity::Error,
+            );
+        }
+        if message.contains("ENETUNREACH") {
+            return (
+                "ENETUNREACH".to_string(),
+                ErrorCategory::Network,
+                "Network Unreachable".to_string(),
+                "Your network cannot reach the servers. Check your internet connection."
+                    .to_string(),
+                ErrorSeverity::Error,
+            );
+        }
+        if message.contains("EPIPE") {
+            return (
+                "EPIPE".to_string(),
+                ErrorCategory::Network,
+                "Connection Lost".to_string(),
+                "The connection was lost while sending data. Try reconnecting.".to_string(),
+                ErrorSeverity::Warning,
+            );
+        }
+        if message.contains("EADDRINUSE") {
+            return (
+                "EADDRINUSE".to_string(),
+                ErrorCategory::Proxy,
+                "Port Already In Use".to_string(),
+                "The proxy port is already being used. Close other applications or change the port in settings.".to_string(),
+                ErrorSeverity::Error,
+            );
+        }
+
+        // Authentication errors
+        if message_lower.contains("token verification error") {
+            return (
+                "AUTH_TOKEN_VERIFY".to_string(),
+                ErrorCategory::Authentication,
+                "Token Verification Failed".to_string(),
+                "Could not verify your token. Check your internet connection and try again."
+                    .to_string(),
+                ErrorSeverity::Error,
+            );
+        }
+        if message_lower.contains("token is invalid") || message_lower.contains("token expired") {
+            return (
+                "AUTH_TOKEN_INVALID".to_string(),
+                ErrorCategory::Authentication,
+                "Invalid Token".to_string(),
+                "Your token is invalid or expired. Please re-authenticate in the launcher."
+                    .to_string(),
+                ErrorSeverity::Error,
+            );
+        }
+        if message_lower.contains("expired") || message_lower.contains("invalid_grant") {
+            return (
+                "AUTH_EXPIRED".to_string(),
+                ErrorCategory::Authentication,
+                "Session Expired".to_string(),
+                "Your login session has expired. Restart the proxy to re-authenticate.".to_string(),
+                ErrorSeverity::Error,
+            );
+        }
+        if message_lower.contains("authentication failed") {
+            return (
+                "AUTH_FAILED".to_string(),
+                ErrorCategory::Authentication,
+                "Authentication Failed".to_string(),
+                "Microsoft authentication failed. Restart the proxy and sign in again.".to_string(),
+                ErrorSeverity::Error,
+            );
+        }
+
+        // Hypixel specific
+        if message_lower.contains("rate limit") {
+            return (
+                "HYPIXEL_RATE_LIMIT".to_string(),
+                ErrorCategory::Hypixel,
+                "Rate Limited".to_string(),
+                "Hypixel is limiting your connections. Wait 5-10 minutes before reconnecting."
+                    .to_string(),
+                ErrorSeverity::Warning,
+            );
+        }
+        if message_lower.contains("banned") && !message_lower.contains("duels+") {
+            return (
+                "HYPIXEL_BANNED".to_string(),
+                ErrorCategory::Hypixel,
+                "Account Banned".to_string(),
+                "This account may be banned from Hypixel. Check your status on the Hypixel website."
+                    .to_string(),
+                ErrorSeverity::Critical,
+            );
+        }
+
+        // API errors
+        if message_lower.contains("api.venxm.uk") || message_lower.contains("api unreachable") {
+            return (
+                "API_UNREACHABLE".to_string(),
+                ErrorCategory::Api,
+                "API Unreachable".to_string(),
+                "Could not connect to the Duels+ API. Check your internet or try again later."
+                    .to_string(),
+                ErrorSeverity::Error,
+            );
+        }
+        if message_lower.contains("duels+ error") || message_lower.contains("api error") {
+            return (
+                "API_ERROR".to_string(),
+                ErrorCategory::Api,
+                "API Error".to_string(),
+                "The Duels+ API returned an error. Try again later or contact support.".to_string(),
+                ErrorSeverity::Error,
+            );
+        }
+
+        // Fallback
+        (
+            "UNKNOWN".to_string(),
+            ErrorCategory::Unknown,
+            "Unexpected Error".to_string(),
+            "An unexpected error occurred. Try reconnecting or restart the proxy.".to_string(),
+            ErrorSeverity::Error,
+        )
+    }
+
     /// Handles stdout and stderr from the proxy process
     async fn handle_output(
         app: AppHandle,
@@ -385,6 +619,9 @@ impl ProxyManager {
         let mut stdout_lines = stdout_reader.lines();
         let mut stderr_lines = stderr_reader.lines();
 
+        // Track if we've emitted an error to avoid duplicates
+        let mut error_emitted = false;
+
         loop {
             tokio::select! {
                 result = stdout_lines.next_line() => {
@@ -395,7 +632,15 @@ impl ProxyManager {
                             // Emit log message and print to console
                             if !line.contains("ExperimentalWarning") && !line.contains("--trace-warnings") {
                                 println!("[proxy] {}", line);
-                                let _ = app.emit("log-message", line);
+                                let _ = app.emit("log-message", line.clone());
+
+                                // Check for error patterns and emit proxy-error event
+                                if !error_emitted {
+                                    if let Some(error_data) = Self::parse_error_from_log(&line) {
+                                        let _ = app.emit("proxy-error", error_data);
+                                        error_emitted = true;
+                                    }
+                                }
                             }
                         }
                         Ok(None) => break,
@@ -409,7 +654,15 @@ impl ProxyManager {
 
                             if !line.contains("ExperimentalWarning") && !line.contains("--trace-warnings") {
                                 eprintln!("[proxy:err] {}", line);
-                                let _ = app.emit("log-message", line);
+                                let _ = app.emit("log-message", line.clone());
+
+                                // Check for error patterns in stderr too
+                                if !error_emitted {
+                                    if let Some(error_data) = Self::parse_error_from_log(&line) {
+                                        let _ = app.emit("proxy-error", error_data);
+                                        error_emitted = true;
+                                    }
+                                }
                             }
                         }
                         Ok(None) => break,
