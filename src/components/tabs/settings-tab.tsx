@@ -18,6 +18,7 @@ import { SettingInput } from "../settings/input";
 import { User, hasPerm } from "@/lib/perm";
 import { getToken } from "@/lib/token";
 import { RestartPendingDialog } from "../dialogs/restart-pending";
+import { EnableBetaDialog } from "../dialogs/enable-beta";
 
 type ApiResponse<T> = {
   success: boolean;
@@ -30,6 +31,10 @@ export function Settings() {
   const [savingKey, setSavingKey] = useState<keyof Config | null>(null);
   const [restartPending, setRestartPending] = useState(false);
   const [restartPendingName, setRestartPendingName] = useState("");
+  const [enableBetaDialogOpen, setEnableBetaDialogOpen] = useState(false);
+  const [pendingBetaValue, setPendingBetaValue] = useState<boolean | null>(
+    null,
+  );
 
   useEffect(() => {
     invoke<ApiResponse<User>>("get_user", {
@@ -162,9 +167,12 @@ export function Settings() {
               description="Receive new proxy updates early with new features and fixes."
               checked={config["receiveBetaReleases"] as boolean}
               onCheckedChange={(value) => {
-                setRestartPending(true);
-                setRestartPendingName("Receive Beta Releases");
-                updateSetting("receiveBetaReleases", value);
+                if (value) {
+                  setPendingBetaValue(value);
+                  setEnableBetaDialogOpen(true);
+                } else {
+                  updateSetting("receiveBetaReleases", value);
+                }
               }}
             />
           )}
@@ -237,6 +245,19 @@ export function Settings() {
         open={restartPending}
         onOpenChange={setRestartPending}
         name={restartPendingName}
+      />
+
+      <EnableBetaDialog
+        open={enableBetaDialogOpen}
+        onOpenChange={setEnableBetaDialogOpen}
+        onContinue={() => {
+          if (pendingBetaValue !== null) {
+            setRestartPending(true);
+            setRestartPendingName("Receive Beta Releases");
+            updateSetting("receiveBetaReleases", pendingBetaValue);
+            setPendingBetaValue(null);
+          }
+        }}
       />
     </div>
   );
