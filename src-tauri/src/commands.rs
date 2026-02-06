@@ -7,7 +7,7 @@ use crate::auth;
 use crate::config;
 use crate::proxy::{download, models, ProxyManager};
 use crate::rpc::RpcManager;
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Emitter, State};
 
 /// Starts the Discord OAuth sign-in flow.
 ///
@@ -165,10 +165,14 @@ pub async fn launch_proxy(
     port: Option<u16>,
 ) -> Result<(), String> {
     let port = port.unwrap_or(25565);
-    manager
-        .check_and_launch(app, port)
-        .await
-        .map_err(|e| e.to_string())
+    match manager.check_and_launch(app.clone(), port).await {
+        Ok(()) => Ok(()),
+        Err(e) => {
+            let msg = format!("[proxy] Launch failed: {}", e);
+            let _ = app.emit("log-message", &msg);
+            Err(e.to_string())
+        }
+    }
 }
 
 /// Stops the proxy process.

@@ -48,11 +48,14 @@ pub async fn fetch_releases(use_beta: bool) -> Result<Vec<Release>, ProxyError> 
     Ok(releases)
 }
 
-/// Finds the latest release
+/// Finds the latest release.
+/// Prefers the release marked `is_latest`; falls back to the first (newest) release
+/// when the API omits the flag (e.g. stable /v1/releases).
 pub fn find_latest_release(releases: &[Release]) -> Result<&Release, ProxyError> {
     releases
         .iter()
         .find(|r| r.is_latest)
+        .or_else(|| releases.first())
         .ok_or(ProxyError::NoReleaseFound)
 }
 
@@ -82,18 +85,17 @@ pub fn is_file_valid(path: &PathBuf) -> bool {
     }
 }
 
-/// Downloads an artifact with progress tracking
+/// Downloads an artifact with progress tracking.
+/// Signed URL is always /releases/signed for both stable and beta assets.
 pub async fn download_artifact<F>(
     asset_id: &str,
     dest_path: &PathBuf,
-    use_beta: bool,
     mut progress_callback: F,
 ) -> Result<(), ProxyError>
 where
     F: FnMut(DownloadProgress),
 {
-    let base_url = if use_beta { API_BASE_BETA } else { API_BASE };
-    let url = format!("{}/signed?assetId={}", base_url, asset_id);
+    let url = format!("{}/signed?assetId={}", API_BASE, asset_id);
     let client = reqwest::Client::new();
 
     let response = client.get(&url).send().await?;
@@ -195,6 +197,15 @@ mod tests {
 
     #[test]
     fn test_find_latest_release_none() {
+        let releases: Vec<Release> = vec![];
+
+        let result = find_latest_release(&releases);
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), ProxyError::NoReleaseFound));
+    }
+
+    #[test]
+    fn test_find_latest_release_fallback() {
         let releases = vec![Release {
             id: "1".to_string(),
             version: "1.0.0".to_string(),
@@ -207,8 +218,8 @@ mod tests {
         }];
 
         let result = find_latest_release(&releases);
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), ProxyError::NoReleaseFound));
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().version, "1.0.0");
     }
 
     #[test]
