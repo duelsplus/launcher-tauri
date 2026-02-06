@@ -256,11 +256,11 @@ export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
                         className="flex items-center gap-2"
                       >
                         {hovered ? (
-                          <StopCircleIcon weight="fill" />
+                          <PlayCircleIcon weight="fill" />
                         ) : (
                           <HeartBreakIcon weight="fill" />
                         )}
-                        {hovered ? "Stop" : "Error"}
+                        {hovered ? (isBeta ? "Launch Beta" : "Launch") : "Error"}
                       </motion.div>
                     </>
                   </>
