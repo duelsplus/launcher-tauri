@@ -136,7 +136,7 @@ export function UserButton() {
                   {user.username}
                 </div>
                 <div className="flex items-center gap-1">
-                  {user?.perms
+                  {(user.perms || [])
                     .filter((p) => p !== "standard") //skip standard perm
                     .map((p) => (
                       <Tooltip>
