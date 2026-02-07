@@ -23,6 +23,7 @@ import { useTabs } from "@/lib/tabs";
 import { config } from "@/lib/config";
 import { ProxyErrorDialog } from "../dialogs/proxy-error";
 import type { ProxyError } from "@/types/proxy";
+import { notify } from "@/lib/notification";
 
 type ProxyStatusEvent =
   | { status: "checking" }
@@ -141,6 +142,7 @@ export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
     const unlisten = listen<ProxyError>("proxy-error", (event) => {
       const { severity } = event.payload;
       if (severity === "error" || severity === "critical") {
+        notify({ title: "A critical error occurred", body: "Check the launcher for details." });
         setProxyError(event.payload);
       }
     });
