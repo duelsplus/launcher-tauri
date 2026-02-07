@@ -2,22 +2,35 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Logo, Logomark, LogomarkCustom } from "@/components/logo";
 import { Skeleton } from "../ui/skeleton";
+import { WarningIcon } from "@phosphor-icons/react";
 
 interface StatCardProps {
   title: string;
   icon?: React.ReactNode;
   stats: { label: string; value: string | number }[];
+  warning?: boolean;
   loading?: boolean;
 }
 
-export function StatCard({ title, icon, stats, loading }: StatCardProps) {
+export function StatCard({
+  title,
+  icon,
+  stats,
+  warning,
+  loading,
+}: StatCardProps) {
   return (
     <div className="p-4 rounded-2xl bg-muted">
-      <div className="flex items-center gap-1.5 mb-3">
-        {icon && <div className="text-muted-foreground/50">{icon}</div>}
-        <h3 className="text-xs text-muted-foreground/50 tracking-widest font-semibold uppercase">
-          {title}
-        </h3>
+      <div className="flex justify-between items-center gap-3 mb-3">
+        <div className="flex items-center gap-1.5">
+          {icon && <div className="text-muted-foreground/50">{icon}</div>}
+          <h3 className="text-xs text-muted-foreground/50 tracking-widest font-semibold uppercase">
+            {title}
+          </h3>
+        </div>
+        {warning && (
+          <WarningIcon weight="fill" className="size-4 fill-amber-400" />
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -68,7 +81,7 @@ export function Stats() {
     GlobalStatsResponse["data"]["globalStats"] | null
   >(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false)
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -113,6 +126,7 @@ export function Stats() {
           { label: "Losses", value: userStats?.losses.toLocaleString() ?? "-" },
           { label: "WLR", value: userStats?.winLossRatio.toFixed(2) ?? "-" },
         ]}
+        warning={error}
         loading={loading}
       />
 
