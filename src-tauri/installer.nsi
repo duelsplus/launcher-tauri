@@ -70,7 +70,7 @@ Var WixMode
 Var OldMainBinaryName
 
 Name "${PRODUCTNAME}"
-BrandingText "Duels+ Launcher Installer"
+BrandingText "Duels+ Launcher"
 Caption "Duels+"
 OutFile "${OUTFILE}"
 
