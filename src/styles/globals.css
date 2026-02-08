@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+    font-family: "notosans";
+    src: url("../fonts/notosans.ttf") format("truetype");
+    font-weight: 100 900; /* full range */
+    font-style: normal;
+    font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 @custom-variant classic (&:is(.classic *));
 
@@ -13,6 +21,11 @@
     --radius-3xl: calc(var(--radius) + 12px);
     --radius-4xl: calc(var(--radius) + 16px);
     --radius-nav: var(--radius-4xl);
+    --font-sans:
+        "notosans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --color-card: var(--card);
