@@ -254,24 +254,26 @@ export function WhatsNew() {
                   This release has no changelog
                 </p>
               ) : (
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  {selected.whatsNew.map((item, i) => {
-                    const meta = changeMeta(item);
-                    return (
-                      <li key={i} className="flex gap-3 items-start">
-                        <meta.Icon
-                          className={`mt-0.5 shrink-0 size-4 ${meta.className}`}
-                        />
-                        <span
-                          className="leading-relaxed"
-                          dangerouslySetInnerHTML={{
-                            __html: renderMarkdown(item),
-                          }}
-                        />
-                      </li>
-                    );
-                  })}
-                </ul>
+                <div className="max-h-[24rem] overflow-y-auto">
+                  <ul className="list-disc list-inside space-y-2 text-sm">
+                    {selected.whatsNew.map((item, i) => {
+                      const meta = changeMeta(item);
+                      return (
+                        <li key={i} className="flex gap-3 items-start">
+                          <meta.Icon
+                            className={`mt-0.5 shrink-0 size-4 ${meta.className}`}
+                          />
+                          <span
+                            className="leading-relaxed"
+                            dangerouslySetInnerHTML={{
+                              __html: renderMarkdown(item),
+                            }}
+                          />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               )}
               <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground/70">
                 <span>
