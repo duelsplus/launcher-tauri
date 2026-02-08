@@ -142,7 +142,10 @@ export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
     const unlisten = listen<ProxyError>("proxy-error", (event) => {
       const { severity } = event.payload;
       if (severity === "error" || severity === "critical") {
-        notify({ title: "A critical error occurred", body: "Check the launcher for details." });
+        notify({
+          title: "A critical error occurred",
+          body: "Check the launcher for details.",
+        });
         setProxyError(event.payload);
       }
     });
@@ -262,7 +265,11 @@ export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
                         ) : (
                           <HeartBreakIcon weight="fill" />
                         )}
-                        {hovered ? (isBeta ? "Launch Beta" : "Launch") : "Error"}
+                        {hovered
+                          ? isBeta
+                            ? "Launch Beta"
+                            : "Launch"
+                          : "Error"}
                       </motion.div>
                     </>
                   </>
@@ -284,11 +291,11 @@ export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
                         )}
                         <div className="flex flex-col text-left">
                           {hovered ? "Stop" : "Running"}
-                          {statusText && !hovered && (
+                          {/*statusText && !hovered && (
                             <p className="text-xs text-white/70 -mt-0.5">
                               {statusText}
                             </p>
-                          )}
+                          )*/}
                         </div>
                       </motion.div>
                     </>
