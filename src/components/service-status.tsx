@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { WarningIcon } from "@phosphor-icons/react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function ServiceStatus() {
   const [healthy, setHealthy] = useState(true);
@@ -22,13 +23,15 @@ export default function ServiceStatus() {
   if (healthy) return null;
 
   return (
-    <div className="w-full py-2">
-      <div className="flex items-center gap-2">
-        <WarningIcon weight="fill" className="size-5 fill-amber-400" />
-        <p className="text-sm text-muted-foreground">
-          Some services are currently unavailable
-        </p>
-      </div>
+    <div className="py-2">
+      <Tooltip>
+        <TooltipTrigger className="flex items-center">
+          <WarningIcon weight="fill" className="size-5 fill-amber-400" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Some services are currently unavailable.</p>
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 }

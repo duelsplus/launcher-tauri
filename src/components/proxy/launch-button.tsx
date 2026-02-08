@@ -339,7 +339,7 @@ export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
         </div>
       )}
       {!user && (
-        <div className="w-full py-2">
+        <div className="w-full py-2 flex-shrink-0">
           <div className="flex items-center gap-2">
             <SpinnerIcon className="size-5 animate-spin" />
             <p className="text-sm text-muted-foreground">
