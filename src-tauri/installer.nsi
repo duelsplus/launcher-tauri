@@ -71,7 +71,7 @@ Var OldMainBinaryName
 
 Name "${PRODUCTNAME}"
 BrandingText "Duels+ Launcher Installer"
-Caption "Duels+r"
+Caption "Duels+"
 OutFile "${OUTFILE}"
 
 ; We don't actually use this value as default install path,
