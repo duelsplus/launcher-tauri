@@ -20,6 +20,7 @@ import {
   WrenchIcon,
   InfoIcon,
 } from "@phosphor-icons/react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 type Release = {
   id: string;
   version: string;
@@ -197,7 +198,14 @@ export function WhatsNew() {
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="text-lg font-semibold">{release.version}</h3>
                 {release.isLatest && (
-                  <div className="size-1.5 bg-primary rounded-full" />
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div className="size-1.5 bg-primary rounded-full" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs font-medium">
+                      Latest
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
               <ul className="list-disc list-inside space-y-1 text-sm">
@@ -245,7 +253,14 @@ export function WhatsNew() {
               <div className="flex items-center gap-3 mb-4">
                 <h3 className="text-xl font-bold">{selected.version}</h3>
                 {selected.isLatest && (
-                  <div className="size-1.5 bg-primary rounded-full" />
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div className="size-1.5 bg-primary rounded-full" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs font-medium">
+                      Latest
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
 
