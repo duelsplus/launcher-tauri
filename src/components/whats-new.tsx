@@ -54,10 +54,18 @@ export function renderMarkdown(text: string) {
   escaped = escaped.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   //italic
   escaped = escaped.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  //masked link
+  escaped = escaped.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" target="_blank" class="text-primary no-underline hover:underline" rel="noopener noreferrer">$1</a>',
+  );
   //link
   escaped = escaped.replace(
-    /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+    /(^|\s)((https?:\/\/|www\.)[^\s<]+)/gi,
+    (_, prefix, url) => {
+      const href = url.startsWith("http") ? url : `https://${url}`;
+      return `${prefix}<a href="${href}" target="_blank" class="text-primary no-underline hover:underline" rel="noopener noreferrer">${url}</a>`;
+    },
   );
 
   return escaped;
