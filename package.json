@@ -28,6 +28,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
     "m3-ripple": "^1.1.3",
+    "radix-ui": "^1.4.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwind-merge": "^3.4.0",

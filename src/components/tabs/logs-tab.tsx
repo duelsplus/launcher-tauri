@@ -1,6 +1,17 @@
-import { useEffect, useRef, useState } from "react";
-import { useLogs } from "@/lib/proxy-logs";
-import { BackspaceIcon, FunnelXIcon, PaletteIcon } from "@phosphor-icons/react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { LOG_LEVELS, LogLevel, getLogLevel, useLogs } from "@/lib/proxy-logs";
+import {
+  BackspaceIcon,
+  FunnelXIcon,
+  PaletteIcon,
+  TextIndentIcon,
+} from "@phosphor-icons/react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu";
 
 import AnsiToHtml from "ansi-to-html";
 import { Button } from "../ui/button";
@@ -14,9 +25,29 @@ export function Logs() {
     return saved === null ? true : saved === "true";
   });
 
+  const [enabledLevels, setEnabledLevels] = useState<Set<LogLevel>>(() => {
+    const saved = localStorage.getItem("logs-enabled-levels");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as LogLevel[];
+        return new Set(parsed);
+      } catch {
+        //
+      }
+    }
+    return new Set(LOG_LEVELS.filter((l) => l !== "DEBUG")); //all except `DEBUG`
+  });
+
   useEffect(() => {
     localStorage.setItem("logs-colors", colors.toString());
   }, [colors]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "logs-enabled-levels",
+      JSON.stringify(Array.from(enabledLevels)),
+    );
+  }, [enabledLevels]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -48,6 +79,15 @@ export function Logs() {
     return text.replace(/\x1B\[[0-9;]*m/g, "");
   }
 
+  const filtered = useMemo(() => {
+    return logs.filter((line) => {
+      const clean = strip(line);
+      const level = getLogLevel(clean);
+      if (!level) return true;
+      return enabledLevels.has(level);
+    });
+  }, [logs, enabledLevels]);
+
   return (
     <div className="flex flex-col space-y-4">
       <div className="flex justify-between items-center gap-2">
@@ -60,6 +100,32 @@ export function Logs() {
           >
             <BackspaceIcon weight="fill" />
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="icon-xs" variant="input">
+                <TextIndentIcon weight="fill" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              {LOG_LEVELS.map((level) => (
+                <DropdownMenuCheckboxItem
+                  key={level}
+                  checked={enabledLevels.has(level)}
+                  onCheckedChange={(checked: boolean) => {
+                    setEnabledLevels((prev) => {
+                      const next = new Set(prev);
+                      if (checked) next.add(level);
+                      else next.delete(level);
+                      return next;
+                    });
+                  }}
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  {level}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             size="icon-xs"
             onClick={() => setColors((prev) => !prev)}
@@ -75,13 +141,13 @@ export function Logs() {
         className="overflow-auto p-3 rounded-2xl bg-muted font-mono text-xs leading-relaxed text-muted-foreground"
         ref={containerRef}
       >
-        {logs.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="flex flex-col gap-2 justify-center items-center text-center h-full text-muted-foreground/50">
             <FunnelXIcon className="size-6" weight="light" />
             No logs yet
           </div>
         ) : (
-          logs.map((line, i) => (
+          filtered.map((line, i) => (
             <div
               key={i}
               className="whitespace-pre-wrap break-words select-text"
