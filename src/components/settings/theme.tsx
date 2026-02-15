@@ -8,6 +8,11 @@ interface SettingThemeProps {
 }
 
 const THEMES = ["dark", "classic", "light"] as const;
+const COLORS: Record<(typeof THEMES)[number], string> = {
+  dark: "bg-[#262624]",
+  classic: "bg-[#18181B]",
+  light: "bg-[#FAF9F5]",
+};
 
 export function SettingTheme({ title, value, onChange }: SettingThemeProps) {
   return (
@@ -21,27 +26,25 @@ export function SettingTheme({ title, value, onChange }: SettingThemeProps) {
         <div className="text-sm font-medium text-foreground">{title}</div>
       </div>
 
-      <div className="flex h-10 shrink-0">
-        {THEMES.map((t, idx, arr) => {
+      <div className="flex gap-1.5 shrink-0">
+        {THEMES.map((t) => {
           const active = value === t;
-          const isFirst = idx === 0;
-          const isLast = idx === arr.length - 1;
           return (
             <button
               key={t}
               onClick={() => onChange(t)}
               className={cn(
-                "relative w-12 text-[11px] capitalize border transition-colors",
-                "flex justify-center items-center",
-                active
-                  ? "bg-primary/10 border-primary z-10"
-                  : "bg-background border-border dark:border-input classic:border-input hover:bg-muted",
-                isFirst && "rounded-l-xl",
-                isLast && "rounded-r-xl",
-                !isFirst && "-ml-px",
+                "relative size-8 rounded-full border flex items-center justify-center transition-colors",
+                COLORS[t],
+                active ? "border-primary z-10" : "hover:border-input",
               )}
             >
-              <span>{t}</span>
+              {active && (
+                <CheckIcon
+                  weight="bold"
+                  className="absolute size-4 text-primary"
+                />
+              )}
             </button>
           );
         })}
