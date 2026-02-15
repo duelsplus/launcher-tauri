@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { CheckIcon } from "@phosphor-icons/react";
+import { Ripple } from "m3-ripple";
 
 interface SettingThemeProps {
   title: string;
@@ -34,17 +35,19 @@ export function SettingTheme({ title, value, onChange }: SettingThemeProps) {
               key={t}
               onClick={() => onChange(t)}
               className={cn(
-                "relative size-8 rounded-full border flex items-center justify-center transition-colors",
+                "group relative size-8 rounded-full border flex items-center justify-center transition-colors",
                 COLORS[t],
-                active ? "border-primary z-10" : "hover:border-input",
+                active && "border-primary z-10",
               )}
             >
-              {active && (
-                <CheckIcon
-                  weight="bold"
-                  className="absolute size-4 text-primary"
-                />
-              )}
+              <Ripple hoverOpacity={0} />
+              <CheckIcon
+                weight="bold"
+                className={cn(
+                  "absolute size-4 transition-opacity",
+                  active ? "text-primary opacity-100" : "text-foreground opacity-0 group-hover:opacity-50",
+                )}
+              />
             </button>
           );
         })}
