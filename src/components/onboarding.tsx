@@ -9,6 +9,7 @@ import { Titlebar } from "./titlebar";
 import { useTheme } from "@/components/theme-provider";
 import { setToken as setCachedToken } from "@/lib/token";
 import { startDiscordAuth } from "@/lib/discord";
+import { Ripple } from "m3-ripple";
 
 type OnboardingProps = {
   open: boolean;
@@ -251,6 +252,7 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
                         : "rounded-none", // middle button
                   )}
                 >
+                  <Ripple hoverOpacity={0} />
                   <span className="absolute bottom-2 left-2">
                     {t[0].toUpperCase() + t.slice(1)}
                   </span>
