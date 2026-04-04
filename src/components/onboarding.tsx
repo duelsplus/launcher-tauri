@@ -58,7 +58,7 @@ function TitleOnly({ title, onNext }: { title: string; onNext?: () => void }) {
 }
 
 export function Onboarding({ open, onFinish }: OnboardingProps) {
-  const [step, setStep] = useState<Step>("welcome");
+  const [step, setStep] = useState<Step>("token");
   const [hasValidToken, setHasValidToken] = useState<boolean | null>(null);
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
@@ -76,10 +76,10 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
 
   // autoclose after final step
   useEffect(() => {
-    if (step === "welcome") {
+    /*if (step === "welcome") {
       const t = setTimeout(onWelcome, 3000);
       return () => clearTimeout(t);
-    }
+    }*/
     if (step === "done") {
       const t = setTimeout(onFinish, 3000);
       return () => clearTimeout(t);
