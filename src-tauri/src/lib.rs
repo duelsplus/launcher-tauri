@@ -65,6 +65,12 @@ pub fn run() {
             rpc_get_valid_image_keys,
         ])
         .setup(|app| {
+            // Fix xdg-open in AppImages
+            if std::env::var("APPIMAGE").is_ok() {
+                if let Ok(current_path) = std::env::var("PATH") {
+                    std::env::set_var("PATH", format!("/usr/bin:/usr/local/bin:{}", current_path))
+                }
+            }
             // Detect if running in dev mode using Tauri's environment
             // In dev mode, Tauri sets TAURI_DEV environment variable
             let is_dev = std::env::var("TAURI_DEV").is_ok() || cfg!(debug_assertions);
