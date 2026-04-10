@@ -4,6 +4,7 @@ import { MainView } from "./main-view";
 import { useEffect } from "react";
 import { useUpdater } from "@/lib/updater";
 import { config } from "@/lib/config";
+import { getBrand, applyBrand } from "@/lib/brand-color";
 
 export function Shell() {
   const checkAndInstall = useUpdater((s) => s.checkAndInstall);
@@ -17,6 +18,13 @@ export function Shell() {
 
     update();
   }, [checkAndInstall]);
+
+  useEffect(() => {
+    const saved = getBrand();
+    if (saved) {
+      applyBrand(saved);
+    }
+  }, []);
 
   return (
     <div className="w-screen h-screen bg-background text-foreground overflow-hidden flex flex-col select-none scroll-smooth">

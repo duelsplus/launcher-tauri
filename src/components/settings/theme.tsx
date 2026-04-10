@@ -1,6 +1,9 @@
 import { cn } from "@/lib/utils";
 import { CheckIcon } from "@phosphor-icons/react";
 import { Ripple } from "m3-ripple";
+import { getBrand, setBrand, applyBrand } from "@/lib/brand-color";
+import { useEffect, useState } from "react";
+import { toHex } from "@/lib/hex";
 
 interface SettingThemeProps {
   title: string;
@@ -27,7 +30,7 @@ export function SettingTheme({ title, value, onChange }: SettingThemeProps) {
         <div className="text-sm font-medium text-foreground">{title}</div>
       </div>
 
-      <div className="flex gap-1.5 shrink-0">
+      <div className="flex items-center gap-1.5 shrink-0">
         {THEMES.map((t) => {
           const active = value === t;
           return (
@@ -45,13 +48,53 @@ export function SettingTheme({ title, value, onChange }: SettingThemeProps) {
                 weight="bold"
                 className={cn(
                   "absolute size-4 transition-opacity",
-                  active ? "text-primary opacity-100" : "text-foreground opacity-0 group-hover:opacity-50",
+                  active
+                    ? "text-primary opacity-100"
+                    : "text-foreground opacity-0 group-hover:opacity-50",
                 )}
               />
             </button>
           );
         })}
+        <div className="w-px h-6 bg-border" />
+        <SettingBrandColor />
       </div>
     </div>
+  );
+}
+
+export function SettingBrandColor() {
+  const [color, setColor] = useState<string>("#ffffff");
+  useEffect(() => {
+    const saved =
+      getBrand() ??
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--brand")
+        .trim();
+    const hex = toHex(saved);
+    setColor(hex);
+    applyBrand(hex);
+  }, []);
+
+  function handleChange(newC: string) {
+    setColor(newC);
+    applyBrand(newC);
+    setBrand(newC);
+  }
+
+  return (
+    <button
+      className="relative size-8 rounded-full border bg-primary overflow-hidden"
+      onClick={() => document.getElementById("brand-picker")?.click()}
+    >
+      <Ripple hoverOpacity={0} />
+      <input
+        id="brand-picker"
+        type="color"
+        className="absolute inset-0 opacity-0 pointer-events-none"
+        value={color}
+        onChange={(e) => handleChange(e.target.value)}
+      />
+    </button>
   );
 }
