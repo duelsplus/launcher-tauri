@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 type RpcImageItem = {
@@ -70,7 +71,7 @@ export function RpcCustomizeDialog({
   };
 
   const renderGrid = (items: RpcImageItem[]) => (
-    <div className="grid grid-cols-5 gap-4">
+    <div className="grid grid-cols-4 gap-2.5">
       {items.map((item) => {
         const active = item.key === activeKey;
 
@@ -79,9 +80,9 @@ export function RpcCustomizeDialog({
             key={item.key}
             onClick={() => selectImage(item)}
             className={cn(
-              "group relative aspect-square rounded-xl size-20 overflow-hidden bg-muted",
-              "hover:ring-2 hover:ring-primary/40 transition focus:outline-none",
-              active && "ring-2 ring-primary",
+              "group relative aspect-square rounded-xl size-27 overflow-hidden bg-muted",
+              "hover:ring-2 hover:ring-foreground/10 text-white/70 transition-all focus:outline-none",
+              active && "ring-3 hover:ring-3 ring-foreground/20 text-white hover:ring-foreground/20",
             )}
           >
             <img
@@ -97,7 +98,7 @@ export function RpcCustomizeDialog({
                 "bg-gradient-to-t from-black/60 via-black/0 to-black/0",
               )}
             >
-              <span className="text-xs text-white/70 font-medium pb-1">{item.label}</span>
+              <span className="text-sm group-hover:text-white transition font-medium pb-1">{item.label}</span>
             </div>
           </button>
         );
@@ -112,21 +113,20 @@ export function RpcCustomizeDialog({
           <DialogTitle>Customize Rich Presence</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          <section className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Fill
-            </h3>
-            {renderGrid(FILL_IMAGES)}
-          </section>
+        <Tabs defaultValue="fill">
+          <TabsList>
+            <TabsTrigger value="fill">Fill</TabsTrigger>
+            <TabsTrigger value="plus">Plus Only</TabsTrigger>
+          </TabsList>
 
-          <section className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Plus Only
-            </h3>
+          <TabsContent value="fill">
+            {renderGrid(FILL_IMAGES)}
+          </TabsContent>
+
+          <TabsContent value="plus">
             {renderGrid(PLUS_IMAGES)}
-          </section>
-        </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
