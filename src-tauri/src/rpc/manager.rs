@@ -862,6 +862,11 @@ impl RpcManager {
 
     /// Sets the anonymization settings for RPC
     pub fn set_anonymization(&self, anonymize_profile: bool, anonymize_location: bool) {
+        {
+            let mut s = self.state.lock().unwrap();
+            s.anonymize_profile = anonymize_profile;
+            s.anonymize_location = anonymize_location;
+        }
         self.send(RpcCommand::SetAnonymization {
             anonymize_profile,
             anonymize_location,
@@ -901,6 +906,10 @@ impl RpcManager {
                 image_key,
                 VALID_IMAGE_KEYS.join(", ")
             ));
+        }
+        {
+            let mut s = self.state.lock().unwrap();
+            s.custom_image = Some(image_key.to_string());
         }
         self.send(RpcCommand::SetImage {
             image_key: image_key.to_string(),
