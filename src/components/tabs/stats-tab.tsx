@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Logo, Logomark, LogomarkCustom } from "@/components/logo";
 import { Skeleton } from "../ui/skeleton";
-import { WarningIcon } from "@phosphor-icons/react";
+import { ArrowUpRightIcon, WarningIcon } from "@phosphor-icons/react";
+import { Button } from "../ui/button";
 
 interface StatCardProps {
   title: string;
@@ -152,6 +153,19 @@ export function Stats() {
         ]}
         loading={loading}
       />
+
+      <div className="w-full flex justify-center">
+        <a
+          href="https://dash.duelsplus.com/?tab=statistics"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button variant="input" size="sm">
+            View detailed stats
+            <ArrowUpRightIcon />
+          </Button>
+        </a>
+      </div>
     </div>
   );
 }
