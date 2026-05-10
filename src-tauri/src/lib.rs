@@ -21,6 +21,11 @@ use tauri::{Manager, WindowEvent};
 /// all authentication-related commands for frontend access.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(target_os = "linux")]
+    if std::env::var_os("WEBKIT_DISABLE_DMABUF_RENDERER").is_none() {
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    }
+
     // Create RPC manager (is_dev will be set in setup hook)
     let rpc_manager = RpcManager::new(false); // Temporary, will be updated in setup
 
