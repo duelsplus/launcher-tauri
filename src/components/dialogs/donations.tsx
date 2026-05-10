@@ -156,7 +156,7 @@ export function DonationsDialog({
               <GridItem
                 name="desiyn"
                 image="https://avatars.githubusercontent.com/u/44251398"
-                url="https://ko-fi.com/polariscli"
+                url="https://paypal.me/polariscli"
               />
               <GridItem
                 name="ref"
