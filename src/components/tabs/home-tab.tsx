@@ -21,31 +21,32 @@ export function Home() {
       <div className="pointer-events-none fixed top-0 h-16 w-full bg-linear-to-b from-background/70 to-transparent z-20" />
       <div className="min-h-[20vh]" />
 
-      <div className="space-y-6">
-        <div className="flex items-center gap-6">
-          <Logo className="h-16 w-auto text-primary dark:text-foreground classic:text-foreground" />
-          {isBeta && <LogoBeta className="h-16 w-auto" />}
-        </div>
-        <div className="flex justify-between items-center gap-4">
-          <div className="flex items-center gap-4">
-            <LaunchButton isBeta={isBeta} />
-            <ServiceStatus />
+      <div className="space-y-9">
+        <div className="space-y-6">
+          <div className="flex items-center gap-6">
+            <Logo className="h-16 w-auto text-primary dark:text-foreground classic:text-foreground" />
+            {isBeta && <LogoBeta className="h-16 w-auto" />}
           </div>
-          <div>
-            <a
-              href="https://discord.gg/YD4JZnuGYv"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="muted" size="pill" className="z-10">
-                <SiDiscord />
-                Support server
-              </Button>
-            </a>
+          <div className="flex justify-between items-center gap-4">
+            <div className="flex items-center gap-4">
+              <LaunchButton isBeta={isBeta} />
+              <ServiceStatus />
+            </div>
+            <div>
+              <a
+                href="https://discord.gg/YD4JZnuGYv"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="muted" size="pill" className="z-10">
+                  <SiDiscord />
+                  Support server
+                </Button>
+              </a>
+            </div>
           </div>
         </div>
         <div className="space-y-3">
-          <h2 className="text-base font-medium">What's new</h2>
           <WhatsNew />
         </div>
       </div>

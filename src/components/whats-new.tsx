@@ -19,6 +19,7 @@ import {
   SparkleIcon,
   WrenchIcon,
   InfoIcon,
+  CircleIcon,
 } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 type Release = {
@@ -177,141 +178,144 @@ export function WhatsNew() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading || !releases.length) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-44" />
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {pageItems.map((release) => {
-          const maxBullets = 2;
-          const whatsNew = release.whatsNew ?? [];
-          const showMore = release.whatsNew.length > maxBullets;
-          return (
-            <motion.div
-              key={release.id}
-              layoutId={`release-${release.id}`}
-              onClick={() => setSelected(release)}
-              className="p-4 rounded-2xl bg-muted/70"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-lg font-semibold">{release.version}</h3>
-                {release.isLatest && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <div className="size-1.5 bg-primary rounded-full" />
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs font-medium">
-                      Latest
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                {whatsNew.slice(0, maxBullets).map((item, idx) => {
-                  const meta = changeMeta(item);
-                  return (
-                    <li key={idx} className="flex gap-2 items-start text-sm">
-                      <meta.Icon
-                        className={`mt-0.5 shrink-0 size-3.5 ${meta.className}`}
-                      />
-                      <span
-                        className="line-clamp-2"
-                        dangerouslySetInnerHTML={{
-                          __html: renderMarkdown(item),
-                        }}
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
-              {showMore && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  +{whatsNew.length - maxBullets} more
-                </p>
+    <div className="rounded-3xl p-1.5 bg-muted/70">
+      <h2 className="text-xs font-bold tracking-widest uppercase text-primary/70 px-2 pt-1 pb-2">
+        Latest Updates
+      </h2>
+      <div className="rounded-2xl bg-background p-1">
+        {loading || !releases.length ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-44" />
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
+              {pageItems.map((release) => {
+                const maxBullets = 2;
+                const whatsNew = release.whatsNew ?? [];
+                const showMore = release.whatsNew.length > maxBullets;
+                return (
+                  <motion.div
+                    key={release.id}
+                    layoutId={`release-${release.id}`}
+                    onClick={() => setSelected(release)}
+                    className="p-4 rounded-xl bg-muted/70"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 250,
+                      damping: 22,
+                      mass: 0.7,
+                    }}
+                  >
+                    <h3 className="text-lg font-semibold mb-2">
+                      {release.version}
+                    </h3>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      {whatsNew.slice(0, maxBullets).map((item, idx) => {
+                        const meta = changeMeta(item);
+                        return (
+                          <li
+                            key={idx}
+                            className="flex gap-2 items-center text-sm"
+                          >
+                            <CircleIcon
+                              className={`shrink-0 size-2 ${meta.className}`}
+                              weight="bold"
+                            />
+                            <span
+                              className="line-clamp-1 font-medium"
+                              dangerouslySetInnerHTML={{
+                                __html: renderMarkdown(item),
+                              }}
+                            />
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    {showMore && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        +{whatsNew.length - maxBullets}
+                      </p>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <AnimatePresence>
+              {selected && (
+                <motion.div
+                  className="fixed inset-0 h-full z-50 flex items-center justify-center backdrop-blur bg-black/50"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setSelected(null)}
+                >
+                  <motion.div
+                    layoutId={`release-${selected.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full max-w-lg rounded-xl bg-background p-6"
+                    transition={{
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 22,
+                    }}
+                  >
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                      <h3 className="text-lg font-semibold tracking-tight">
+                        {selected.version}
+                      </h3>
+                      <div className="flex items-center justify-between text-xs font-medium text-muted-foreground/70">
+                        <span>
+                          Released{" "}
+                          <span className="text-muted-foreground">
+                            {formatDate(selected.releaseDate)}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {selected.whatsNew.length === 0 ? (
+                      <p className="text-sm text-center text-muted-foreground">
+                        This release has no changelog
+                      </p>
+                    ) : (
+                      <div className="max-h-[24rem] overflow-y-auto">
+                        <ul className="list-disc list-inside space-y-2 text-sm">
+                          {selected.whatsNew.map((item, i) => {
+                            const meta = changeMeta(item);
+                            return (
+                              <li key={i} className="flex gap-3 items-start">
+                                <CircleIcon
+                                  className={`mt-[7px] shrink-0 size-2 ${meta.className}`}
+                                  weight="bold"
+                                />
+                                <span
+                                  className="leading-relaxed font-medium"
+                                  dangerouslySetInnerHTML={{
+                                    __html: renderMarkdown(item),
+                                  }}
+                                />
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
+                  </motion.div>
+                </motion.div>
               )}
-            </motion.div>
-          );
-        })}
+            </AnimatePresence>
+          </>
+        )}
       </div>
 
-      <AnimatePresence>
-        {selected && (
-          <motion.div
-            className="fixed inset-0 h-full z-50 flex items-center justify-center backdrop-blur bg-black/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSelected(null)}
-          >
-            <motion.div
-              layoutId={`release-${selected.id}`}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg rounded-2xl bg-background p-6 shadow-xl"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <h3 className="text-xl font-bold">{selected.version}</h3>
-                {selected.isLatest && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <div className="size-1.5 bg-primary rounded-full" />
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs font-medium">
-                      Latest
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-
-              {selected.whatsNew.length === 0 ? (
-                <p className="text-sm text-center text-muted-foreground">
-                  This release has no changelog
-                </p>
-              ) : (
-                <div className="max-h-[24rem] overflow-y-auto">
-                  <ul className="list-disc list-inside space-y-2 text-sm">
-                    {selected.whatsNew.map((item, i) => {
-                      const meta = changeMeta(item);
-                      return (
-                        <li key={i} className="flex gap-3 items-start">
-                          <meta.Icon
-                            className={`mt-0.5 shrink-0 size-4 ${meta.className}`}
-                          />
-                          <span
-                            className="leading-relaxed"
-                            dangerouslySetInnerHTML={{
-                              __html: renderMarkdown(item),
-                            }}
-                          />
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-              <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground/70">
-                <span>
-                  Released{" "}
-                  <span className="text-muted-foreground">
-                    {formatDate(selected.releaseDate)}
-                  </span>
-                </span>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <Pagination className="mt-6 justify-center flex">
+      <Pagination className="mt-2 mb-1 justify-center flex">
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
@@ -346,6 +350,6 @@ export function WhatsNew() {
           </PaginationItem>
         </PaginationContent>
       </Pagination>
-    </>
+    </div>
   );
 }
