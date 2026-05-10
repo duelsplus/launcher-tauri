@@ -154,10 +154,9 @@ export function DonationsDialog({
                 url="https://github.com/sponsors/noowz"
               />
               <GridItem
-                name="Stu"
-                image="https://avatars.githubusercontent.com/u/73356864"
-                url=""
-                disabled
+                name="desiyn"
+                image="https://avatars.githubusercontent.com/u/44251398"
+                url="https://ko-fi.com/polariscli"
               />
               <GridItem
                 name="ref"
