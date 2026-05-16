@@ -21,32 +21,36 @@ export function StatCard({
   loading,
 }: StatCardProps) {
   return (
-    <div className="p-4 rounded-2xl bg-muted">
-      <div className="flex justify-between items-center gap-3 mb-3">
+    <div className="p-1.5 rounded-3xl bg-muted/70">
+      <div className="flex justify-between items-center gap-3 px-2 pt-1 mb-2">
         <div className="flex items-center gap-1.5">
           {icon && <div className="text-muted-foreground/50">{icon}</div>}
-          <h3 className="text-xs text-muted-foreground/50 tracking-widest font-semibold uppercase">
+          <h2 className="text-xs font-bold tracking-widest uppercase text-muted-foreground/50">
             {title}
-          </h3>
+          </h2>
         </div>
         {warning && (
           <WarningIcon weight="fill" className="size-4 fill-amber-400" />
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {stats.map((stat) => (
-          <div key={stat.label} className="flex flex-col items-start">
-            {loading ? (
-              <Skeleton className="bg-background/50 h-5.5 w-12 mb-1.5" />
-            ) : (
-              <span className="text-lg font-bold text-foreground">
-                {stat.value}
+      <div className="rounded-2xl bg-background p-1">
+        <div className="grid grid-cols-2 gap-4 p-1.5">
+          {stats.map((stat) => (
+            <div key={stat.label} className="flex flex-col items-start">
+              {loading ? (
+                <Skeleton className="bg-background/50 h-5.5 w-12 mb-1.5" />
+              ) : (
+                <span className="text-lg font-bold text-foreground">
+                  {stat.value}
+                </span>
+              )}
+              <span className="text-xs text-muted-foreground">
+                {stat.label}
               </span>
-            )}
-            <span className="text-xs text-muted-foreground">{stat.label}</span>
-          </div>
-        ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
