@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { getVersion } from "@tauri-apps/api/app";
 
 import type { Config } from "@/types/config";
 import { settingDefinitions } from "@/settings/definitions";
@@ -28,6 +29,7 @@ type ApiResponse<T> = {
 export function Settings() {
   const [user, setUser] = useState<User | null>(null);
   const [config, setConfig] = useState<Config | null>(null);
+  const [version, setVersion] = useState("");
   const [savingKey, setSavingKey] = useState<keyof Config | null>(null);
   const [restartPending, setRestartPending] = useState(false);
   const [restartPendingName, setRestartPendingName] = useState("");
@@ -74,6 +76,12 @@ export function Settings() {
       .catch(() => {
         setConfig(defaultSettings);
       });
+  }, []);
+
+  useEffect(() => {
+    getVersion()
+      .then(setVersion)
+      .catch(() => {});
   }, []);
 
   const grouped = useMemo(() => {
@@ -224,7 +232,7 @@ export function Settings() {
         />
       </SettingsSection>
 
-      <div className="w-full flex justify-center">
+      <div className="w-full gap-3 flex flex-col justify-center items-center">
         <a
           href="https://dash.duelsplus.com"
           target="_blank"
@@ -235,6 +243,8 @@ export function Settings() {
             <ArrowUpRightIcon />
           </Button>
         </a>
+
+        <span className="text-xs tracking-tight text-muted-foreground">v{version}</span>
       </div>
 
       <RpcCustomizeDialog
