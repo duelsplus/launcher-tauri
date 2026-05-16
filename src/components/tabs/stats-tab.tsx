@@ -39,7 +39,7 @@ export function StatCard({
           {stats.map((stat) => (
             <div key={stat.label} className="flex flex-col items-start">
               {loading ? (
-                <Skeleton className="bg-background/50 h-5.5 w-12 mb-1.5" />
+                <Skeleton className="bg-muted/70 h-5.5 w-12 mb-1.5" />
               ) : (
                 <span className="text-lg font-bold text-foreground">
                   {stat.value}
