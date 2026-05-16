@@ -138,19 +138,10 @@ function UpdateButton() {
 
 export function ActionRail() {
   const { activeTab, toggleTab } = useTabs();
-  const [version, setVersion] = useState("");
-
-  const [major, minor, patch] = version.split(".");
-
-  useEffect(() => {
-    getVersion()
-      .then(setVersion)
-      .catch(() => {});
-  }, []);
 
   return (
     <>
-      <nav className="fixed top-0 bottom-0 left-0 w-24 z-10 flex flex-col justify-center items-center bg-semimuted gap-3">
+      <nav className="fixed top-0 bottom-0 left-0 w-22 z-10 flex flex-col justify-center items-center bg-semimuted gap-3">
         <ActionCategory>
           <ActionButton
             icon="home"
@@ -178,30 +169,6 @@ export function ActionRail() {
           <DonateButton />
           <UserButton />
         </ActionCategory>
-        <div className="fixed bottom-5 text-xs tracking-tight text-foreground/50">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-help">v{version}</span>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="font-medium text-xs leading-relaxed"
-            >
-              This is the launcher version.
-              <br />
-              <div className="text-[10px]">
-                Major: <span className="font-semibold">{major}</span> (breaking
-                changes - this may never change)
-                <br />
-                Minor: <span className="font-semibold">{minor}</span> (new
-                features)
-                <br />
-                Patch: <span className="font-semibold">{patch}</span> (bug
-                fixes)
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </div>
       </nav>
 
       <Drawer />
@@ -216,7 +183,7 @@ function Drawer() {
   return (
     <div
       className={clsx(
-        "fixed top-0 left-24 h-full w-80 bg-semimuted z-0 transition-transform duration-300 flex flex-col",
+        "fixed top-0 left-22 h-full w-80 bg-semimuted z-0 transition-transform duration-300 flex flex-col",
         isOpen ? "translate-x-0" : "-translate-x-full",
       )}
     >
