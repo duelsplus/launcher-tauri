@@ -15,6 +15,7 @@ import {
   TrophyIcon,
   HeartIcon,
   ClockIcon,
+  UserPlusIcon,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,7 @@ const permLabels: Record<Perm, string> = {
   tester: "Tester",
   partner: "Partner",
   leaderboard: "Leaderboard",
+  supporterplus: "Supporter+",
   supporter: "Supporter",
   combo: "Combo",
   standard: "Standard", // to satisfy typescript
@@ -55,6 +57,7 @@ const permIcons: Record<Perm, any> = {
   tester: TestTubeIcon,
   partner: StarFourIcon,
   leaderboard: TrophyIcon,
+  supporterplus: UserPlusIcon,
   supporter: HeartIcon,
   combo: ClockIcon,
   standard: WrenchIcon, // to satisfy typescript
