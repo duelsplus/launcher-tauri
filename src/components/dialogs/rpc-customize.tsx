@@ -103,6 +103,33 @@ const PLUS_IMAGES: RpcImageItem[] = [
   },
 ];
 
+const SP_IMAGES: RpcImageItem[] = [
+  {
+    key: "nerd",
+    label: "Nerd",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1505142506503798824.png",
+  },
+  {
+    key: "i-paid-for-this-btw",
+    label: "paid for this",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1505141712408805386.png",
+  },
+  {
+    key: "i-own-u",
+    label: "i own u",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1505141712509468802.png",
+  },
+  {
+    key: "esex",
+    label: "esex?",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1505142195936563281.png",
+  },
+];
+
 interface RpcCustomizeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -117,6 +144,12 @@ export function RpcCustomizeDialog({
 
   const isVeryCool =
     hasPerm(user, "supporter") ||
+    hasPerm(user, "supporterplus") ||
+    hasPerm(user, "developer") ||
+    hasPerm(user, "admin");
+
+  const isVeryVeryCool =
+    hasPerm(user, "supporterplus") ||
     hasPerm(user, "developer") ||
     hasPerm(user, "admin");
 
@@ -215,9 +248,21 @@ export function RpcCustomizeDialog({
               <TabsTrigger value="fill">Free</TabsTrigger>
               <TabsTrigger
                 value="plus"
-                className={cn(!isVeryCool && "data-[state=active]:bg-red-200/70! data-[state=active]:text-red-800! dark:data-[state=active]:bg-red-950/70! dark:data-[state=active]:text-red-300! classic:data-[state=active]:bg-red-950/70! classic:data-[state=active]:text-red-300!")}
+                className={cn(
+                  !isVeryCool &&
+                    "data-[state=active]:bg-red-200/70! data-[state=active]:text-red-800! dark:data-[state=active]:bg-red-950/70! dark:data-[state=active]:text-red-300! classic:data-[state=active]:bg-red-950/70! classic:data-[state=active]:text-red-300!",
+                )}
               >
                 Supporter
+              </TabsTrigger>
+              <TabsTrigger
+                value="supporterplus"
+                className={cn(
+                  !isVeryVeryCool &&
+                    "data-[state=active]:bg-red-200/70! data-[state=active]:text-red-800! dark:data-[state=active]:bg-red-950/70! dark:data-[state=active]:text-red-300! classic:data-[state=active]:bg-red-950/70! classic:data-[state=active]:text-red-300!",
+                )}
+              >
+                Supporter+
               </TabsTrigger>
             </TabsList>
 
@@ -226,6 +271,10 @@ export function RpcCustomizeDialog({
 
               <TabsContent value="plus">
                 {renderGrid(PLUS_IMAGES, !isVeryCool)}
+              </TabsContent>
+
+              <TabsContent value="supporterplus">
+                {renderGrid(SP_IMAGES, !isVeryVeryCool)}
               </TabsContent>
             </div>
           </Tabs>

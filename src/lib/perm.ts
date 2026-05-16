@@ -5,6 +5,7 @@ export type Perm =
   | "tester"
   | "partner"
   | "leaderboard"
+  | "supporterplus"
   | "supporter"
   | "combo"
   | "standard";

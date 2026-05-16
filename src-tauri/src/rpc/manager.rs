@@ -27,6 +27,10 @@ pub const VALID_IMAGE_KEYS: &[&str] = &[
     "logo-blue-plus",
     "logo-white",
     "logo-gray",
+    "i-paid-for-this-btw",
+    "i-own-u",
+    "esex",
+    "nerd",
 ];
 
 /// Commands sent to the RPC worker thread
