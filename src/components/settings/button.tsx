@@ -21,7 +21,7 @@ export function SettingButton({
         if (!disabled && onClick) onClick();
       }}
       className={cn(
-        "group/item w-full flex items-center justify-between text-left gap-4 rounded-2xl px-4 py-3",
+        "group/item w-full flex items-center justify-between text-left gap-4 rounded-xl px-4 py-3",
         "bg-muted/70 hover:bg-muted transition-colors",
         disabled && "opacity-50 cursor-not-allowed",
       )}

@@ -22,7 +22,7 @@ export function SettingTheme({ title, value, onChange }: SettingThemeProps) {
   return (
     <div
       className={cn(
-        "w-full flex items-center justify-between gap-4 rounded-2xl px-4 py-3 transition-colors",
+        "w-full flex items-center justify-between gap-4 rounded-xl px-4 py-3 transition-colors",
         "bg-muted/70",
       )}
     >
