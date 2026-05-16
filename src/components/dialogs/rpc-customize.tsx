@@ -18,21 +18,81 @@ type RpcImageItem = {
 };
 
 const FILL_IMAGES: RpcImageItem[] = [
-  { key: "logo-v1", label: "Classic", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1391867456661880884.png" },
-  { key: "logo-v1-purple", label: "Purple", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1404368523651842179.png" },
-  { key: "logo-emerald", label: "Emerald", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143122220253297.png" },
-  { key: "logo-golden-mark", label: "Golden", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143122627104778.png" },
-  { key: "logo-green", label: "Green", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143121742106824.png" },
-  { key: "logo-shiny", label: "Shiny", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143121972789382.png" },
-  { key: "logo-blue", label: "Blue", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1461068864094998623.png" },
-  { key: "logo-white", label: "White", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1461068864048726153.png" },
-  { key: "logo-gray", label: "Gray", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1461068175725564048.png" },
+  {
+    key: "logo-v1",
+    label: "Classic",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1391867456661880884.png",
+  },
+  {
+    key: "logo-v1-purple",
+    label: "Purple",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1404368523651842179.png",
+  },
+  {
+    key: "logo-emerald",
+    label: "Emerald",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143122220253297.png",
+  },
+  {
+    key: "logo-golden-mark",
+    label: "Golden",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143122627104778.png",
+  },
+  {
+    key: "logo-green",
+    label: "Green",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143121742106824.png",
+  },
+  {
+    key: "logo-shiny",
+    label: "Shiny",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143121972789382.png",
+  },
+  {
+    key: "logo-blue",
+    label: "Blue",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1461068864094998623.png",
+  },
+  {
+    key: "logo-white",
+    label: "White",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1461068864048726153.png",
+  },
+  {
+    key: "logo-gray",
+    label: "Gray",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1461068175725564048.png",
+  },
 ];
 
 const PLUS_IMAGES: RpcImageItem[] = [
-  { key: "logo-emerald-plus", label: "Emerald", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143123096600698.png" },
-  { key: "logo-golden-plus", label: "Golden", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143123474354400.png" },
-  { key: "logo-blue-plus", label: "Blue", image: "https://cdn.discordapp.com/app-assets/1391866803889770526/1461068864409309284.png" },
+  {
+    key: "logo-emerald-plus",
+    label: "Emerald",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143123096600698.png",
+  },
+  {
+    key: "logo-golden-plus",
+    label: "Golden",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143123474354400.png",
+  },
+  {
+    key: "logo-blue-plus",
+    label: "Blue",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1461068864409309284.png",
+  },
 ];
 
 interface RpcCustomizeDialogProps {
@@ -71,7 +131,7 @@ export function RpcCustomizeDialog({
   };
 
   const renderGrid = (items: RpcImageItem[]) => (
-    <div className="grid grid-cols-4 gap-2.5">
+    <div className="grid grid-cols-4 gap-1.5">
       {items.map((item) => {
         const active = item.key === activeKey;
 
@@ -80,9 +140,10 @@ export function RpcCustomizeDialog({
             key={item.key}
             onClick={() => selectImage(item)}
             className={cn(
-              "group relative aspect-square rounded-xl size-27 overflow-hidden bg-muted",
+              "group relative aspect-square rounded-xl size-27 overflow-hidden bg-muted/70",
               "hover:ring-2 hover:ring-foreground/10 text-white/70 transition-all focus:outline-none",
-              active && "ring-3 hover:ring-3 ring-foreground/20 text-white hover:ring-foreground/20",
+              active &&
+                "ring-3 hover:ring-3 ring-foreground/20 text-white hover:ring-foreground/20",
             )}
           >
             <img
@@ -98,7 +159,9 @@ export function RpcCustomizeDialog({
                 "bg-gradient-to-t from-black/60 via-black/0 to-black/0",
               )}
             >
-              <span className="text-sm group-hover:text-white transition font-medium pb-1">{item.label}</span>
+              <span className="text-sm group-hover:text-white transition font-medium pb-1">
+                {item.label}
+              </span>
             </div>
           </button>
         );
@@ -113,20 +176,20 @@ export function RpcCustomizeDialog({
           <DialogTitle>Customize Rich Presence</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="fill">
-          <TabsList>
-            <TabsTrigger value="fill">Fill</TabsTrigger>
-            <TabsTrigger value="plus">Plus Only</TabsTrigger>
-          </TabsList>
+        <div className="rounded-3xl p-1.5 bg-muted/70">
+          <Tabs className="gap-1" defaultValue="fill">
+            <TabsList>
+              <TabsTrigger value="fill">Fill</TabsTrigger>
+              <TabsTrigger value="plus">Plus Only</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="fill">
-            {renderGrid(FILL_IMAGES)}
-          </TabsContent>
+            <div className="rounded-2xl bg-background p-1">
+              <TabsContent value="fill">{renderGrid(FILL_IMAGES)}</TabsContent>
 
-          <TabsContent value="plus">
-            {renderGrid(PLUS_IMAGES)}
-          </TabsContent>
-        </Tabs>
+              <TabsContent value="plus">{renderGrid(PLUS_IMAGES)}</TabsContent>
+            </div>
+          </Tabs>
+        </div>
       </DialogContent>
     </Dialog>
   );
