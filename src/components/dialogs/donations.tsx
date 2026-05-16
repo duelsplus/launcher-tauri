@@ -127,58 +127,53 @@ export function DonationsDialog({
             </div>
           </section>
 
-          <section className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <div className="rounded-3xl p-1.5 bg-muted/70">
+            <h2 className="text-xs font-bold tracking-widest uppercase text-primary/70 px-2 pt-1 pb-2">
               Support the Devs Individually
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <GridItem
-                name="lee"
-                image="https://avatars.githubusercontent.com/u/74821251"
-                url="https://ko-fi.com/wyzux"
-              />
-              <GridItem
-                name="Hachem"
-                image="https://avatars.githubusercontent.com/u/83752039"
-                url="https://ko-fi.com/hxchem"
-              />
-              <GridItem
-                name="Venxm"
-                image="https://avatars.githubusercontent.com/u/96634931"
-                url="https://paypal.me/venxmediting"
-              />
-              <GridItem
-                name="Noowz"
-                image="https://avatars.githubusercontent.com/u/44096711"
-                url="https://github.com/sponsors/noowz"
-              />
-              <GridItem
-                name="desiyn"
-                image="https://avatars.githubusercontent.com/u/44251398"
-                url="https://paypal.me/polariscli"
-              />
-              <GridItem
-                name="ref"
-                image="https://avatars.githubusercontent.com/u/104659005"
-                url=""
-                disabled
-              />
+            </h2>
+            <div className="rounded-2xl bg-background p-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                <GridItem
+                  name="lee"
+                  image="https://avatars.githubusercontent.com/u/74821251"
+                  url="https://ko-fi.com/wyzux"
+                />
+                <GridItem
+                  name="Hachem"
+                  image="https://avatars.githubusercontent.com/u/83752039"
+                  url="https://ko-fi.com/hxchem"
+                />
+                <GridItem
+                  name="Venxm"
+                  image="https://avatars.githubusercontent.com/u/96634931"
+                  url="https://paypal.me/venxmediting"
+                />
+                <GridItem
+                  name="Noowz"
+                  image="https://avatars.githubusercontent.com/u/44096711"
+                  url="https://github.com/sponsors/noowz"
+                />
+                <GridItem
+                  name="desiyn"
+                  image="https://avatars.githubusercontent.com/u/44251398"
+                  url="https://paypal.me/polariscli"
+                />
+                <GridItem
+                  name="ref"
+                  image="https://avatars.githubusercontent.com/u/104659005"
+                  url=""
+                  disabled
+                />
+              </div>
             </div>
 
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              All funds will go <strong>directly to the developers</strong>.
-              Every contribution supports them personally for their time and
-              work.
-            </p>
-
-            {!isVeryCool && (
-              <p className="text-xs leading-relaxed text-muted-foreground/70">
-                Note: Donating to a developer directly does <strong>not</strong>{" "}
-                grant supporter perks.
+            <div className="px-2 mt-2 mb-1">
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                All funds will go directly to the developers. Donating to a
+                developer directly does not grant any perks.
               </p>
-            )}
-          </section>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
