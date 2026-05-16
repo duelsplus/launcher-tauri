@@ -343,7 +343,7 @@ export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
           <div className="flex items-center gap-2">
             <SpinnerIcon className="size-5 animate-spin" />
             <p className="text-sm text-muted-foreground">
-              Connecting to Duels+ services
+              Connecting...
             </p>
           </div>
         </div>
