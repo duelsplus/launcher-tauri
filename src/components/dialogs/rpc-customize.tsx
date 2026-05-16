@@ -135,11 +135,26 @@ interface RpcCustomizeDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const getTab = (imageKey: string): string => {
+  //for making sure it opens on the tab of active image
+  if (FILL_IMAGES.some((img) => img.key === imageKey)) {
+    return "fill";
+  }
+  if (PLUS_IMAGES.some((img) => img.key === imageKey)) {
+    return "plus";
+  }
+  if (SP_IMAGES.some((img) => img.key === imageKey)) {
+    return "supporterplus";
+  }
+  return "fill"; // fallback??
+};
+
 export function RpcCustomizeDialog({
   open,
   onOpenChange,
 }: RpcCustomizeDialogProps) {
   const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("fill");
   const [user, setUser] = useState<User | null>(null);
 
   const isVeryCool =
@@ -167,14 +182,17 @@ export function RpcCustomizeDialog({
       .get()
       .then((cfg) => {
         setActiveKey(cfg.rpcImage);
+        setActiveTab(getTab(cfg.rpcImage));
       })
       .catch(() => {
         setActiveKey(defaultSettings.rpcImage);
+        setActiveTab(getTab(defaultSettings.rpcImage));
       });
   }, [open]);
 
   const selectImage = async (item: RpcImageItem) => {
     setActiveKey(item.key);
+    setActiveTab(getTab(item.key));
 
     try {
       await invoke("rpc_set_image", {
@@ -243,7 +261,11 @@ export function RpcCustomizeDialog({
         </DialogHeader>
 
         <div className="rounded-3xl p-1.5 bg-muted/70">
-          <Tabs className="gap-1" defaultValue="fill">
+          <Tabs
+            className="gap-1"
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
             <TabsList>
               <TabsTrigger value="fill">Free</TabsTrigger>
               <TabsTrigger
