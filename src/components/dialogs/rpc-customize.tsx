@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { config as configApi } from "@/lib/config";
+import { User, hasPerm } from "@/lib/perm";
+import { getToken } from "@/lib/token";
 import { defaultSettings } from "@/settings/defaults";
 import {
   Dialog,
@@ -10,6 +12,12 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { LockSimpleIcon } from "@phosphor-icons/react";
+
+type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+};
 
 type RpcImageItem = {
   key: string;
@@ -49,12 +57,6 @@ const FILL_IMAGES: RpcImageItem[] = [
       "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143121742106824.png",
   },
   {
-    key: "logo-shiny",
-    label: "Shiny",
-    image:
-      "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143121972789382.png",
-  },
-  {
     key: "logo-blue",
     label: "Blue",
     image:
@@ -76,20 +78,26 @@ const FILL_IMAGES: RpcImageItem[] = [
 
 const PLUS_IMAGES: RpcImageItem[] = [
   {
+    key: "logo-shiny",
+    label: "Shiny",
+    image:
+      "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143121972789382.png",
+  },
+  {
     key: "logo-emerald-plus",
-    label: "Emerald",
+    label: "Emerald +",
     image:
       "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143123096600698.png",
   },
   {
     key: "logo-golden-plus",
-    label: "Golden",
+    label: "Golden +",
     image:
       "https://cdn.discordapp.com/app-assets/1391866803889770526/1454143123474354400.png",
   },
   {
     key: "logo-blue-plus",
-    label: "Blue",
+    label: "Blue +",
     image:
       "https://cdn.discordapp.com/app-assets/1391866803889770526/1461068864409309284.png",
   },
@@ -105,6 +113,20 @@ export function RpcCustomizeDialog({
   onOpenChange,
 }: RpcCustomizeDialogProps) {
   const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  const isVeryCool =
+    hasPerm(user, "supporter") ||
+    hasPerm(user, "developer") ||
+    hasPerm(user, "admin");
+
+  useEffect(() => {
+    invoke<ApiResponse<User>>("get_user", {
+      token: getToken(),
+    })
+      .then((u) => setUser(u.data))
+      .catch(() => setUser(null));
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -130,7 +152,7 @@ export function RpcCustomizeDialog({
     }
   };
 
-  const renderGrid = (items: RpcImageItem[]) => (
+  const renderGrid = (items: RpcImageItem[], disabled = false) => (
     <div className="grid grid-cols-4 gap-1.5">
       {items.map((item) => {
         const active = item.key === activeKey;
@@ -138,28 +160,39 @@ export function RpcCustomizeDialog({
         return (
           <button
             key={item.key}
-            onClick={() => selectImage(item)}
+            onClick={() => !disabled && selectImage(item)}
+            disabled={disabled}
             className={cn(
               "group relative aspect-square rounded-xl size-27 overflow-hidden bg-muted/70",
               "hover:ring-2 hover:ring-foreground/10 text-white/70 transition-all focus:outline-none",
               active &&
                 "ring-3 hover:ring-3 ring-foreground/20 text-white hover:ring-foreground/20",
+              disabled && "pointer-events-none ring-2 ring-red-950/20",
             )}
           >
             <img
               src={item.image}
               alt=""
               draggable={false}
-              className="h-full w-full object-cover select-none pointer-events-none"
+              className={cn(
+                "h-full w-full object-cover select-none pointer-events-none transition-opacity",
+                //disabled && "opacity-60",
+              )}
             />
 
             <div
               className={cn(
                 "absolute inset-0 flex items-end justify-center",
                 "bg-gradient-to-t from-black/60 via-black/0 to-black/0",
+                disabled && "from-red-950/60",
               )}
             >
-              <span className="text-sm group-hover:text-white transition font-medium pb-1">
+              <span
+                className={cn(
+                  "relative text-sm group-hover:text-white transition font-medium z-20 pb-1",
+                  disabled && "text-red-400",
+                )}
+              >
                 {item.label}
               </span>
             </div>
@@ -179,14 +212,21 @@ export function RpcCustomizeDialog({
         <div className="rounded-3xl p-1.5 bg-muted/70">
           <Tabs className="gap-1" defaultValue="fill">
             <TabsList>
-              <TabsTrigger value="fill">Fill</TabsTrigger>
-              <TabsTrigger value="plus">Plus Only</TabsTrigger>
+              <TabsTrigger value="fill">Free</TabsTrigger>
+              <TabsTrigger
+                value="plus"
+                className={cn(!isVeryCool && "data-[state=active]:bg-red-200/70! data-[state=active]:text-red-800! dark:data-[state=active]:bg-red-950/70! dark:data-[state=active]:text-red-300! classic:data-[state=active]:bg-red-950/70! classic:data-[state=active]:text-red-300!")}
+              >
+                Supporter
+              </TabsTrigger>
             </TabsList>
 
             <div className="rounded-2xl bg-background p-1">
               <TabsContent value="fill">{renderGrid(FILL_IMAGES)}</TabsContent>
 
-              <TabsContent value="plus">{renderGrid(PLUS_IMAGES)}</TabsContent>
+              <TabsContent value="plus">
+                {renderGrid(PLUS_IMAGES, !isVeryCool)}
+              </TabsContent>
             </div>
           </Tabs>
         </div>
