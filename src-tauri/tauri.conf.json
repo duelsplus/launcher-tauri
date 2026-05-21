@@ -17,6 +17,7 @@
         "width": 1000,
         "height": 700,
         "visible": false,
+        "transparent": true,
         "shadow": true,
         "decorations": false,
         "dragDropEnabled": false,
