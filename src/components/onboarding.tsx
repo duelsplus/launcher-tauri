@@ -66,7 +66,9 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
   const [actionError, setActionError] = useState(false);
   const [discordLoading, setDiscordLoading] = useState(false);
   const { theme: currentTheme, setTheme: setAppTheme } = useTheme();
-  const [theme, setTheme] = useState<"dark" | "classic" | "light">(currentTheme);
+  const [theme, setTheme] = useState<"dark" | "classic" | "light">(
+    currentTheme,
+  );
 
   useEffect(() => {
     invoke<boolean>("token_exists")
@@ -208,6 +210,28 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
                   )}
                 </Button>
               </div>
+            </div>
+            <div className="fixed bottom-6 text-xs text-muted-foreground font-medium mt-auto">
+              <p>
+                By continuing, you agree to our{" "}
+                <a
+                  href="https://duelsplus.com/policy/tos"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:no-underline"
+                >
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a
+                  href="https://duelsplus.com/policy/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:no-underline"
+                >
+                  Privacy Policy
+                </a>
+              </p>
             </div>
           </Panel>
         )}

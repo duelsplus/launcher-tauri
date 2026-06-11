@@ -243,8 +243,25 @@ export function Settings() {
             <ArrowUpRightIcon />
           </Button>
         </a>
-
-        <span className="text-xs tracking-tight text-muted-foreground">v{version}</span>
+        <div className="flex flex-col justify-center items-center gap-1 text-xs tracking-tight text-muted-foreground">
+          <span className="text-sm tracking-tight">v{version}</span>
+          <a
+            href="https://duelsplus.com/policy/tos"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:no-underline"
+          >
+            Terms of Service
+          </a>
+          <a
+            href="https://duelsplus.com/policy/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:no-underline"
+          >
+            Privacy Policy
+          </a>
+        </div>
       </div>
 
       <RpcCustomizeDialog
