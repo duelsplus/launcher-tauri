@@ -6,19 +6,8 @@ import {
   CopyIcon,
   CheckIcon,
   SpinnerIcon,
-  UserGearIcon,
-  ShieldCheckIcon,
-  WrenchIcon,
-  TestTubeIcon,
-  BracketsCurlyIcon,
-  StarFourIcon,
-  TrophyIcon,
-  HeartIcon,
-  ClockIcon,
-  UserPlusIcon,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Popover,
   PopoverTrigger,
@@ -30,42 +19,25 @@ import { useOnboarding } from "@/lib/onboarding";
 import { Skeleton } from "../ui/skeleton";
 import { User, Perm } from "@/lib/perm";
 import { Ripple } from "m3-ripple";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type ApiResponse<T> = {
   success: boolean;
   data: T;
 };
 
-const permLabels: Record<Perm, string> = {
-  admin: "Admin",
-  developer: "Developer",
-  moderator: "Moderator",
-  tester: "Tester",
-  partner: "Partner",
-  leaderboard: "Leaderboard",
-  supporterplus: "Supporter+",
-  supporter: "Supporter",
-  combo: "Combo",
-  standard: "Standard", // to satisfy typescript
+const badOrder = ["divine", "celestial"];
+const badLabels: Record<string, string> = {
+  divine: "Divine",
+  celestial: "Celestial",
 };
 
-const permIcons: Record<Perm, any> = {
-  admin: UserGearIcon,
-  developer: BracketsCurlyIcon,
-  moderator: ShieldCheckIcon,
-  tester: TestTubeIcon,
-  partner: StarFourIcon,
-  leaderboard: TrophyIcon,
-  supporterplus: UserPlusIcon,
-  supporter: HeartIcon,
-  combo: ClockIcon,
-  standard: WrenchIcon, // to satisfy typescript
-};
-
-export function PermIcon({ perm }: { perm: Perm }) {
-  const Icon = permIcons[perm];
-  return <Icon className="text-muted-foreground/30 size-4" weight="fill" />;
+function getBadge(perms: Perm[]): string | null {
+  for (const bad of badOrder) {
+    if (perms.includes(bad as Perm)) {
+      return badLabels[bad];
+    }
+  }
+  return null;
 }
 
 export function UserButton() {
@@ -106,17 +78,6 @@ export function UserButton() {
     }
   };
 
-  /*if (!user)
-    return (
-      <Button
-        variant="muted"
-        size="icon-lg"
-        className="rounded-[32px] hover:rounded-3xl p-5.5 [&_svg:not([class*='size-'])]:size-6"
-      >
-        <UserIcon />
-      </Button>
-      );*/
-
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -132,28 +93,17 @@ export function UserButton() {
 
       <PopoverContent side="right" align="start" className="select-none">
         <div className="flex flex-col p-2 pr-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-baseline gap-2">
             {user ? (
               <>
                 <div className="text-sm font-medium truncate">
                   {user.username}
                 </div>
-                <div className="flex items-center gap-1">
-                  {(user.perms || [])
-                    .filter((p) => p !== "standard") //skip standard perm
-                    .map((p) => (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="inline-flex">
-                            <PermIcon key={p} perm={p} />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="text-xs font-medium">
-                          {permLabels[p]}
-                        </TooltipContent>
-                      </Tooltip>
-                    ))}
-                </div>
+                {getBadge(user.perms || []) && (
+                  <span className="text-xs font-medium text-primary">
+                    {getBadge(user.perms || [])}
+                  </span>
+                )}
               </>
             ) : (
               <>
