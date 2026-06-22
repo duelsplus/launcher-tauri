@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { SiDiscord } from "@icons-pack/react-simple-icons";
 import { config as configApi } from "@/lib/config";
 import { useEffect, useState } from "react";
+import { SubscribeBanner } from "../nav/subscribe-banner";
 
 export function Home() {
   const [isBeta, setIsBeta] = useState(false);
@@ -19,7 +20,8 @@ export function Home() {
   return (
     <div className="relative">
       <div className="pointer-events-none fixed top-0 h-16 w-full bg-linear-to-b from-background/70 to-transparent z-20" />
-      <div className="min-h-[20vh]" />
+      <SubscribeBanner />
+      <div className="min-h-[16vh]" />
 
       <div className="space-y-9">
         <div className="space-y-6">

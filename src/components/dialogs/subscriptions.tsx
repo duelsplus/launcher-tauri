@@ -27,7 +27,7 @@ export function SubscriptionsDialog({
   const isDivine = hasPerm(user, "divine");
 
   const bodyCopy = isDivine
-    ? "You’re on Divine, a monthly subscription that keeps Duels+ evolving with exclusive features, and early access drops, and everything else Celestial has to offer."
+    ? "You’re on Divine, a monthly subscription that keeps Duels+ evolving with exclusive features, early access drops, and everything else Celestial has to offer."
     : isCele
       ? "You're on Celestial, a one-time unlock that permanently grants API-Keyless and other neat perks."
       : "Subscribe to a paid tier for extra features that expand what you can do with Duels+ and make your experience feel complete.";
