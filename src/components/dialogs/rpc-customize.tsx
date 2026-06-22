@@ -158,13 +158,13 @@ export function RpcCustomizeDialog({
   const [user, setUser] = useState<User | null>(null);
 
   const isVeryCool =
-    hasPerm(user, "supporter") ||
-    hasPerm(user, "supporterplus") ||
+    hasPerm(user, "celestial") ||
+    hasPerm(user, "divine") ||
     hasPerm(user, "developer") ||
     hasPerm(user, "admin");
 
   const isVeryVeryCool =
-    hasPerm(user, "supporterplus") ||
+    hasPerm(user, "divine") ||
     hasPerm(user, "developer") ||
     hasPerm(user, "admin");
 
@@ -275,7 +275,7 @@ export function RpcCustomizeDialog({
                     "data-[state=active]:bg-red-200/70! data-[state=active]:text-red-800! dark:data-[state=active]:bg-red-950/70! dark:data-[state=active]:text-red-300! classic:data-[state=active]:bg-red-950/70! classic:data-[state=active]:text-red-300!",
                 )}
               >
-                Supporter
+                Celestial
               </TabsTrigger>
               <TabsTrigger
                 value="supporterplus"
@@ -284,7 +284,7 @@ export function RpcCustomizeDialog({
                     "data-[state=active]:bg-red-200/70! data-[state=active]:text-red-800! dark:data-[state=active]:bg-red-950/70! dark:data-[state=active]:text-red-300! classic:data-[state=active]:bg-red-950/70! classic:data-[state=active]:text-red-300!",
                 )}
               >
-                Supporter+
+                Divine
               </TabsTrigger>
             </TabsList>
 
