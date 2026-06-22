@@ -100,7 +100,7 @@ export function UserButton() {
                   {user.username}
                 </div>
                 {getBadge(user.perms || []) && (
-                  <span className="text-xs font-medium text-primary">
+                  <span className="text-xs font-medium text-foreground/40">
                     {getBadge(user.perms || [])}
                   </span>
                 )}

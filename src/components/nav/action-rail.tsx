@@ -26,6 +26,7 @@ import { Logs } from "../tabs/logs-tab";
 import { UserButton } from "./user-button";
 import { notify } from "@/lib/notification";
 import { DonateButton } from "./donate-button";
+import { SubscribeButton } from "./subscribe-button";
 import { getVersion } from "@tauri-apps/api/app";
 
 interface ActionButtonProps {
@@ -166,7 +167,7 @@ export function ActionRail() {
         </ActionCategory>
         <ActionCategory>
           <UpdateButton />
-          <DonateButton />
+          <SubscribeButton />
           <UserButton />
         </ActionCategory>
       </nav>

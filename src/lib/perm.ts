@@ -1,11 +1,11 @@
 export type Perm =
   | "admin"
   | "developer"
-  | "moderator"
   | "tester"
   | "partner"
   | "leaderboard"
-  | "supporterplus"
+  | "divine"
+  | "celestial"
   | "supporter"
   | "combo"
   | "standard";
