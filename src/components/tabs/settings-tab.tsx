@@ -20,6 +20,7 @@ import { User, hasPerm } from "@/lib/perm";
 import { getToken } from "@/lib/token";
 import { RestartPendingDialog } from "../dialogs/restart-pending";
 import { EnableBetaDialog } from "../dialogs/enable-beta";
+import { Skeleton } from "../ui/skeleton";
 
 type ApiResponse<T> = {
   success: boolean;
@@ -148,9 +149,11 @@ export function Settings() {
       <div className="space-y-4">
         <h2 className="text-base font-medium">Settings</h2>
 
-        <div className="flex justify-center items-center w-full">
-          <SpinnerIcon className="animate-spin text-muted-foreground" />
-        </div>
+        <Skeleton className="rounded-3xl bg-muted/40 w-full h-48" />
+
+        <Skeleton className="rounded-3xl bg-muted/40 w-full h-28" />
+
+        <Skeleton className="rounded-3xl bg-muted/40 w-full h-64" />
       </div>
     );
   }
