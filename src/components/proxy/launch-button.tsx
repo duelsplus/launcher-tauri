@@ -328,26 +328,6 @@ export function LaunchButton({ isBeta = false }: LaunchButtonProps) {
           </AnimatePresence>
         </Tooltip>
       </div>
-      {user?.isBanned && (
-        <div className="w-full py-2">
-          <div className="flex items-center gap-2">
-            <WarningOctagonIcon weight="fill" className="size-5 fill-red-400" />
-            <p className="text-sm text-muted-foreground">
-              Your account was banned for breaching the Duels+ ToS
-            </p>
-          </div>
-        </div>
-      )}
-      {!user && (
-        <div className="w-full py-2 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <SpinnerIcon className="size-5 animate-spin" />
-            <p className="text-sm text-muted-foreground">
-              Connecting...
-            </p>
-          </div>
-        </div>
-      )}
 
       <ProxyErrorDialog
         open={!!proxyError}

@@ -30,7 +30,7 @@ export function Home() {
             {isBeta && <LogoBeta className="h-16 w-auto" />}
           </div>
           <div className="flex justify-between items-center gap-4">
-            <div className="flex items-center gap-4">
+            <div className="flex justify-start items-center gap-3">
               <LaunchButton isBeta={isBeta} />
               <ServiceStatus />
             </div>
