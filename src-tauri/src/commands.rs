@@ -149,6 +149,11 @@ pub async fn check_api_status() -> bool {
     auth::api::check_api_status().await
 }
 
+#[tauri::command]
+pub async fn get_status() -> Result<auth::models::GetStatusResponse, String> {
+    auth::api::get_status().await.map_err(|e| e.to_string())
+}
+
 /// Launches the proxy process.
 ///
 /// This command checks for updates, downloads if necessary, and starts the proxy.

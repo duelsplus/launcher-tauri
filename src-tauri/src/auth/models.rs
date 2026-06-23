@@ -133,3 +133,19 @@ pub struct GetGlobalStatsResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StatusMessage {
+    #[serde(rename = "type")] /// error, warning, info
+    pub message_type: String,
+    pub message: String,
+    #[serde(rename = "createdAt")]
+    pub created_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GetStatusResponse {
+    pub status: String,
+    #[serde(default)]
+    pub messages: Vec<StatusMessage>,
+}

@@ -5,7 +5,8 @@
 
 use crate::auth::error::AuthError;
 use crate::auth::models::{
-    GetGlobalStatsResponse, GetStatsResponse, GetUserResponse, User, VerifyTokenResponse,
+    GetGlobalStatsResponse, GetStatsResponse, GetStatusResponse, GetUserResponse, User,
+    VerifyTokenResponse,
 };
 use crate::auth::API_BASE_URL;
 
@@ -442,6 +443,28 @@ pub async fn check_api_status() -> bool {
             }
         }
         Err(_) => false,
+    }
+}
+
+pub async fn get_status() -> Result<GetStatusResponse, AuthError> {
+    let client = reqwest::Client::new();
+    let url = format!("{}/get-status", API_BASE_URL);
+
+    match client.get(&url).send().await {
+        Ok(response) => {
+            if response.status().is_success() {
+                response
+                    .json::<GetStatusResponse>()
+                    .await
+                    .map_err(AuthError::from)
+            } else {
+                Err(AuthError::Unknown(format!(
+                    "Service status gave {}",
+                    response.status()
+                )))
+            }
+        }
+        Err(e) => Err(AuthError::Network(e)),
     }
 }
 
