@@ -52,7 +52,8 @@ export function Settings() {
     if (
       currentTheme === "light" ||
       currentTheme === "dark" ||
-      currentTheme === "classic"
+      currentTheme === "classic" ||
+      currentTheme === "black"
     ) {
       return currentTheme;
     }

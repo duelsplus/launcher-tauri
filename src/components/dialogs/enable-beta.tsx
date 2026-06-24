@@ -83,7 +83,7 @@ export function EnableBetaDialog({
             >
               Terms
             </Button>
-            <div className="p-3 rounded-xl rounded-tl-none bg-rose-200/50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 classic:bg-rose-950/50 classic:text-rose-400">
+            <div className="p-3 rounded-xl rounded-tl-none bg-rose-200/50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 classic:bg-rose-950/50 classic:text-rose-400 black:bg-rose-950/50 black:text-rose-400">
               <ul className="list-disc list-inside space-y-1 marker:text-current/30 text-sm">
                 <li>Avoid exposure of beta builds in public environments.</li>
                 <li>Don't stream, record, or share your gameplay.</li>

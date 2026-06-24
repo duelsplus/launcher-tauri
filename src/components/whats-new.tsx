@@ -103,7 +103,7 @@ function changeMeta(item: string) {
     return {
       type: "fix",
       Icon: BugIcon,
-      className: "text-red-500 dark:text-red-400 classic:text-red-400",
+      className: "text-rose-500 dark:text-rose-400 classic:text-rose-400 black:text-rose-400",
     };
 
   if (
@@ -116,7 +116,7 @@ function changeMeta(item: string) {
     return {
       type: "new",
       Icon: PlusIcon,
-      className: "text-green-600 dark:text-green-400 classic:text-green-400",
+      className: "text-green-600 dark:text-green-400 classic:text-green-400 black:text-green-400",
     };
 
   if (
@@ -130,7 +130,7 @@ function changeMeta(item: string) {
     return {
       type: "improve",
       Icon: SparkleIcon,
-      className: "text-blue-500 dark:text-blue-400 classic:text-blue-400",
+      className: "text-sky-500 dark:text-sky-400 classic:text-sky-400 black:text-sky-400",
     };
 
   if (
@@ -144,7 +144,7 @@ function changeMeta(item: string) {
     return {
       type: "change",
       Icon: WrenchIcon,
-      className: "text-amber-500 dark:text-amber-400 classic:text-amber-400",
+      className: "text-amber-500 dark:text-amber-400 classic:text-amber-400 black:text-amber-400",
     };
 
   return { type: "info", Icon: InfoIcon, className: "text-muted-foreground" };

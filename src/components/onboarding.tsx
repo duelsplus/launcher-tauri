@@ -66,7 +66,7 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
   const [actionError, setActionError] = useState(false);
   const [discordLoading, setDiscordLoading] = useState(false);
   const { theme: currentTheme, setTheme: setAppTheme } = useTheme();
-  const [theme, setTheme] = useState<"dark" | "classic" | "light">(
+  const [theme, setTheme] = useState<"dark" | "classic" | "black" | "light">(
     currentTheme,
   );
 
@@ -175,9 +175,9 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
                 Sign in with Discord
               </Button>
               <div className="relative flex items-center w-full">
-                <hr className="flex-1 border-t dark:border-input classic:border-input" />
+                <hr className="flex-1 border-t dark:border-input classic:border-input black:border-input" />
                 <span className="px-2 text-sm text-muted-foreground">or</span>
-                <hr className="flex-1 border-t dark:border-input classic:border-input" />
+                <hr className="flex-1 border-t dark:border-input classic:border-input black:border-input" />
               </div>
               <div className="relative w-full">
                 <Input
@@ -257,7 +257,7 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
         {step === "theme" && (
           <Panel title="Choose Your Theme">
             <div className="flex flex-col gap-0 mt-4 w-full max-w-sm mx-auto">
-              {(["dark", "classic", "light"] as const).map((t, idx, arr) => (
+              {(["dark", "classic", "black", "light"] as const).map((t, idx, arr) => (
                 <button
                   key={t}
                   onClick={() => {
@@ -268,7 +268,7 @@ export function Onboarding({ open, onFinish }: OnboardingProps) {
                     "w-full relative border px-4 py-3 h-14 text-sm text-left",
                     theme === t
                       ? "border-primary bg-primary/10"
-                      : "border-border dark:border-input classic:border-input",
+                      : "border-border dark:border-input classic:border-input black:border-input",
                     idx === 0
                       ? "rounded-t-xl rounded-b-none!" // first button
                       : idx === arr.length - 1

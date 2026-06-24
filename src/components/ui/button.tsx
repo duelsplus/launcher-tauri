@@ -18,9 +18,9 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         warning:
-          "bg-amber-100/50 text-amber-600 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-500 dark:hover:bg-amber-950 classic:bg-amber-950/50 classic:text-amber-500 classic:hover:bg-amber-950",
-        rose: "bg-rose-200/50 text-rose-600 hover:bg-rose-200 dark:bg-rose-950/50 dark:text-rose-400 dark:hover:bg-rose-950 classic:bg-rose-950/50 classic:text-rose-400 classic:hover:bg-rose-950",
-        info: "bg-sky-200/50 text-sky-600 hover:bg-sky-200 dark:bg-sky-950/50 dark:text-sky-400 dark:hover:bg-sky-950 classic:bg-sky-950/50 classic:text-sky-400 classic:hover:bg-sky-950",
+          "bg-amber-100/50 text-amber-600 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-500 dark:hover:bg-amber-950 classic:bg-amber-950/50 classic:text-amber-500 classic:hover:bg-amber-950 black:bg-amber-950/50 black:text-amber-500 black:hover:bg-amber-950",
+        rose: "bg-rose-200/50 text-rose-600 hover:bg-rose-200 dark:bg-rose-950/50 dark:text-rose-400 dark:hover:bg-rose-950 classic:bg-rose-950/50 classic:text-rose-400 classic:hover:bg-rose-950 black:bg-rose-950/50 black:text-rose-400 black:hover:bg-rose-950",
+        info: "bg-sky-200/50 text-sky-600 hover:bg-sky-200 dark:bg-sky-950/50 dark:text-sky-400 dark:hover:bg-sky-950 classic:bg-sky-950/50 classic:text-sky-400 classic:hover:bg-sky-950 black:bg-sky-950/50 black:text-sky-400 black:hover:bg-sky-950",
         input: "bg-input/50 dark:text-muted-foreground hover:bg-input/80",
         muted: "bg-card text-muted-foreground hover:bg-popover",
         ghost:

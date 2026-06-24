@@ -272,7 +272,7 @@ export function RpcCustomizeDialog({
                 value="plus"
                 className={cn(
                   !isVeryCool &&
-                    "data-[state=active]:bg-red-200/70! data-[state=active]:text-red-800! dark:data-[state=active]:bg-red-950/70! dark:data-[state=active]:text-red-300! classic:data-[state=active]:bg-red-950/70! classic:data-[state=active]:text-red-300!",
+                    "data-[state=active]:bg-red-200/70! data-[state=active]:text-red-800! dark:data-[state=active]:bg-red-950/70! dark:data-[state=active]:text-red-300! classic:data-[state=active]:bg-red-950/70! classic:data-[state=active]:text-red-300! black:data-[state=active]:bg-red-950/70! black:data-[state=active]:text-red-300!",
                 )}
               >
                 Celestial
@@ -281,7 +281,7 @@ export function RpcCustomizeDialog({
                 value="supporterplus"
                 className={cn(
                   !isVeryVeryCool &&
-                    "data-[state=active]:bg-red-200/70! data-[state=active]:text-red-800! dark:data-[state=active]:bg-red-950/70! dark:data-[state=active]:text-red-300! classic:data-[state=active]:bg-red-950/70! classic:data-[state=active]:text-red-300!",
+                    "data-[state=active]:bg-red-200/70! data-[state=active]:text-red-800! dark:data-[state=active]:bg-red-950/70! dark:data-[state=active]:text-red-300! classic:data-[state=active]:bg-red-950/70! classic:data-[state=active]:text-red-300! black:data-[state=active]:bg-red-950/70! black:data-[state=active]:text-red-300!",
                 )}
               >
                 Divine

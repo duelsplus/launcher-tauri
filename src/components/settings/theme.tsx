@@ -7,14 +7,15 @@ import { toHex } from "@/lib/hex";
 
 interface SettingThemeProps {
   title: string;
-  value: "dark" | "light" | "classic";
-  onChange: (theme: "dark" | "light" | "classic") => void;
+  value: "dark" | "light" | "classic" | "black";
+  onChange: (theme: "dark" | "light" | "classic" | "black") => void;
 }
 
-const THEMES = ["dark", "classic", "light"] as const;
+const THEMES = ["dark", "classic", "black", "light"] as const;
 const COLORS: Record<(typeof THEMES)[number], string> = {
   dark: "bg-[#262624]",
   classic: "bg-[#18181B]",
+  black: "bg-[#060605]",
   light: "bg-[#FAF9F5]",
 };
 

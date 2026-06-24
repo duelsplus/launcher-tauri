@@ -46,17 +46,17 @@ const STATUS = {
   error: {
     label: "Critical",
     Icon: WarningIcon,
-    iconClass: "text-red-500 dark:text-red-400 classic:text-red-400",
+    iconClass: "text-red-500 dark:text-red-400 classic:text-red-400 black:text-red-400",
   },
   warning: {
     label: "Degraded",
     Icon: WarningIcon,
-    iconClass: "text-amber-500 dark:text-amber-400 classic:text-amber-400",
+    iconClass: "text-amber-500 dark:text-amber-400 classic:text-amber-400 black:text-amber-400",
   },
   info: {
     label: "Notice",
     Icon: InfoIcon,
-    iconClass: "text-blue-500 dark:text-blue-400 classic:text-blue-400",
+    iconClass: "text-sky-500 dark:text-sky-400 classic:text-sky-400 black:text-sky-400",
   },
 } as const;
 
@@ -64,20 +64,20 @@ const COLOR = {
   error: {
     variant: "rose",
     button: "rose",
-    bg: "bg-rose-200/50 dark:bg-rose-950/50 classic:bg-rose-950/50",
-    text: "text-rose-600 dark:text-rose-400 classic:text-rose-400",
+    bg: "bg-rose-200/50 dark:bg-rose-950/50 classic:bg-rose-950/50 black:bg-rose-950/50",
+    text: "text-rose-600 dark:text-rose-400 classic:text-rose-400 black:text-rose-400",
   },
   warning: {
     variant: "warning",
     button: "warning",
-    bg: "bg-amber-100/50 dark:bg-amber-950/50 classic:bg-amber-950/50",
-    text: "text-amber-600 dark:text-amber-500 classic:text-amber-500",
+    bg: "bg-amber-100/50 dark:bg-amber-950/50 classic:bg-amber-950/50 black:bg-amber-950/50",
+    text: "text-amber-600 dark:text-amber-500 classic:text-amber-500 black:text-amber-500",
   },
   info: {
     variant: "info",
     button: "info",
-    bg: "bg-sky-200/50 dark:bg-sky-950/50 classic:bg-sky-950/50",
-    text: "text-sky-600 dark:text-sky-400 classic:text-sky-400",
+    bg: "bg-sky-200/50 dark:bg-sky-950/50 classic:bg-sky-950/50 black:bg-sky-950/50",
+    text: "text-sky-600 dark:text-sky-400 classic:text-sky-400 black:text-sky-400",
   },
 } as const;
 
