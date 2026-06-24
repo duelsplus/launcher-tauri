@@ -16,13 +16,35 @@ import {
 import AnsiToHtml from "ansi-to-html";
 import { Button } from "../ui/button";
 const ansiConvert = new AnsiToHtml({ escapeXML: true });
+const LREG =
+  /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) \[(\w+)\] (\[\S[^\]]*\]) (.+)$/; //2026-01-01 01:01:01.010 [INFO] [Duels+] ready
+
+const LEVELS: Record<string, string> = {
+  INFO: "bg-sky-500/10 text-sky-400",
+  WARN: "bg-amber-500/10 text-amber-400",
+  ERROR: "bg-rose-500/10 text-rose-400",
+  DEBUG: "bg-zinc-500/10 text-zinc-400",
+};
+
+function LevelBadge({ level }: { level: string | null }) {
+  if (!level) return null;
+  const cls = LEVELS[level] ?? LEVELS.DEBUG;
+  return (
+    <span
+      className={`inline-flex items-center rounded px-1.5 pb-0.5 pt-1 text-[10px] font-medium leading-none tabular-nums select-none shrink-0 ${cls}`}
+    >
+      {level}
+    </span>
+  );
+}
 
 export function Logs() {
   const logs = useLogs((s) => s.logs);
   const containerRef = useRef<HTMLDivElement>(null);
   const [colors, setColors] = useState(() => {
-    const saved = localStorage.getItem("logs-colors");
-    return saved === null ? true : saved === "true";
+    /*const saved = localStorage.getItem("logs-colors");
+    return saved === null ? true : saved === "true";*/
+    return true;
   });
 
   const [enabledLevels, setEnabledLevels] = useState<Set<LogLevel>>(() => {
@@ -38,9 +60,9 @@ export function Logs() {
     return new Set(LOG_LEVELS.filter((l) => l !== "DEBUG")); //all except `DEBUG`
   });
 
-  useEffect(() => {
+  /*useEffect(() => {
     localStorage.setItem("logs-colors", colors.toString());
-  }, [colors]);
+  }, [colors]);*/
 
   useEffect(() => {
     localStorage.setItem(
@@ -77,6 +99,13 @@ export function Logs() {
 
   function strip(text: string) {
     return text.replace(/\x1B\[[0-9;]*m/g, "");
+  }
+
+  function parse(raw: string) {
+    const cl = strip(raw);
+    const m = cl.match(LREG);
+    if (!m) return { ts: null, level: null, module: null, message: cl };
+    return { ts: m[1], level: m[2], module: m[3], message: m[4] };
   }
 
   const filtered = useMemo(() => {
@@ -121,18 +150,18 @@ export function Logs() {
                   }}
                   onSelect={(e) => e.preventDefault()}
                 >
-                  {level}
+                  <LevelBadge level={level} />
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button
+          {/*<Button
             size="icon-xs"
             onClick={() => setColors((prev) => !prev)}
             variant={colors ? "input" : "outline"}
           >
             <PaletteIcon weight={colors ? "fill" : "regular"} />
-          </Button>
+            </Button>*/}
         </div>
       </div>
 
@@ -147,13 +176,33 @@ export function Logs() {
             No logs yet
           </div>
         ) : (
-          filtered.map((line, i) => (
-            <div
-              key={i}
-              className="whitespace-pre-wrap break-words select-text"
-              dangerouslySetInnerHTML={{ __html: renderLog(line) }}
-            />
-          ))
+          filtered.map((line, i) => {
+            const { ts, level, module, message } = parse(line);
+            if (!ts) {
+              return (
+                <div
+                  key={i}
+                  className="whitespace-pre-wrap break-words select-text px-1 text-muted-foreground/60"
+                >
+                  {line}
+                </div>
+              );
+            }
+            return (
+              <div key={i} className="flex items-baseline gap-1 select-text">
+                <LevelBadge level={level} />
+                <p className="inline space-x-1.5 mb-px">
+                  <span className="text-muted-foreground/50 shrink-0">
+                    {module}
+                  </span>
+                  <span
+                    className="break-words"
+                    dangerouslySetInnerHTML={{ __html: renderLog(message) }}
+                  />
+                </p>
+              </div>
+            );
+          })
         )}
       </div>
     </div>
