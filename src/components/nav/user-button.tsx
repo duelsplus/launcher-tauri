@@ -8,6 +8,7 @@ import {
   SpinnerIcon,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Popover,
   PopoverTrigger,
@@ -30,6 +31,10 @@ const badLabels: Record<string, string> = {
   divine: "Divine",
   celestial: "Celestial",
 };
+const badVariants: Record<string, "divine" | "celestial" | "fallback"> = {
+  divine: "divine",
+  celestial: "celestial",
+};
 
 function getBadge(perms: Perm[]): string | null {
   for (const bad of badOrder) {
@@ -38,6 +43,15 @@ function getBadge(perms: Perm[]): string | null {
     }
   }
   return null;
+}
+
+function getBadgeVariant(perms: Perm[]): "divine" | "celestial" | "fallback" {
+  for (const bad of badOrder) {
+    if (perms.includes(bad as Perm)) {
+      return badVariants[bad];
+    }
+  }
+  return "fallback";
 }
 
 export function UserButton() {
@@ -93,16 +107,16 @@ export function UserButton() {
 
       <PopoverContent side="right" align="start" className="select-none">
         <div className="flex flex-col p-2 pr-1">
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-center gap-2">
             {user ? (
               <>
-                <div className="text-sm font-medium truncate">
+                <div className="text-sm truncate">
                   {user.username}
                 </div>
                 {getBadge(user.perms || []) && (
-                  <span className="text-xs font-medium text-foreground/40">
+                  <Badge variant={getBadgeVariant(user.perms || [])}>
                     {getBadge(user.perms || [])}
-                  </span>
+                  </Badge>
                 )}
               </>
             ) : (
