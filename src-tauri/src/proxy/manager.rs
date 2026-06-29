@@ -237,10 +237,10 @@ impl ProxyManager {
             .map(|c| c.receive_beta_releases)
             .unwrap_or(false);
 
-        if use_beta {
+        /*if use_beta {
             println!("[proxy] Beta releases enabled");
             let _ = app.emit("log-message", "Beta releases enabled");
-        }
+        }*/
 
         // Get platform and install directory
         let platform_tag = get_platform_tag()?;
@@ -257,9 +257,9 @@ impl ProxyManager {
         let needs_download = !is_file_valid(&file_path);
 
         if needs_download {
-            let msg = format!("Downloading version {}", latest.version);
-            println!("[proxy] {}", msg);
-            let _ = app.emit("log-message", msg);
+            //let msg = format!("Downloading version {}", latest.version);
+            //println!("[proxy] {}", msg);
+            //let _ = app.emit("log-message", msg);
             let _ = app.emit(
                 "updater:status",
                 ProxyStatus::Downloading {
@@ -276,12 +276,12 @@ impl ProxyManager {
             })
             .await?;
 
-            println!("[proxy] Download complete!");
-            let _ = app.emit("log-message", "Download complete!");
+            //println!("[proxy] Download complete!");
+            //let _ = app.emit("log-message", "Download complete!");
         } else {
-            let msg = format!("Proxy already up to date ({})", latest.version);
-            println!("[proxy] {}", msg);
-            let _ = app.emit("log-message", msg);
+            //let msg = format!("Proxy already up to date ({})", latest.version);
+            //println!("[proxy] {}", msg);
+            //let _ = app.emit("log-message", msg);
         }
 
         // Clean up old executables
