@@ -19,6 +19,10 @@ use tokio::net::TcpStream;
 use tokio::process::{Child, Command};
 use tokio::sync::Mutex;
 
+const CONTROL_SOCKET_INITIAL_DELAY: std::time::Duration = std::time::Duration::from_millis(500);
+const CONTROL_SOCKET_RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(500);
+const CONTROL_SOCKET_CONNECT_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(2);
+
 /// Lock file data structure written by the proxy
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -95,105 +99,120 @@ async fn send_shutdown_command(control_port: u16) -> bool {
     }
 }
 
-/// Connects to the control socket and listens for user data messages
-async fn listen_control_socket(app: AppHandle, is_running: Arc<Mutex<bool>>) {
-    // Wait a bit for the proxy to start and write the lock file
-    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+async fn connect_control_socket(is_running: &Arc<Mutex<bool>>) -> Option<TcpStream> {
+    while *is_running.lock().await {
+        if let Some(lock_data) = read_lock_file() {
+            if let Some(control_port) = lock_data.control_port {
+                let addr = format!("127.0.0.1:{}", control_port);
+                match tokio::time::timeout(
+                    CONTROL_SOCKET_CONNECT_TIMEOUT,
+                    TcpStream::connect(&addr),
+                )
+                .await
+                {
+                    Ok(Ok(stream)) => return Some(stream),
+                    Ok(Err(_)) | Err(_) => {}
+                }
+            }
+        }
 
-    // Retry connecting to the control socket
-    let mut stream = None;
-    for _ in 0..10 {
+        tokio::time::sleep(CONTROL_SOCKET_RETRY_DELAY).await;
+    }
+
+    None
+}
+
+fn handle_control_message(app: &AppHandle, line: &str) {
+    if let Ok(msg) = serde_json::from_str::<ControlMessage>(line) {
+        match msg {
+            ControlMessage::UserData { ign, uuid } => {
+                // Emit event for frontend
+                let _ = app.emit(
+                    "rpc-user-data",
+                    RpcUserData {
+                        ign: ign.clone(),
+                        uuid: uuid.clone(),
+                    },
+                );
+
+                // Update Discord RPC directly
+                if let Some(rpc) = app.try_state::<RpcManager>() {
+                    rpc.set_user_data(Some(ign), Some(uuid));
+                }
+            }
+            ControlMessage::GameMode {
+                mode,
+                map,
+                gametype,
+                lobbyname,
+            } => {
+                // Update Discord RPC with game mode (mode can be null when in lobby)
+                if let Some(rpc) = app.try_state::<RpcManager>() {
+                    rpc.set_game_mode(mode, map, gametype, lobbyname);
+                }
+            }
+            ControlMessage::Disconnect => {
+                // User disconnected from Hypixel, reset RPC to idle
+                if let Some(rpc) = app.try_state::<RpcManager>() {
+                    rpc.set_disconnected();
+                }
+            }
+            ControlMessage::ProxyError {
+                code,
+                title,
+                message,
+                suggestion,
+                severity,
+                category,
+                original_message,
+                context,
+                timestamp,
+            } => {
+                // Emit error event for frontend to handle
+                let error_data = ProxyErrorData {
+                    code,
+                    title,
+                    message,
+                    suggestion,
+                    severity,
+                    category,
+                    original_message,
+                    context,
+                    timestamp,
+                };
+                let _ = app.emit("proxy-error", error_data);
+            }
+        }
+    }
+}
+
+/// Connects to the control socket and listens for proxy status messages.
+async fn listen_control_socket(app: AppHandle, is_running: Arc<Mutex<bool>>) {
+    // Wait a bit for the proxy to start and write the lock file.
+    tokio::time::sleep(CONTROL_SOCKET_INITIAL_DELAY).await;
+
+    while *is_running.lock().await {
+        let stream = match connect_control_socket(&is_running).await {
+            Some(stream) => stream,
+            None => return,
+        };
+
+        let reader = BufReader::new(stream);
+        let mut lines = reader.lines();
+
         if !*is_running.lock().await {
             return;
         }
 
-        if let Some(lock_data) = read_lock_file() {
-            if let Some(control_port) = lock_data.control_port {
-                let addr = format!("127.0.0.1:{}", control_port);
-                if let Ok(s) = TcpStream::connect(&addr).await {
-                    stream = Some(s);
-                    break;
-                }
+        loop {
+            match lines.next_line().await {
+                Ok(Some(line)) => handle_control_message(&app, &line),
+                Ok(None) | Err(_) => break,
             }
         }
-        tokio::time::sleep(std::time::Duration::from_millis(200)).await;
-    }
 
-    let stream = match stream {
-        Some(s) => s,
-        None => return,
-    };
-
-    let reader = BufReader::new(stream);
-    let mut lines = reader.lines();
-
-    while *is_running.lock().await {
-        match lines.next_line().await {
-            Ok(Some(line)) => {
-                if let Ok(msg) = serde_json::from_str::<ControlMessage>(&line) {
-                    match msg {
-                        ControlMessage::UserData { ign, uuid } => {
-                            // Emit event for frontend
-                            let _ = app.emit(
-                                "rpc-user-data",
-                                RpcUserData {
-                                    ign: ign.clone(),
-                                    uuid: uuid.clone(),
-                                },
-                            );
-
-                            // Update Discord RPC directly
-                            if let Some(rpc) = app.try_state::<RpcManager>() {
-                                rpc.set_user_data(Some(ign), Some(uuid));
-                            }
-                        }
-                        ControlMessage::GameMode {
-                            mode,
-                            map,
-                            gametype,
-                            lobbyname,
-                        } => {
-                            // Update Discord RPC with game mode (mode can be null when in lobby)
-                            if let Some(rpc) = app.try_state::<RpcManager>() {
-                                rpc.set_game_mode(mode, map, gametype, lobbyname);
-                            }
-                        }
-                        ControlMessage::Disconnect => {
-                            // User disconnected from Hypixel, reset RPC to idle
-                            if let Some(rpc) = app.try_state::<RpcManager>() {
-                                rpc.set_disconnected();
-                            }
-                        }
-                        ControlMessage::ProxyError {
-                            code,
-                            title,
-                            message,
-                            suggestion,
-                            severity,
-                            category,
-                            original_message,
-                            context,
-                            timestamp,
-                        } => {
-                            // Emit error event for frontend to handle
-                            let error_data = ProxyErrorData {
-                                code,
-                                title,
-                                message,
-                                suggestion,
-                                severity,
-                                category,
-                                original_message,
-                                context,
-                                timestamp,
-                            };
-                            let _ = app.emit("proxy-error", error_data);
-                        }
-                    }
-                }
-            }
-            Ok(None) => break,
-            Err(_) => break,
+        if *is_running.lock().await {
+            tokio::time::sleep(CONTROL_SOCKET_RETRY_DELAY).await;
         }
     }
 }
