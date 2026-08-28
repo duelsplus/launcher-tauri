@@ -595,7 +595,7 @@ impl ProxyManager {
         }
 
         // API errors
-        if message_lower.contains("api.venxm.uk") || message_lower.contains("api unreachable") {
+        if message_lower.contains("api-prod.duelsplus.com") || message_lower.contains("api unreachable") {
             return (
                 "API_UNREACHABLE".to_string(),
                 ErrorCategory::Api,

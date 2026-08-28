@@ -13,4 +13,4 @@ pub mod models;
 pub mod token;
 
 /// Base URL for the authentication API
-pub const API_BASE_URL: &str = "https://api.venxm.uk";
+pub const API_BASE_URL: &str = "https://api-prod.duelsplus.com";
