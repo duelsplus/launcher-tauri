@@ -35,7 +35,7 @@
     "publisher": "Duels+",
     "category": "Game",
     "homepage": "https://duelsplus.com",
-    "shortDescription": "Lightweight Minecraft proxy for Hypixel Duels",
+    "shortDescription": "Lightweight Minecraft proxy for Hypixel",
     "targets": ["deb", "rpm", "appimage", "nsis", "dmg"],
     "windows": {
       "nsis": {
