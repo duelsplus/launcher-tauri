@@ -89,6 +89,7 @@ export function Logs() {
       escaped = strip(escaped);
     }
 
+    escaped = escaped.replace(/&amp;/g, "&");
     escaped = escaped.replace(
       /(https?:\/\/[^\s]+)/g,
       '<a href="$1" target="_blank" class="underline hover:no-underline" rel="noopener noreferrer">$1</a>',
