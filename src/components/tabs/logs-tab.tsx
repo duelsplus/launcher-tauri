@@ -192,12 +192,12 @@ export function Logs() {
             return (
               <div key={i} className="flex items-baseline gap-1 select-text">
                 <LevelBadge level={level} />
-                <p className="inline space-x-1.5 mb-px">
+                <p className="inline min-w-0 flex-1 space-x-1.5 mb-px">
                   <span className="text-muted-foreground/50 shrink-0">
                     {module}
                   </span>
                   <span
-                    className="break-words"
+                    className="break-words [overflow-wrap:anywhere]"
                     dangerouslySetInnerHTML={{ __html: renderLog(message) }}
                   />
                 </p>
